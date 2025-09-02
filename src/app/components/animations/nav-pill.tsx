@@ -77,7 +77,7 @@ const PillNav: React.FC<PillNavProps> = ({
           slider: 'bg-white dark:bg-gray-700 shadow-sm',
           text: 'text-gray-700 dark:text-gray-300',
           activeText: 'text-gray-900 dark:text-white',
-          hover: 'hover:text-gray-900 dark:hover:text-white'
+          hover: 'hover:text-gray-900 dark:hover:text-white' 
         };
       default:
         return {
