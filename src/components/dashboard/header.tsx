@@ -1,0 +1,248 @@
+"use client"
+
+import { Bell, Search, Home, Receipt, BarChart3, Settings, Moon, Sun, LogOut, User, DollarSign, RefreshCw } from "lucide-react"
+import { useSession, signOut } from "next-auth/react"
+import { useTheme } from "next-themes"
+import { useRouter } from "next/navigation"
+import Link from "next/link"
+import { useEffect, useState } from "react"
+import { useCurrency } from "@/hooks/use-currency"
+import { useSearch } from "@/contexts/SearchContext"
+import { useNotifications } from "@/contexts/NotificationContext"
+import { SearchDropdown } from "./search-dropdown"
+import { NotificationDropdown } from "./notification-dropdown"
+
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Separator } from "@/components/ui/separator"
+import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
+export function Header() {
+  const { data: session } = useSession()
+  const { theme, setTheme } = useTheme()
+  const { getSymbol } = useCurrency()
+  const { searchQuery, setSearchQuery, isDropdownOpen, setIsDropdownOpen } = useSearch()
+  const { unreadCount } = useNotifications()
+  const [mounted, setMounted] = useState(false)
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false)
+  const router = useRouter()
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: "/login" })
+  }
+
+  const handleSwitchAccount = async () => {
+    await signOut({ callbackUrl: "/login" })
+  }
+
+  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setSearchQuery(value)
+    setIsDropdownOpen(value.length > 0)
+  }
+
+  const handleSearchInputFocus = () => {
+    if (searchQuery.length > 0) {
+      setIsDropdownOpen(true)
+    }
+  }
+
+  const handleSelectSuggestion = (suggestion: { id: string }) => {
+    // You can customize this behavior - maybe show expense details or navigate to expenses page
+    router.push(`/expenses?id=${suggestion.id}`)
+    setSearchQuery('')
+    setIsDropdownOpen(false)
+  }
+
+
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark")
+  }
+
+  const getUserInitials = (name?: string | null, email?: string) => {
+    if (name) {
+      return name.charAt(0).toUpperCase()
+    }
+    if (email) {
+      return email.charAt(0).toUpperCase()
+    }
+    return "U"
+  }
+
+  return (
+    <header className="flex h-16 items-center gap-4 border-b bg-background px-6">
+      <div className="flex-1 flex items-center gap-3">
+        <h1 className="text-2xl font-semibold">Dashboard</h1>
+        <div className="flex items-center gap-1 px-2 py-1 bg-muted rounded-md">
+          <DollarSign className="h-3 w-3 text-muted-foreground" />
+          <span className="text-xs font-medium text-muted-foreground">{getSymbol()}</span>
+        </div>
+      </div>
+      <div className="flex items-center gap-4">
+        <div className="relative w-72">
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 transition-colors duration-200 group-focus-within:text-blue-500" />
+            <Input
+              placeholder="Search expenses..."
+              className="pl-11 pr-4 py-2.5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-gray-200 dark:border-gray-700 rounded-xl shadow-sm hover:shadow-md focus:shadow-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 placeholder:text-gray-400"
+              value={searchQuery}
+              onChange={handleSearchInputChange}
+              onFocus={handleSearchInputFocus}
+              onBlur={() => setTimeout(() => setIsDropdownOpen(false), 200)}
+            />
+            {searchQuery && (
+              <button
+                onClick={() => {
+                  setSearchQuery('')
+                  setIsDropdownOpen(false)
+                }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
+          <SearchDropdown
+            query={searchQuery}
+            isOpen={isDropdownOpen}
+            onClose={() => setIsDropdownOpen(false)}
+            onSelectSuggestion={handleSelectSuggestion}
+          />
+        </div>
+        <Separator orientation="vertical" className="h-6" />
+        <div className="relative">
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+            className="relative"
+          >
+            <Bell className="h-4 w-4" />
+            {unreadCount > 0 && (
+              <Badge 
+                variant="destructive" 
+                className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center text-xs p-0"
+              >
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </Badge>
+            )}
+          </Button>
+          <NotificationDropdown 
+            isOpen={isNotificationOpen}
+            onClose={() => setIsNotificationOpen(false)}
+          />
+        </div>
+        
+        {/* Theme Toggle Button */}
+        <Button variant="ghost" size="icon" onClick={toggleTheme}>
+          {mounted ? (
+            theme === "dark" ? (
+              <Sun className="h-4 w-4" />
+            ) : (
+              <Moon className="h-4 w-4" />
+            )
+          ) : (
+            <div className="h-4 w-4" />
+          )}
+        </Button>
+        
+        {/* User Avatar Dropdown */}
+        {session?.user && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage 
+                    src={session.user.image || undefined} 
+                    alt={session.user.name || session.user.email || ""} 
+                  />
+                  <AvatarFallback className="text-sm font-medium bg-primary text-primary-foreground">
+                    {getUserInitials(session.user.name || null, session.user.email || undefined)}
+                  </AvatarFallback>
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="end" forceMount>
+              {/* User Info Section */}
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium leading-none">
+                    {session.user.name || session.user.email}
+                  </p>
+                  <p className="text-xs leading-none text-muted-foreground">
+                    Logged in
+                  </p>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              
+              {/* Navigation Section */}
+              <DropdownMenuGroup>
+                <DropdownMenuItem asChild>
+                  <Link href="/" className="flex items-center">
+                    <Home className="mr-2 h-4 w-4" />
+                    <span>Dashboard</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/expenses" className="flex items-center">
+                    <Receipt className="mr-2 h-4 w-4" />
+                    <span>Expenses</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/analytics" className="flex items-center">
+                    <BarChart3 className="mr-2 h-4 w-4" />
+                    <span>Analytics</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/settings" className="flex items-center">
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Settings</span>
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              
+              {/* Actions Section */}
+              <DropdownMenuGroup>
+                <DropdownMenuItem asChild>
+                  <Link href="/settings" className="flex items-center">
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Account Settings</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleSwitchAccount} className="flex items-center">
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  <span>Switch Account</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout} className="flex items-center text-red-600 focus:text-red-600">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Logout</span>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+      </div>
+    </header>
+  )
+}
