@@ -357,6 +357,13 @@ export default function Home() {
         <AddExpenseDialog 
           open={isAddExpenseOpen} 
           onOpenChange={setIsAddExpenseOpen}
+          onSubmit={() => {
+            // Demo mode - just show success message
+            toast({
+              title: "Demo Mode",
+              description: "Expense would be saved in demo mode.",
+            })
+          }}
           onExpenseAdded={async () => {
             // For demo purposes, just close the dialog
             setIsAddExpenseOpen(false)

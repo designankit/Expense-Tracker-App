@@ -135,7 +135,7 @@ export async function importJSONFile(
       // Generate ID if missing or duplicate
       let id = item.id
       if (!id || typeof id !== "string" || existingIds.has(id)) {
-        id = crypto.randomUUID()
+        id = `expense-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
       }
       existingIds.add(id)
       

@@ -583,6 +583,13 @@ export default function ExpensesPage() {
             open={isAddExpenseOpen}
             onOpenChange={setIsAddExpenseOpen}
             initialData={editingExpense || undefined}
+            onSubmit={() => {
+              // Demo mode - just show success message
+              toast({
+                title: "Demo Mode",
+                description: "Expense would be saved in demo mode.",
+              })
+            }}
             onExpenseAdded={handleExpenseAdded}
           />
         </div>
