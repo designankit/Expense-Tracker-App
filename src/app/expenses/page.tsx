@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
+import { useState, useMemo, useEffect, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 // Demo expense type
 interface Expense {
@@ -41,7 +41,7 @@ interface FilterState {
   dateTo: string
 }
 
-export default function ExpensesPage() {
+function ExpensesPageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [expenses, setExpenses] = useState<Expense[]>([])
@@ -594,5 +594,21 @@ export default function ExpensesPage() {
           />
         </div>
       </AppLayout>
+  )
+}
+
+export default function ExpensesPage() {
+  return (
+    <Suspense fallback={
+      <AppLayout>
+        <div className="p-6">
+          <div className="flex items-center justify-center h-96">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+          </div>
+        </div>
+      </AppLayout>
+    }>
+      <ExpensesPageContent />
+    </Suspense>
   )
 }

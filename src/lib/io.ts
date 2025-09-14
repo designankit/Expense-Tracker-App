@@ -133,8 +133,8 @@ export async function importJSONFile(
       }
       
       // Generate ID if missing or duplicate
-      let id = item.id
-      if (!id || typeof id !== "string" || existingIds.has(id)) {
+      let id: string = typeof item.id === "string" ? item.id : ""
+      if (!id || existingIds.has(id)) {
         id = `expense-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
       }
       existingIds.add(id)
@@ -144,9 +144,12 @@ export async function importJSONFile(
         id,
         amount: item.amount,
         category: item.category.trim(),
-        type: item.type,
+        type: item.type as "expense" | "income",
         date: item.date,
-        note: typeof item.note === "string" ? item.note.trim() : undefined
+        note: typeof item.note === "string" ? item.note.trim() : undefined,
+        userId: "demo-user",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       }
       
       validExpenses.push(expense)
