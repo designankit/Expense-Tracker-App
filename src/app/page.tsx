@@ -208,7 +208,7 @@ export default function Home() {
         date.setDate(date.getDate() - daysAgo)
         
         demoExpenses.push({
-          id: `income-${i}`,
+          id: `income-${i}`, 
           amount: Math.floor(Math.random() * 4900) + 100, // 100 to 5000
           category: incomeCategory,
           type: "income",
