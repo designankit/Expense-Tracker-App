@@ -19,14 +19,31 @@ import {
 } from "lucide-react"
 import { useTheme } from "next-themes"
 import { useRouter } from "next/navigation"
-import { apiService, Expense } from "@/lib/api"
+// Demo expense type
+interface Expense {
+  id: string
+  amount: number
+  category: string
+  type: string
+  date: string
+  note?: string
+  userId: string
+}
+
+// Demo user data
+const demoUser = {
+  name: "Demo User",
+  email: "demo@example.com",
+  image: undefined,
+  currency: "INR",
+  timezone: "Asia/Kolkata",
+  categories: ["Food", "Travel", "Shopping", "Bills"],
+  emailNotif: false,
+  twoFA: false
+}
 import { AccountSettings } from "@/components/account-settings"
-import { useCurrency } from "@/hooks/use-currency"
-import { useSession } from "next-auth/react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { User, Mail } from "lucide-react"
-import { ProtectedRoute } from "@/components/auth/protected-route"
-import { SetupGuard } from "@/components/auth/setup-guard"
 
 export default function SettingsPage() {
   const [expenses, setExpenses] = useState<Expense[]>([])
@@ -34,8 +51,12 @@ export default function SettingsPage() {
   const { toast } = useToast()
   const { theme, setTheme } = useTheme()
   const router = useRouter()
-  const { formatAmount } = useCurrency()
-  const { data: session } = useSession()
+  // Currency formatting function
+  const formatAmount = (amount: number) => {
+    return `₹${amount.toLocaleString()}`
+  }
+  // Demo session data
+  const session = { user: demoUser }
 
   const getUserInitials = (name?: string | null, email?: string) => {
     if (name) {
@@ -48,44 +69,38 @@ export default function SettingsPage() {
   }
 
   useEffect(() => {
-    const fetchExpenses = async () => {
-      try {
-        const data = await apiService.getExpenses()
-        setExpenses(data)
-      } catch (error) {
-        console.error("Failed to fetch expenses:", error)
-        toast({
-          title: "Error",
-          description: "Failed to load expenses",
-          variant: "destructive",
-        })
-      } finally {
-        setIsLoading(false)
+    // Demo data
+    const demoExpenses: Expense[] = [
+      {
+        id: "1",
+        amount: 1500,
+        category: "Food",
+        type: "expense",
+        date: new Date().toISOString(),
+        note: "Lunch",
+        userId: "demo"
+      },
+      {
+        id: "2",
+        amount: 5000,
+        category: "Income",
+        type: "income",
+        date: new Date().toISOString(),
+        note: "Salary",
+        userId: "demo"
       }
-    }
+    ]
+    setExpenses(demoExpenses)
+    setIsLoading(false)
+  }, [])
 
-    fetchExpenses()
-  }, [toast])
-
-  const clearExpenses = async () => {
-    try {
-      // Delete all expenses one by one
-      for (const expense of expenses) {
-        await apiService.deleteExpense(expense.id)
-      }
-      setExpenses([])
-      toast({
-        title: "Success",
-        description: "All expenses have been cleared",
-      })
-    } catch (error) {
-      console.error("Failed to clear expenses:", error)
-      toast({
-        title: "Error",
-        description: "Failed to clear expenses",
-        variant: "destructive",
-      })
-    }
+  const clearExpenses = () => {
+    // Demo mode - just clear local state
+    setExpenses([])
+    toast({
+      title: "Demo Mode",
+      description: "In demo mode, expenses are cleared locally only.",
+    })
   }
 
   const getByCategory = () => {
@@ -125,32 +140,26 @@ export default function SettingsPage() {
 
   if (!mounted || isLoading) {
     return (
-      <ProtectedRoute>
-        <SetupGuard>
-          <AppLayout>
-            <div className="p-6">
-              <div className="space-y-6">
-                <div>
-                  <h1 className="text-3xl font-bold">Settings</h1>
-                  <p className="text-muted-foreground">
-                    Manage your application preferences and data
-                  </p>
-                </div>
-                <div className="animate-pulse">
-                  <div className="h-32 bg-muted rounded-lg"></div>
-                </div>
-              </div>
+      <AppLayout>
+        <div className="p-6">
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-3xl font-bold">Settings</h1>
+              <p className="text-muted-foreground">
+                Manage your application preferences and data
+              </p>
             </div>
-          </AppLayout>
-        </SetupGuard>
-      </ProtectedRoute>
+            <div className="animate-pulse">
+              <div className="h-32 bg-muted rounded-lg"></div>
+            </div>
+          </div>
+        </div>
+      </AppLayout>
     )
   }
 
   return (
-    <ProtectedRoute>
-      <SetupGuard>
-        <AppLayout>
+    <AppLayout>
       <div className="p-6">
         <div className="space-y-6">
             <div>
@@ -436,7 +445,5 @@ export default function SettingsPage() {
         </div>
       </div>
     </AppLayout>
-      </SetupGuard>
-    </ProtectedRoute>
   )
 }

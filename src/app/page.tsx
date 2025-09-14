@@ -8,10 +8,18 @@ import { Button } from "@/components/ui/button"
 import { ExpenseCharts } from "@/components/dashboard/expense-charts"
 import { DashboardSkeleton } from "@/components/dashboard/dashboard-skeleton"
 import AddExpenseDialog from "@/components/AddExpenseDialog"
-import { ProtectedRoute } from "@/components/auth/protected-route"
-import { SetupGuard } from "@/components/auth/setup-guard"
-import { useSession } from "next-auth/react"
-import { apiService, Expense } from "@/lib/api"
+// Demo expense type
+interface Expense {
+  id: string
+  amount: number
+  category: string
+  type: "expense" | "income"
+  date: string
+  note?: string
+  userId: string
+  createdAt: string
+  updatedAt: string
+}
 import { useToast } from "@/hooks/use-toast"
 import { useNotifications } from "@/contexts/NotificationContext"
 import { exportJSON, exportCSV, exportPDF, triggerJSONImport } from "@/lib/io"
@@ -31,50 +39,48 @@ import {
 import { Download, Upload, FileText, FileSpreadsheet, FileType } from "lucide-react"
 
 export default function Home() {
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
   const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false)
   const [expenses, setExpenses] = useState<Expense[]>([])
   const { toast } = useToast()
-  const { data: session, status } = useSession()
   const { addDemoNotifications } = useNotifications()
 
   useEffect(() => {
-    const fetchExpenses = async () => {
-      // Wait for session to be loaded
-      if (status === "loading") {
-        console.log("Dashboard: Waiting for session to load...")
-        return
-      }
-      
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if (!(session as any)?.user?.id) {
-        console.log("Dashboard: No session available, skipping expense fetch")
-        setIsLoading(false)
-        return
-      }
-
-      try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        console.log("Dashboard: Session available, fetching expenses for user:", (session as any).user.id)
-        const data = await apiService.getExpenses()
-        setExpenses(data)
-        
-        // Add demo notifications once when expenses are loaded
-        addDemoNotifications()
-      } catch (error) {
-        console.error("Failed to fetch expenses:", error)
-        toast({
-          title: "Error",
-          description: "Failed to load expenses",
-          variant: "destructive",
-        })
-      } finally {
-        setIsLoading(false)
-      }
+    // Simulate loading demo data
+    const loadDemoData = () => {
+      setIsLoading(true)
+      // Add some demo expenses
+      const demoExpenses: Expense[] = [
+        {
+          id: "1",
+          amount: 1500,
+          category: "Food",
+          type: "expense",
+          date: new Date().toISOString(),
+          note: "Lunch at restaurant",
+          userId: "demo-user",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        },
+        {
+          id: "2", 
+          amount: 5000,
+          category: "Income",
+          type: "income",
+          date: new Date().toISOString(),
+          note: "Freelance work",
+          userId: "demo-user",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+      ]
+      setExpenses(demoExpenses)
+      addDemoNotifications()
+      setIsLoading(false)
     }
 
-    fetchExpenses()
-  }, [toast, session, status, addDemoNotifications])
+    loadDemoData()
+  }, [addDemoNotifications])
 
   const handleExport = (format: "json" | "csv" | "pdf") => {
     try {
@@ -119,25 +125,25 @@ export default function Home() {
   const handleImport = async () => {
     try {
       const success = await triggerJSONImport(async (importedExpenses) => {
-        // Add each expense individually to avoid overwriting existing data
-        for (const expense of importedExpenses) {
-          await apiService.createExpense({
-            amount: expense.amount,
-            category: expense.category,
-            type: expense.type,
-            date: expense.date,
-            note: expense.note
-          })
-        }
-        // Refresh expenses
-        const data = await apiService.getExpenses()
-        setExpenses(data)
+        // Demo mode - just add to local state
+        const newExpenses = importedExpenses.map((expense, index) => ({
+          id: `imported-${index}`,
+          amount: expense.amount,
+          category: expense.category,
+          type: expense.type,
+          date: expense.date,
+          note: expense.note,
+          userId: "demo-user",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }))
+        setExpenses(prev => [...prev, ...newExpenses])
       })
 
       if (success) {
         toast({
           title: "Import Successful",
-          description: "Expenses imported successfully.",
+          description: "Expenses imported successfully (demo mode).",
         })
       }
     } catch (error) {
@@ -149,14 +155,8 @@ export default function Home() {
     }
   }
 
-  const generateDemoData = async () => {
+  const generateDemoData = () => {
     try {
-      // Clear existing data by fetching current expenses and deleting them
-      const currentExpenses = await apiService.getExpenses()
-      for (const expense of currentExpenses) {
-        await apiService.deleteExpense(expense.id)
-      }
-
       // Categories for expenses and income
       const expenseCategories = ["Food", "Travel", "Shopping", "Bills", "Entertainment"]
       const incomeCategory = "Income"
@@ -171,6 +171,8 @@ export default function Home() {
         "Income": ["Salary", "Freelance", "Bonus", "Investment", "Refund", "Gift"]
       }
 
+      const demoExpenses: Expense[] = []
+
       // Generate 20 expenses
       for (let i = 0; i < 20; i++) {
         const category = expenseCategories[Math.floor(Math.random() * expenseCategories.length)]
@@ -182,12 +184,16 @@ export default function Home() {
         const date = new Date()
         date.setDate(date.getDate() - daysAgo)
         
-        await apiService.createExpense({
+        demoExpenses.push({
+          id: `expense-${i}`,
           amount: Math.floor(Math.random() * 4900) + 100, // 100 to 5000
           category,
           type: "expense",
-          date: date.toISOString().split('T')[0],
-          note: `${note} - ${new Date().toLocaleDateString()}`
+          date: date.toISOString(),
+          note: `${note} - ${new Date().toLocaleDateString()}`,
+          userId: "demo-user",
+          createdAt: date.toISOString(),
+          updatedAt: date.toISOString()
         })
       }
 
@@ -201,25 +207,27 @@ export default function Home() {
         const date = new Date()
         date.setDate(date.getDate() - daysAgo)
         
-        await apiService.createExpense({
+        demoExpenses.push({
+          id: `income-${i}`,
           amount: Math.floor(Math.random() * 4900) + 100, // 100 to 5000
           category: incomeCategory,
           type: "income",
-          date: date.toISOString().split('T')[0],
-          note: `${note} - ${new Date().toLocaleDateString()}`
+          date: date.toISOString(),
+          note: `${note} - ${new Date().toLocaleDateString()}`,
+          userId: "demo-user",
+          createdAt: date.toISOString(),
+          updatedAt: date.toISOString()
         })
       }
 
-      // Refresh expenses
-      const data = await apiService.getExpenses()
-      setExpenses(data)
+      // Set the demo expenses
+      setExpenses(demoExpenses)
 
       toast({
         title: "Demo Data Added",
         description: "25 sample records have been generated for testing.",
       })
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (_error) {
+    } catch (error) {
       toast({
         title: "Demo Data Failed",
         description: "Failed to generate demo data. Please try again.",
@@ -229,9 +237,7 @@ export default function Home() {
   }
 
   return (
-    <ProtectedRoute>
-      <SetupGuard>
-        <AppLayout>
+    <AppLayout>
         <div className="p-6">
           {isLoading ? (
             <DashboardSkeleton />
@@ -352,12 +358,14 @@ export default function Home() {
           open={isAddExpenseOpen} 
           onOpenChange={setIsAddExpenseOpen}
           onExpenseAdded={async () => {
-            const data = await apiService.getExpenses()
-            setExpenses(data)
+            // For demo purposes, just close the dialog
+            setIsAddExpenseOpen(false)
+            toast({
+              title: "Demo Mode",
+              description: "In demo mode, expenses are not actually saved.",
+            })
           }}
         />
-        </AppLayout>
-      </SetupGuard>
-    </ProtectedRoute>
+    </AppLayout>
   )
 }

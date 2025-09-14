@@ -1,5 +1,3 @@
-import { prisma } from "@/lib/prisma"
-
 // Currency symbols and formatting
 export const CURRENCY_CONFIG = {
   INR: { symbol: "₹", code: "INR", locale: "en-IN" },
@@ -67,15 +65,10 @@ export function convertCurrency(
 }
 
 // Get user's currency preference from session/database
+// Note: This function should be called from server-side API routes only
+// For client-side usage, use the session data instead
 export async function getUserCurrency(userId: string): Promise<CurrencyCode> {
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { currency: true }
-    })
-    return (user?.currency as CurrencyCode) || "INR"
-  } catch (error) {
-    console.error("Error fetching user currency:", error)
-    return "INR"
-  }
+  // This function is deprecated - use session data instead
+  console.warn("getUserCurrency is deprecated. Use session data instead.")
+  return "INR"
 }

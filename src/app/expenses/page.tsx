@@ -2,13 +2,21 @@
 
 import { useState, useMemo, useEffect } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
-import { apiService, Expense } from "@/lib/api"
+// Demo expense type
+interface Expense {
+  id: string
+  amount: number
+  category: string
+  type: "expense" | "income"
+  date: string
+  note?: string
+  userId: string
+  createdAt: string
+  updatedAt: string
+}
 import { formatDate } from "@/lib/format"
-import { useCurrency } from "@/hooks/use-currency"
 import { useToast } from "@/hooks/use-toast"
 import { AppLayout } from "@/components/layout/app-layout"
-import { ProtectedRoute } from "@/components/auth/protected-route"
-import { SetupGuard } from "@/components/auth/setup-guard"
 import AddExpenseDialog from "@/components/AddExpenseDialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -39,7 +47,10 @@ export default function ExpensesPage() {
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const { toast } = useToast()
-  const { formatAmount } = useCurrency()
+  // Currency formatting function
+  const formatAmount = (amount: number) => {
+    return `₹${amount.toLocaleString()}`
+  }
   const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false)
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
@@ -224,24 +235,34 @@ export default function ExpensesPage() {
   }, [searchParams, expenses, toast, currentPage, itemsPerPage, filters, sortField, sortDirection, isLoading])
 
   useEffect(() => {
-    const fetchExpenses = async () => {
-      try {
-        const data = await apiService.getExpenses()
-        setExpenses(data)
-      } catch (error) {
-        console.error("Failed to fetch expenses:", error)
-        toast({
-          title: "Error",
-          description: "Failed to load expenses",
-          variant: "destructive",
-        })
-      } finally {
-        setIsLoading(false)
+    // Demo data
+    const demoExpenses: Expense[] = [
+      {
+        id: "1",
+        amount: 1500,
+        category: "Food",
+        type: "expense",
+        date: new Date().toISOString(),
+        note: "Lunch at restaurant",
+        userId: "demo-user",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      },
+      {
+        id: "2", 
+        amount: 5000,
+        category: "Income",
+        type: "income",
+        date: new Date().toISOString(),
+        note: "Freelance work",
+        userId: "demo-user",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       }
-    }
-
-    fetchExpenses()
-  }, [toast])
+    ]
+    setExpenses(demoExpenses)
+    setIsLoading(false)
+  }, [])
 
   // Get unique categories from expenses
   const uniqueCategories = useMemo(() => {
@@ -311,30 +332,18 @@ export default function ExpensesPage() {
   }
 
   const handleDelete = async (id: string) => {
-    try {
-      await apiService.deleteExpense(id)
-      setExpenses(prev => prev.filter(expense => expense.id !== id))
-      toast({
-        title: "Success",
-        description: "Expense deleted successfully",
-      })
-    } catch (error) {
-      console.error("Failed to delete expense:", error)
-      toast({
-        title: "Error",
-        description: "Failed to delete expense",
-        variant: "destructive",
-      })
-    }
+    // Demo mode - just remove from local state
+    setExpenses(prev => prev.filter(expense => expense.id !== id))
+    toast({
+      title: "Demo Mode",
+      description: "Expense would be deleted in demo mode.",
+    })
   }
 
   const handleExpenseAdded = async () => {
-    try {
-      const data = await apiService.getExpenses()
-      setExpenses(data)
-    } catch (error) {
-      console.error("Failed to refresh expenses:", error)
-    }
+    // Demo mode - no need to refresh, just close dialog
+    setEditingExpense(null)
+    setIsAddExpenseOpen(false)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -359,24 +368,18 @@ export default function ExpensesPage() {
 
   if (isLoading) {
     return (
-      <ProtectedRoute>
-        <SetupGuard>
-          <AppLayout>
-            <div className="p-6">
-              <div className="flex items-center justify-center h-96">
-                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-              </div>
-            </div>
-          </AppLayout>
-        </SetupGuard>
-      </ProtectedRoute>
+      <AppLayout>
+        <div className="p-6">
+          <div className="flex items-center justify-center h-96">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+          </div>
+        </div>
+      </AppLayout>
     )
   }
 
   return (
-    <ProtectedRoute>
-      <SetupGuard>
-        <AppLayout>
+    <AppLayout>
         <div className="p-6 space-y-6">
           {/* Header */}
           <div className="flex justify-between items-center">
@@ -584,7 +587,5 @@ export default function ExpensesPage() {
           />
         </div>
       </AppLayout>
-      </SetupGuard>
-    </ProtectedRoute>
   )
 }

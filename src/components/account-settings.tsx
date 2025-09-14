@@ -1,7 +1,16 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSession } from "next-auth/react"
+// Demo user data
+const demoUser = {
+  name: "Demo User",
+  email: "demo@example.com",
+  currency: "INR",
+  timezone: "Asia/Kolkata",
+  categories: ["Food", "Travel", "Shopping", "Bills"],
+  emailNotif: false,
+  twoFA: false
+}
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
@@ -45,7 +54,7 @@ interface UserSettings {
 }
 
 export function AccountSettings() {
-  const { data: session } = useSession()
+  const session = { user: demoUser }
   const { toast } = useToast()
   const [settings, setSettings] = useState<UserSettings>({
     currency: "INR",

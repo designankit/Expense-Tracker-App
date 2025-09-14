@@ -1,4 +1,15 @@
-import { Expense } from "./store"
+// Demo expense type
+interface Expense {
+  id: string
+  amount: number
+  category: string
+  type: "expense" | "income"
+  date: string
+  note?: string
+  userId: string
+  createdAt: string
+  updatedAt: string
+}
 
 /**
  * Export expenses to JSON file
@@ -111,7 +122,7 @@ export async function importJSONFile(
         continue
       }
       
-      if (!["expense", "income"].includes(item.type)) {
+      if (!["expense", "income"].includes(item.type as string)) {
         console.warn(`Skipping item ${i}: Invalid type`)
         continue
       }

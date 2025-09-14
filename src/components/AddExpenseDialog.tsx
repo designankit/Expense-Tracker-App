@@ -2,7 +2,14 @@
 
 import { useState, useEffect } from "react"
 import { useToast } from "@/hooks/use-toast"
-import { apiService, CreateExpenseData } from "@/lib/api"
+// Demo expense data type
+interface CreateExpenseData {
+  amount: number
+  category: string
+  type: "expense" | "income"
+  date: string
+  note?: string
+}
 import {
   Dialog,
   DialogContent,
@@ -118,21 +125,16 @@ export default function AddExpenseDialog({ open, onOpenChange, initialData, onSu
       }
 
       if (initialData?.id) {
-        // Update existing expense
-        await apiService.updateExpense({
-          ...expenseData,
-          id: initialData.id
-        })
+        // Demo mode - simulate update
         toast({
-          title: "Expense Updated",
-          description: `${expenseData.type === 'expense' ? 'Expense' : 'Income'} has been updated successfully.`,
+          title: "Demo Mode",
+          description: `${expenseData.type === 'expense' ? 'Expense' : 'Income'} would be updated in demo mode.`,
         })
       } else {
-        // Create new expense
-        await apiService.createExpense(expenseData)
+        // Demo mode - simulate creation
         toast({
-          title: "Expense Added",
-          description: `${expenseData.type === 'expense' ? 'Expense' : 'Income'} has been added successfully.`,
+          title: "Demo Mode",
+          description: `${expenseData.type === 'expense' ? 'Expense' : 'Income'} would be added in demo mode.`,
         })
       }
 

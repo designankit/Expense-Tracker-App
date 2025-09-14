@@ -4,7 +4,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Expense } from "@/lib/api"
 import { formatDate } from "@/lib/format"
-import { useCurrency } from "@/hooks/use-currency"
+// Currency formatting function
+const formatCurrency = (amount: number, currency: string = "INR"): string => {
+  const symbols = {
+    INR: "₹",
+    USD: "$",
+    EUR: "€",
+    GBP: "£"
+  }
+  return `${symbols[currency as keyof typeof symbols] || "₹"}${amount.toLocaleString()}`
+}
 import {
   Tooltip,
   TooltipContent,
@@ -35,7 +44,7 @@ const categoryColors: Record<string, string> = {
 }
 
 export function RecentExpenses({ expenses }: RecentExpensesProps) {
-  const { formatAmount } = useCurrency()
+  const formatAmount = (amount: number) => formatCurrency(amount, "INR")
   
   // Get recent expenses (last 5, sorted by date descending)
   const recentExpenses = expenses

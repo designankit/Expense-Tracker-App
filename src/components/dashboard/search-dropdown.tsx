@@ -4,7 +4,16 @@ import { useState, useEffect, useRef } from "react"
 import { Search, TrendingUp, TrendingDown, Calendar } from "lucide-react"
 // import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { useCurrency } from "@/hooks/use-currency"
+// Currency formatting function
+const formatCurrency = (amount: number, currency: string = "INR"): string => {
+  const symbols = {
+    INR: "₹",
+    USD: "$",
+    EUR: "€",
+    GBP: "£"
+  }
+  return `${symbols[currency as keyof typeof symbols] || "₹"}${amount.toLocaleString()}`
+}
 import { formatDate } from "@/lib/format"
 
 interface SearchSuggestion {
@@ -27,7 +36,7 @@ export function SearchDropdown({ query, isOpen, onClose, onSelectSuggestion }: S
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
-  const { formatAmount } = useCurrency()
+  const formatAmount = (amount: number) => formatCurrency(amount, "INR")
 
   // Fetch suggestions when query changes
   useEffect(() => {
@@ -164,7 +173,7 @@ export function SearchDropdown({ query, isOpen, onClose, onSelectSuggestion }: S
                         
                         <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
                           <Calendar className="h-3 w-3 mr-1.5" />
-                          {formatDate(new Date(suggestion.date))}
+                          {formatDate(suggestion.date)}
                         </div>
                       </div>
                       

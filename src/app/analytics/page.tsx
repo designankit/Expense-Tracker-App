@@ -1,12 +1,19 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { apiService, Expense } from "@/lib/api"
+// Demo expense type
+interface Expense {
+  id: string
+  amount: number
+  category: string
+  type: string
+  date: string
+  note?: string
+  userId: string
+}
 import { formatCurrency } from "@/lib/format"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { AppLayout } from "@/components/layout/app-layout"
-import { ProtectedRoute } from "@/components/auth/protected-route"
-import { SetupGuard } from "@/components/auth/setup-guard"
 import {
   ResponsiveContainer,
   PieChart,
@@ -32,18 +39,29 @@ export default function AnalyticsPage() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const fetchExpenses = async () => {
-      try {
-        const data = await apiService.getExpenses()
-        setExpenses(data)
-      } catch (error) {
-        console.error("Failed to fetch expenses:", error)
-      } finally {
-        setIsLoading(false)
+    // Demo data
+    const demoExpenses: Expense[] = [
+      {
+        id: "1",
+        amount: 1500,
+        category: "Food",
+        type: "expense",
+        date: new Date().toISOString(),
+        note: "Lunch",
+        userId: "demo"
+      },
+      {
+        id: "2",
+        amount: 5000,
+        category: "Income",
+        type: "income",
+        date: new Date().toISOString(),
+        note: "Salary",
+        userId: "demo"
       }
-    }
-
-    fetchExpenses()
+    ]
+    setExpenses(demoExpenses)
+    setIsLoading(false)
   }, [])
 
   // Calculate totals
@@ -78,17 +96,34 @@ export default function AnalyticsPage() {
   const netBalance = thisMonthIncome - thisMonthExpenses
 
   // Get category data (excluding Income)
-  const categoryData = apiService.getByCategory(expenses)
+  const categoryData = expenses
+    .filter(expense => expense.type === "expense")
+    .reduce((acc, expense) => {
+      const existing = acc.find(item => item.category === expense.category)
+      if (existing) {
+        existing.amount += expense.amount
+      } else {
+        acc.push({ category: expense.category, amount: expense.amount })
+      }
+      return acc
+    }, [] as { category: string; amount: number }[])
   const pieData = categoryData
     .filter((item) => item.category !== "Income")
     .map((item, index) => ({
       name: item.category,
-      value: item.total,
+      value: item.amount,
       fill: COLORS[index % COLORS.length],
     }))
 
-  // Get monthly trend data
-  const monthlyData = apiService.getMonthlyTotals(expenses, 6)
+  // Get monthly trend data (demo)
+  const monthlyData = [
+    { month: "Jan", expenses: 2000, income: 5000 },
+    { month: "Feb", expenses: 1500, income: 5000 },
+    { month: "Mar", expenses: 3000, income: 5000 },
+    { month: "Apr", expenses: 2500, income: 5000 },
+    { month: "May", expenses: 1800, income: 5000 },
+    { month: "Jun", expenses: 2200, income: 5000 }
+  ]
   const lineData = monthlyData.map((item) => ({
     month: item.month,
     expenses: item.expenses,
@@ -97,42 +132,32 @@ export default function AnalyticsPage() {
 
   if (isLoading) {
     return (
-      <ProtectedRoute>
-        <SetupGuard>
-          <AppLayout>
-            <div className="p-6">
-              <div className="flex items-center justify-center h-96">
-                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-              </div>
-            </div>
-          </AppLayout>
-        </SetupGuard>
-      </ProtectedRoute>
+      <AppLayout>
+        <div className="p-6">
+          <div className="flex items-center justify-center h-96">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+          </div>
+        </div>
+      </AppLayout>
     )
   }
 
   if (expenses.length === 0) {
     return (
-      <ProtectedRoute>
-        <SetupGuard>
-          <AppLayout>
-            <div className="p-6">
-              <div className="flex items-center justify-center h-96">
-                <p className="text-muted-foreground text-lg">
-                  No data available. Please add some expenses.
-                </p>
-              </div>
-            </div>
-          </AppLayout>
-        </SetupGuard>
-      </ProtectedRoute>
+      <AppLayout>
+        <div className="p-6">
+          <div className="flex items-center justify-center h-96">
+            <p className="text-muted-foreground text-lg">
+              No data available. Please add some expenses.
+            </p>
+          </div>
+        </div>
+      </AppLayout>
     )
   }
 
   return (
-    <ProtectedRoute>
-      <SetupGuard>
-        <AppLayout>
+    <AppLayout>
         <div className="container mx-auto p-6 space-y-6">
           {/* Stat Cards Section */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -254,7 +279,5 @@ export default function AnalyticsPage() {
           </div>
         </div>
       </AppLayout>
-      </SetupGuard>
-    </ProtectedRoute>
   )
 }

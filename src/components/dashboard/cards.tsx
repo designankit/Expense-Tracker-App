@@ -16,7 +16,16 @@ import {
 } from "lucide-react"
 import { formatPercentage } from "@/lib/format"
 import { Expense } from "@/lib/api"
-import { useCurrency } from "@/hooks/use-currency"
+// Currency formatting function
+const formatCurrency = (amount: number, currency: string = "INR"): string => {
+  const symbols = {
+    INR: "₹",
+    USD: "$",
+    EUR: "€",
+    GBP: "£"
+  }
+  return `${symbols[currency as keyof typeof symbols] || "₹"}${amount.toLocaleString()}`
+}
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -39,7 +48,7 @@ function IconBadge({ children, color }: { children: React.ReactNode; color: stri
 }
 
 export function Cards({ expenses }: CardsProps) {
-  const { formatAmount } = useCurrency()
+  const formatAmount = (amount: number) => formatCurrency(amount, "INR")
   
   // Helper functions for calculations
   const getTotal = () => {
