@@ -168,7 +168,7 @@ export function AccountSettings() {
               </Badge>
             ))}
           </div>
-        </div>
+        </div> 
 
         {/* Notifications & Security */}
         <div className="space-y-4">
