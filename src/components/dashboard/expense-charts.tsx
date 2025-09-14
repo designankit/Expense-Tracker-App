@@ -270,22 +270,22 @@ export function ExpenseCharts({ expenses }: ExpenseChartsProps) {
 
   return (
     <TooltipProvider>
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2">
         <Tooltip>
           <TooltipTrigger asChild>
             <Card className="border hover:shadow-sm transition-shadow cursor-pointer">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-lg font-semibold">Spending Trend</CardTitle>
-                <div className="h-8 w-8 rounded-md bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
-                  <TrendingUp className="h-4 w-4 text-blue-700 dark:text-blue-300" />
+                <CardTitle className="text-base sm:text-lg font-semibold">Spending Trend</CardTitle>
+                <div className="h-6 w-6 sm:h-8 sm:w-8 rounded-md bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
+                  <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-blue-700 dark:text-blue-300" />
                 </div>
               </CardHeader>
-              <CardContent className="h-80">
+              <CardContent className="h-64 sm:h-80">
                 {monthlyData.length > 0 ? (
                   <Line data={lineData} options={getLineOptions(isDark)} />
                 ) : (
                   <div className="flex items-center justify-center h-full text-muted-foreground">
-                    <p>No data available</p>
+                    <p className="text-sm sm:text-base">No data available</p>
                   </div>
                 )}
               </CardContent>
@@ -300,19 +300,19 @@ export function ExpenseCharts({ expenses }: ExpenseChartsProps) {
           <TooltipTrigger asChild>
             <Card className="border hover:shadow-sm transition-shadow cursor-pointer">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-lg font-semibold">Spending by Category</CardTitle>
-                <div className="h-8 w-8 rounded-md bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center">
-                  <PieChart className="h-4 w-4 text-purple-700 dark:text-purple-300" />
+                <CardTitle className="text-base sm:text-lg font-semibold">Spending by Category</CardTitle>
+                <div className="h-6 w-6 sm:h-8 sm:w-8 rounded-md bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center">
+                  <PieChart className="h-3 w-3 sm:h-4 sm:w-4 text-purple-700 dark:text-purple-300" />
                 </div>
               </CardHeader>
-              <CardContent className="h-80 flex items-center justify-center">
+              <CardContent className="h-64 sm:h-80 flex items-center justify-center">
                 {categories.length > 0 ? (
-                  <div className="w-80 h-80">
+                  <div className="w-64 h-64 sm:w-80 sm:h-80">
                     <Doughnut data={doughnutData} options={getDoughnutOptions(isDark)} />
                   </div>
                 ) : (
                   <div className="text-muted-foreground">
-                    <p>No expenses to display</p>
+                    <p className="text-sm sm:text-base">No expenses to display</p>
                   </div>
                 )}
               </CardContent>

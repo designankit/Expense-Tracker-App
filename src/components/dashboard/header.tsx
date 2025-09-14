@@ -1,6 +1,6 @@
 "use client"
 
-import { Bell, Search, Home, Receipt, BarChart3, Settings, Moon, Sun, LogOut, User, DollarSign, RefreshCw } from "lucide-react"
+import { Bell, Search, Home, Receipt, BarChart3, Settings, Moon, Sun, LogOut, User, RefreshCw, Menu } from "lucide-react"
 import { useTheme } from "next-themes"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -25,7 +25,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-export function Header() {
+interface HeaderProps {
+  onMobileMenuToggle?: () => void
+}
+
+export function Header({ onMobileMenuToggle }: HeaderProps) {
   const { theme, setTheme } = useTheme()
   const getSymbol = () => "₹" // Default to INR symbol
   const { searchQuery, setSearchQuery, isDropdownOpen, setIsDropdownOpen } = useSearch()
@@ -83,21 +87,29 @@ export function Header() {
   }
 
   return (
-    <header className="flex h-16 items-center gap-4 border-b bg-background px-6">
-      <div className="flex-1 flex items-center gap-3">
-        <h1 className="text-2xl font-semibold">Dashboard</h1>
-        <div className="flex items-center gap-1 px-2 py-1 bg-muted rounded-md">
-          <DollarSign className="h-3 w-3 text-muted-foreground" />
-          <span className="text-xs font-medium text-muted-foreground">{getSymbol()}</span>
-        </div>
+    <header className="flex h-14 sm:h-16 items-center gap-2 sm:gap-4 border-b bg-background px-3 sm:px-6">
+      {/* Mobile Menu Button */}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={onMobileMenuToggle}
+        className="sm:hidden h-8 w-8"
+      >
+        <Menu className="h-4 w-4" />
+      </Button>
+      
+      <div className="flex-1 flex items-center gap-2 sm:gap-3 min-w-0">
+        <h1 className="text-lg sm:text-2xl font-semibold truncate">Dashboard</h1>
       </div>
-      <div className="flex items-center gap-4">
-        <div className="relative w-72">
+      
+      <div className="flex items-center gap-2 sm:gap-4">
+        {/* Search - Hidden on mobile, shown on larger screens */}
+        <div className="relative w-48 sm:w-72 hidden md:block">
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 transition-colors duration-200 group-focus-within:text-blue-500" />
+            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 transition-colors duration-200 group-focus-within:text-blue-500 z-10" />
             <Input
               placeholder="Search expenses..."
-              className="pl-11 pr-4 py-2.5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-gray-200 dark:border-gray-700 rounded-xl shadow-sm hover:shadow-md focus:shadow-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 placeholder:text-gray-400"
+              className="pl-11 pr-4 py-2.5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-gray-200 dark:border-gray-700 rounded-xl shadow-sm hover:shadow-md focus:shadow-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 placeholder:text-gray-400 relative z-0"
               value={searchQuery}
               onChange={handleSearchInputChange}
               onFocus={handleSearchInputFocus}
@@ -109,7 +121,7 @@ export function Header() {
                   setSearchQuery('')
                   setIsDropdownOpen(false)
                 }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200 z-10"
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -124,19 +136,30 @@ export function Header() {
             onSelectSuggestion={handleSelectSuggestion}
           />
         </div>
-        <Separator orientation="vertical" className="h-6" />
+        
+        {/* Mobile Search Button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden h-8 w-8"
+        >
+          <Search className="h-4 w-4" />
+        </Button>
+        
+        <Separator orientation="vertical" className="h-6 hidden sm:block" />
+        
         <div className="relative">
           <Button 
             variant="ghost" 
             size="icon"
             onClick={() => setIsNotificationOpen(!isNotificationOpen)}
-            className="relative"
+            className="relative h-8 w-8 sm:h-10 sm:w-10"
           >
             <Bell className="h-4 w-4" />
             {unreadCount > 0 && (
               <Badge 
                 variant="destructive" 
-                className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center text-xs p-0"
+                className="absolute -top-1 -right-1 h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center text-xs p-0"
               >
                 {unreadCount > 9 ? '9+' : unreadCount}
               </Badge>
@@ -149,7 +172,7 @@ export function Header() {
         </div>
         
         {/* Theme Toggle Button */}
-        <Button variant="ghost" size="icon" onClick={toggleTheme}>
+        <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-8 w-8 sm:h-10 sm:w-10">
           {mounted ? (
             theme === "dark" ? (
               <Sun className="h-4 w-4" />

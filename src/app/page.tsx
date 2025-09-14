@@ -39,48 +39,52 @@ import {
 import { Download, Upload, FileText, FileSpreadsheet, FileType } from "lucide-react"
 
 export default function Home() {
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false)
   const [expenses, setExpenses] = useState<Expense[]>([])
   const { toast } = useToast()
   const { addDemoNotifications } = useNotifications()
 
   useEffect(() => {
-    // Simulate loading demo data
-    const loadDemoData = () => {
-      setIsLoading(true)
-      // Add some demo expenses
-      const demoExpenses: Expense[] = [
-        {
-          id: "1",
-          amount: 1500,
-          category: "Food",
-          type: "expense",
-          date: new Date().toISOString(),
-          note: "Lunch at restaurant",
-          userId: "demo-user",
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        },
-        {
-          id: "2", 
-          amount: 5000,
-          category: "Income",
-          type: "income",
-          date: new Date().toISOString(),
-          note: "Freelance work",
-          userId: "demo-user",
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        }
-      ]
-      setExpenses(demoExpenses)
-      addDemoNotifications()
-      setIsLoading(false)
-    }
+    // Demo expenses data
+    const demoExpenses: Expense[] = [
+      {
+        id: "1",
+        amount: 1500,
+        category: "Food",
+        type: "expense",
+        date: new Date().toISOString(),
+        note: "Lunch at restaurant",
+        userId: "demo-user",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      },
+      {
+        id: "2", 
+        amount: 5000,
+        category: "Income",
+        type: "income",
+        date: new Date().toISOString(),
+        note: "Freelance work",
+        userId: "demo-user",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+    ]
+    
+    // Set expenses and stop loading immediately
+    setExpenses(demoExpenses)
+    setIsLoading(false)
+  }, [])
 
-    loadDemoData()
-  }, [addDemoNotifications])
+  // Add demo notifications only once on mount
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      addDemoNotifications()
+    }, 1000)
+    
+    return () => clearTimeout(timer)
+  }, [])
 
   const handleExport = (format: "json" | "csv" | "pdf") => {
     try {
@@ -238,24 +242,24 @@ export default function Home() {
 
   return (
     <AppLayout>
-        <div className="p-6">
+        <div className="p-3 sm:p-4 lg:p-6">
           {isLoading ? (
             <DashboardSkeleton />
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               <Cards expenses={expenses} />
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                <div className="md:col-span-2">
+              <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
+                <div className="lg:col-span-2">
                   <RecentExpenses expenses={expenses} />
                 </div>
                 <TooltipProvider>
-                  <div className="bg-card border rounded-lg p-6">
-                    <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
-                    <div className="space-y-3">
+                  <div className="bg-card border rounded-lg p-4 sm:p-6">
+                    <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Quick Actions</h3>
+                    <div className="space-y-2 sm:space-y-3">
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button 
-                            className="w-full justify-start" 
+                            className="w-full justify-start text-sm sm:text-base" 
                             variant="default"
                             onClick={() => setIsAddExpenseOpen(true)}
                           >
@@ -268,7 +272,7 @@ export default function Home() {
                       </Tooltip>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button className="w-full justify-start" variant="secondary">
+                          <Button className="w-full justify-start text-sm sm:text-base" variant="secondary">
                             View Reports
                           </Button>
                         </TooltipTrigger>
@@ -279,28 +283,28 @@ export default function Home() {
                       
                       {/* Export Data Dropdown */}
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-muted-foreground">Export Data</label>
+                        <label className="text-xs sm:text-sm font-medium text-muted-foreground">Export Data</label>
                         <Select onValueChange={(value) => handleExport(value as "json" | "csv" | "pdf")}>
-                          <SelectTrigger className="w-full">
+                          <SelectTrigger className="w-full text-sm sm:text-base">
                             <SelectValue placeholder="Choose export format" />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="json">
                               <div className="flex items-center gap-2">
                                 <FileText className="h-4 w-4" />
-                                Export as JSON
+                                <span className="text-sm sm:text-base">Export as JSON</span>
                               </div>
                             </SelectItem>
                             <SelectItem value="csv">
                               <div className="flex items-center gap-2">
                                 <FileSpreadsheet className="h-4 w-4" />
-                                Export as CSV
+                                <span className="text-sm sm:text-base">Export as CSV</span>
                               </div>
                             </SelectItem>
                             <SelectItem value="pdf">
                               <div className="flex items-center gap-2">
                                 <FileType className="h-4 w-4" />
-                                Export as PDF
+                                <span className="text-sm sm:text-base">Export as PDF</span>
                               </div>
                             </SelectItem>
                           </SelectContent>
@@ -311,7 +315,7 @@ export default function Home() {
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button 
-                            className="w-full justify-start" 
+                            className="w-full justify-start text-sm sm:text-base" 
                             variant="outline"
                             onClick={handleImport}
                           >
@@ -329,7 +333,7 @@ export default function Home() {
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button 
-                              className="w-full justify-start" 
+                              className="w-full justify-start text-sm sm:text-base" 
                               variant="secondary"
                               onClick={generateDemoData}
                             >

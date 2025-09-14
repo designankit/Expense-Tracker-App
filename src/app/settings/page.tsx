@@ -141,16 +141,16 @@ export default function SettingsPage() {
   if (!mounted || isLoading) {
     return (
       <AppLayout>
-        <div className="p-6">
-          <div className="space-y-6">
+        <div className="p-3 sm:p-4 lg:p-6">
+          <div className="space-y-4 sm:space-y-6">
             <div>
-              <h1 className="text-3xl font-bold">Settings</h1>
-              <p className="text-muted-foreground">
+              <h1 className="text-2xl sm:text-3xl font-bold">Settings</h1>
+              <p className="text-sm sm:text-base text-muted-foreground">
                 Manage your application preferences and data
               </p>
             </div>
             <div className="animate-pulse">
-              <div className="h-32 bg-muted rounded-lg"></div>
+              <div className="h-24 sm:h-32 bg-muted rounded-lg"></div>
             </div>
           </div>
         </div>
@@ -160,57 +160,57 @@ export default function SettingsPage() {
 
   return (
     <AppLayout>
-      <div className="p-6">
-        <div className="space-y-6">
+      <div className="p-3 sm:p-4 lg:p-6">
+        <div className="space-y-4 sm:space-y-6">
             <div>
-              <h1 className="text-3xl font-bold">Settings</h1>
-              <p className="text-muted-foreground">
+              <h1 className="text-2xl sm:text-3xl font-bold">Settings</h1>
+              <p className="text-sm sm:text-base text-muted-foreground">
                 Manage your application preferences and data
               </p>
             </div>
 
             {/* Profile Information (Read-only) */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5" />
+              <CardHeader className="pb-3 sm:pb-6">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <User className="h-4 w-4 sm:h-5 sm:w-5" />
                   Profile Information
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-sm">
                   Your profile details (editable through setup wizard)
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center gap-6">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
                   {/* Profile Picture */}
-                  <Avatar className="h-16 w-16">
+                  <Avatar className="h-12 w-12 sm:h-16 sm:w-16 mx-auto sm:mx-0">
                     <AvatarImage 
                       src={session?.user?.image || undefined} 
                       alt={session?.user?.name || session?.user?.email || ""} 
                     />
-                    <AvatarFallback className="text-lg bg-primary text-primary-foreground">
+                    <AvatarFallback className="text-base sm:text-lg bg-primary text-primary-foreground">
                       {getUserInitials(session?.user?.name || null, session?.user?.email || undefined)}
                     </AvatarFallback>
                   </Avatar>
                   
                   {/* Profile Details */}
-                  <div className="space-y-2 flex-1">
-                    <div className="flex items-center gap-2">
+                  <div className="space-y-2 flex-1 text-center sm:text-left">
+                    <div className="flex items-center justify-center sm:justify-start gap-2">
                       <User className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">
+                      <span className="font-medium text-sm sm:text-base">
                         {session?.user?.name || "No name set"}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-center sm:justify-start gap-2">
                       <Mail className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-xs sm:text-sm text-muted-foreground">
                         {session?.user?.email}
                       </span>
                     </div>
                   </div>
                   
                   {/* Edit Hint */}
-                  <div className="text-right">
+                  <div className="text-center sm:text-right">
                     <p className="text-xs text-muted-foreground">
                       To edit profile details, use the setup wizard
                     </p>
@@ -224,23 +224,23 @@ export default function SettingsPage() {
 
             {/* Quick Setup */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Settings2 className="h-5 w-5" />
+              <CardHeader className="pb-3 sm:pb-6">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <Settings2 className="h-4 w-4 sm:h-5 sm:w-5" />
                   Quick Setup
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3 sm:space-y-4">
                 <div>
                   <h3 className="text-sm font-medium mb-2">Setup Wizard</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
+                  <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
                     Complete or redo your account setup to configure all preferences at once.
                   </p>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <Button 
                       variant="outline" 
                       onClick={() => router.push("/setup-account")}
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-2 w-full sm:w-auto"
                     >
                       <Settings2 className="h-4 w-4" />
                       Go to Setup Wizard
@@ -269,6 +269,7 @@ export default function SettingsPage() {
                           }
                         }
                       }}
+                      className="w-full sm:w-auto"
                     >
                       Reset Setup
                     </Button>
@@ -279,16 +280,16 @@ export default function SettingsPage() {
 
             {/* Theme Settings */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Monitor className="h-5 w-5" />
+              <CardHeader className="pb-3 sm:pb-6">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <Monitor className="h-4 w-4 sm:h-5 sm:w-5" />
                   Appearance
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3 sm:space-y-4">
                 <div>
                   <h3 className="text-sm font-medium mb-3">Theme</h3>
-                  <div className="flex gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     <Button
                       variant={theme === "light" ? "default" : "outline"}
                       size="sm"
@@ -299,7 +300,7 @@ export default function SettingsPage() {
                           description: "Switched to light theme",
                         })
                       }}
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-2 w-full"
                     >
                       <Sun className="h-4 w-4" />
                       Light
@@ -314,7 +315,7 @@ export default function SettingsPage() {
                           description: "Switched to dark theme",
                         })
                       }}
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-2 w-full"
                     >
                       <Moon className="h-4 w-4" />
                       Dark
@@ -329,7 +330,7 @@ export default function SettingsPage() {
                           description: "Switched to system theme",
                         })
                       }}
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-2 w-full"
                     >
                       <Monitor className="h-4 w-4" />
                       System
@@ -344,14 +345,14 @@ export default function SettingsPage() {
 
             {/* Categories Information */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Tag className="h-5 w-5" />
+              <CardHeader className="pb-3 sm:pb-6">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <Tag className="h-4 w-4 sm:h-5 sm:w-5" />
                   Categories
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   <div>
                     <h3 className="text-sm font-medium mb-3">
                       Active Categories ({categoryList.length})
@@ -365,7 +366,7 @@ export default function SettingsPage() {
                         ))}
                       </div>
                     ) : (
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs sm:text-sm text-muted-foreground">
                         No categories found. Add some expenses to see categories here.
                       </p>
                     )}
@@ -373,18 +374,18 @@ export default function SettingsPage() {
                   
                   <Separator />
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2 text-center sm:text-left">
                       <h4 className="text-sm font-medium">Total Expenses</h4>
-                      <p className="text-2xl font-bold text-red-600">
+                      <p className="text-xl sm:text-2xl font-bold text-red-600">
                         {formatAmount(expenses
                           .filter(expense => expense.type === 'expense')
                           .reduce((sum, expense) => sum + expense.amount, 0))}
                       </p>
                     </div>
-                    <div className="space-y-2">
+                    <div className="space-y-2 text-center sm:text-left">
                       <h4 className="text-sm font-medium">Total Income</h4>
-                      <p className="text-2xl font-bold text-green-600">
+                      <p className="text-xl sm:text-2xl font-bold text-green-600">
                         {formatAmount(expenses
                           .filter(expense => expense.type === 'income')
                           .reduce((sum, expense) => sum + expense.amount, 0))}
@@ -397,28 +398,28 @@ export default function SettingsPage() {
 
             {/* Danger Zone */}
             <Card className="border-red-200 dark:border-red-800">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-red-600 dark:text-red-400">
-                  <AlertTriangle className="h-5 w-5" />
+              <CardHeader className="pb-3 sm:pb-6">
+                <CardTitle className="flex items-center gap-2 text-red-600 dark:text-red-400 text-base sm:text-lg">
+                  <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5" />
                   Danger Zone
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3 sm:space-y-4">
                 <div className="space-y-2">
                   <h3 className="text-sm font-medium">Clear All Data</h3>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     Permanently delete all expenses and income data. This action cannot be undone.
                   </p>
-                  <div className="flex items-center gap-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                     <Button
                       variant="destructive"
                       onClick={handleClearAllExpenses}
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-2 w-full sm:w-auto"
                     >
                       <Trash2 className="h-4 w-4" />
                       Clear All Expenses
                     </Button>
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-xs text-muted-foreground text-center sm:text-left">
                       {expenses.length} entries will be deleted
                     </div>
                   </div>
@@ -428,14 +429,14 @@ export default function SettingsPage() {
 
             {/* App Information */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <DollarSign className="h-5 w-5" />
+              <CardHeader className="pb-3 sm:pb-6">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <DollarSign className="h-4 w-4 sm:h-5 sm:w-5" />
                   About
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2 text-sm text-muted-foreground">
+                <div className="space-y-2 text-xs sm:text-sm text-muted-foreground">
                   <p><strong>ExpenseTracker</strong> - A simple and effective expense management application</p>
                   <p>Built with Next.js, TypeScript, and Tailwind CSS</p>
                   <p>Data is stored locally in your browser</p>

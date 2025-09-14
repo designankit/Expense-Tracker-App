@@ -15,8 +15,19 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Expense Tracker App",
+  title: "Expensio Tracker",
   description: "Track your personal expenses easily",
+  icons: {
+    icon: [
+      {
+        url: "/Favicon.png",
+        sizes: "32x32",
+        type: "image/png",
+      },
+    ],
+    shortcut: "/Favicon.png",
+    apple: "/Favicon.png",
+  },
 };
 
 export default function RootLayout({
@@ -28,6 +39,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning
       >
         <Providers>
           {children}

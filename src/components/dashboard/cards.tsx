@@ -165,12 +165,12 @@ export function Cards({ expenses }: CardsProps) {
 
   return (
     <TooltipProvider>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <Tooltip>
           <TooltipTrigger asChild>
             <Card className="border hover:shadow-sm transition-shadow cursor-pointer">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
+                <CardTitle className="text-xs sm:text-sm font-medium">
                   Total Expenses
                 </CardTitle>
                 <IconBadge color={getTotalExpensesColor()}>
@@ -178,7 +178,7 @@ export function Cards({ expenses }: CardsProps) {
                 </IconBadge>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{formatAmount(totalExpenses)}</div>
+                <div className="text-lg sm:text-xl lg:text-2xl font-bold">{formatAmount(totalExpenses)}</div>
                 <p className="text-xs text-muted-foreground">
                   All time expenses
                 </p>
@@ -194,7 +194,7 @@ export function Cards({ expenses }: CardsProps) {
           <TooltipTrigger asChild>
             <Card className="border hover:shadow-sm transition-shadow cursor-pointer">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
+                <CardTitle className="text-xs sm:text-sm font-medium">
                   This Month
                 </CardTitle>
                 <IconBadge color={getThisMonthColor()}>
@@ -202,7 +202,7 @@ export function Cards({ expenses }: CardsProps) {
                 </IconBadge>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{formatAmount(thisMonthExpenses)}</div>
+                <div className="text-lg sm:text-xl lg:text-2xl font-bold">{formatAmount(thisMonthExpenses)}</div>
                 <p className="text-xs text-muted-foreground">
                   Current month expenses
                 </p>
@@ -218,13 +218,13 @@ export function Cards({ expenses }: CardsProps) {
           <TooltipTrigger asChild>
             <Card className="border hover:shadow-sm transition-shadow cursor-pointer">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Categories</CardTitle>
+                <CardTitle className="text-xs sm:text-sm font-medium">Categories</CardTitle>
                 <IconBadge color={getCategoriesColor()}>
                   {getCategoriesIcon()}
                 </IconBadge>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{uniqueCategories}</div>
+                <div className="text-lg sm:text-xl lg:text-2xl font-bold">{uniqueCategories}</div>
                 <p className="text-xs text-muted-foreground">
                   Active categories
                 </p>
@@ -240,13 +240,13 @@ export function Cards({ expenses }: CardsProps) {
           <TooltipTrigger asChild>
             <Card className="border hover:shadow-sm transition-shadow cursor-pointer">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Savings Rate</CardTitle>
+                <CardTitle className="text-xs sm:text-sm font-medium">Savings Rate</CardTitle>
                 <IconBadge color={getSavingsRateColor()}>
                   {getSavingsRateIcon()}
                 </IconBadge>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{formatPercentage(savingsRate / 100)}</div>
+                <div className="text-lg sm:text-xl lg:text-2xl font-bold">{formatPercentage(savingsRate / 100)}</div>
                 <p className="text-xs text-muted-foreground">
                   This month savings
                 </p>

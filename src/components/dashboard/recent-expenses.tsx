@@ -55,34 +55,34 @@ export function RecentExpenses({ expenses }: RecentExpensesProps) {
     <TooltipProvider>
       <Card>
         <CardHeader>
-          <CardTitle>Recent Transactions</CardTitle>
+          <CardTitle className="text-base sm:text-lg">Recent Transactions</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {recentExpenses.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <p>No transactions yet</p>
-                <p className="text-sm">Add your first expense or income to get started</p>
+              <div className="text-center py-6 sm:py-8 text-muted-foreground">
+                <p className="text-sm sm:text-base">No transactions yet</p>
+                <p className="text-xs sm:text-sm">Add your first expense or income to get started</p>
               </div>
             ) : (
               recentExpenses.map((expense) => (
                 <Tooltip key={expense.id}>
                   <TooltipTrigger asChild>
-                    <div className="flex items-center justify-between cursor-pointer hover:bg-muted/50 p-2 rounded-md transition-colors">
-                      <div className="flex items-center space-x-4">
-                        <div className={`w-2 h-2 rounded-full ${
+                    <div className="flex items-center justify-between cursor-pointer hover:bg-muted/50 p-2 sm:p-3 rounded-md transition-colors">
+                      <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
+                        <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
                           expense.type === 'income' ? 'bg-green-500' : 'bg-red-500'
                         }`} />
-                        <div>
-                          <p className="text-sm font-medium">{expense.note || 'No description'}</p>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs sm:text-sm font-medium truncate">{expense.note || 'No description'}</p>
                           <p className="text-xs text-muted-foreground">{formatDate(expense.date)}</p>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <Badge className={categoryColors[expense.category] || categoryColors.Other}>
+                      <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
+                        <Badge className={`text-xs ${categoryColors[expense.category] || categoryColors.Other} hidden sm:inline-flex`}>
                           {expense.category}
                         </Badge>
-                        <span className={`text-sm font-medium ${
+                        <span className={`text-xs sm:text-sm font-medium ${
                           expense.type === 'income' ? 'text-green-600' : 'text-red-600'
                         }`}>
                           {expense.type === 'income' ? '+' : '-'}{formatAmount(expense.amount)}
@@ -92,6 +92,7 @@ export function RecentExpenses({ expenses }: RecentExpensesProps) {
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>{expense.type === 'income' ? 'Income' : 'Expense'} - {expense.note || 'No description'}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{expense.category}</p>
                   </TooltipContent>
                 </Tooltip>
               ))

@@ -98,15 +98,15 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   const addDemoNotifications = () => {
     // Only add demo notifications if none exist
     if (notifications.length === 0) {
-      setTimeout(() => {
-        addNotification({
-          title: "Welcome!",
-          message: "Your expense tracker is ready to use.",
-          type: "success",
-          actionUrl: "/"
-        })
-      }, 2000)
+      // Add welcome notification immediately
+      addNotification({
+        title: "Welcome!",
+        message: "Your expense tracker is ready to use.",
+        type: "success",
+        actionUrl: "/"
+      })
 
+      // Add feature notification after a delay
       setTimeout(() => {
         addNotification({
           title: "New Feature",
@@ -114,7 +114,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
           type: "info",
           actionUrl: "/expenses"
         })
-      }, 5000)
+      }, 3000)
     }
   }
 

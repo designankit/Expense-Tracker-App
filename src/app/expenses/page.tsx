@@ -380,62 +380,64 @@ function ExpensesPageContent() {
 
   return (
     <AppLayout>
-        <div className="p-6 space-y-6">
+        <div className="p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
           {/* Header */}
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold">Expenses</h1>
-              {searchParams.get('search') && (
-                <Badge variant="secondary" className="animate-pulse">
-                  <Search className="h-3 w-3 mr-1" />
-                  Searching: &quot;{searchParams.get('search')}&quot;
-                  <button
-                    onClick={() => {
-                      setFilters(prev => ({ ...prev, search: '' }))
-                      router.push('/expenses')
-                    }}
-                    className="ml-2 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full p-0.5"
-                  >
-                    <span className="sr-only">Clear search</span>
-                    ×
-                  </button>
-                </Badge>
-              )}
-              {searchParams.get('id') && (
-                <Badge variant="default" className="animate-pulse bg-blue-500 hover:bg-blue-600">
-                  <span className="text-white">📍 Expense Highlighted</span>
-                  <button
-                    onClick={() => router.push('/expenses')}
-                    className="ml-2 hover:bg-blue-400 rounded-full p-0.5"
-                  >
-                    <span className="sr-only">Clear highlight</span>
-                    <span className="text-white">×</span>
-                  </button>
-                </Badge>
-              )}
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+              <h1 className="text-2xl sm:text-3xl font-bold">Expenses</h1>
+              <div className="flex flex-wrap gap-2">
+                {searchParams.get('search') && (
+                  <Badge variant="secondary" className="animate-pulse text-xs sm:text-sm">
+                    <Search className="h-3 w-3 mr-1" />
+                    <span className="hidden sm:inline">Searching: </span>&quot;{searchParams.get('search')}&quot;
+                    <button
+                      onClick={() => {
+                        setFilters(prev => ({ ...prev, search: '' }))
+                        router.push('/expenses')
+                      }}
+                      className="ml-2 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full p-0.5"
+                    >
+                      <span className="sr-only">Clear search</span>
+                      ×
+                    </button>
+                  </Badge>
+                )}
+                {searchParams.get('id') && (
+                  <Badge variant="default" className="animate-pulse bg-blue-500 hover:bg-blue-600 text-xs sm:text-sm">
+                    <span className="text-white">📍 <span className="hidden sm:inline">Expense Highlighted</span><span className="sm:hidden">Highlighted</span></span>
+                    <button
+                      onClick={() => router.push('/expenses')}
+                      className="ml-2 hover:bg-blue-400 rounded-full p-0.5"
+                    >
+                      <span className="sr-only">Clear highlight</span>
+                      <span className="text-white">×</span>
+                    </button>
+                  </Badge>
+                )}
+              </div>
             </div>
-            <Button onClick={() => setIsAddExpenseOpen(true)}>
+            <Button onClick={() => setIsAddExpenseOpen(true)} className="w-full sm:w-auto">
               Add Expense
             </Button>
           </div>
 
           {/* Filters */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Filter className="h-5 w-5" />
+            <CardHeader className="pb-3 sm:pb-6">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <Filter className="h-4 w-4 sm:h-5 sm:w-5" />
                 Filters
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <CardContent className="space-y-3 sm:space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                 <div className="relative">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Search expenses..."
                     value={filters.search}
                     onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                    className="pl-10"
+                    className="pl-10 h-10 sm:h-11"
                   />
                 </div>
 
@@ -443,7 +445,7 @@ function ExpensesPageContent() {
                   value={filters.category}
                   onValueChange={(value) => setFilters(prev => ({ ...prev, category: value }))}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="h-10 sm:h-11">
                     <SelectValue placeholder="All Categories" />
                   </SelectTrigger>
                   <SelectContent>
@@ -461,6 +463,7 @@ function ExpensesPageContent() {
                   placeholder="From Date"
                   value={filters.dateFrom}
                   onChange={(e) => setFilters(prev => ({ ...prev, dateFrom: e.target.value }))}
+                  className="h-10 sm:h-11"
                 />
 
                 <Input
@@ -468,11 +471,12 @@ function ExpensesPageContent() {
                   placeholder="To Date"
                   value={filters.dateTo}
                   onChange={(e) => setFilters(prev => ({ ...prev, dateTo: e.target.value }))}
+                  className="h-10 sm:h-11"
                 />
               </div>
 
               <div className="flex gap-2">
-                <Button variant="outline" onClick={clearFilters}>
+                <Button variant="outline" onClick={clearFilters} className="w-full sm:w-auto">
                   Clear Filters
                 </Button>
               </div>
@@ -481,65 +485,116 @@ function ExpensesPageContent() {
 
           {/* Expenses List */}
           <Card>
-            <CardHeader>
-              <CardTitle>
+            <CardHeader className="pb-3 sm:pb-6">
+              <CardTitle className="text-base sm:text-lg">
                 All Expenses ({filteredAndSortedExpenses.length})
               </CardTitle>
             </CardHeader>
             <CardContent>
               {currentExpenses.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
-                  No expenses found
+                  <p className="text-sm sm:text-base">No expenses found</p>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   {currentExpenses.map((expense) => (
                     <div
                       key={expense.id}
                       id={`expense-${expense.id}`}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-all duration-200 hover:shadow-md"
+                      className="border rounded-lg hover:bg-muted/50 transition-all duration-200 hover:shadow-md overflow-hidden"
                     >
-                      <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div>
-                          <p className="font-medium">{expense.category}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {expense.note || 'No note'}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-muted-foreground">Date</p>
-                          <p className="font-medium">{formatDate(expense.date)}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-muted-foreground">Type</p>
-                          <Badge variant={expense.type === 'income' ? 'default' : 'secondary'}>
-                            {expense.type}
-                          </Badge>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm text-muted-foreground">Amount</p>
-                          <p className={`font-bold text-lg ${
-                            expense.type === 'income' ? 'text-green-600' : 'text-red-600'
-                          }`}>
-                            {expense.type === 'income' ? '+' : '-'}{formatAmount(expense.amount)}
-                          </p>
+                      {/* Mobile Layout */}
+                      <div className="block sm:hidden p-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1 min-w-0 pr-3">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h3 className="font-semibold text-base truncate">{expense.category}</h3>
+                              <Badge 
+                                variant={expense.type === 'income' ? 'default' : 'secondary'}
+                                className="text-xs flex-shrink-0"
+                              >
+                                {expense.type}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground truncate mb-1">
+                              {expense.note || 'No note'}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {formatDate(expense.date)}
+                            </p>
+                          </div>
+                          <div className="flex flex-col items-end gap-3">
+                            <p className={`font-bold text-lg ${
+                              expense.type === 'income' ? 'text-green-600' : 'text-red-600'
+                            }`}>
+                              {expense.type === 'income' ? '+' : '-'}{formatAmount(expense.amount)}
+                            </p>
+                            <div className="flex gap-1">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleEdit(expense)}
+                                className="h-8 w-8 p-0 hover:bg-blue-50 dark:hover:bg-blue-950"
+                              >
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleDelete(expense.id)}
+                                className="h-8 w-8 p-0 hover:bg-red-50 dark:hover:bg-red-950"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                      <div className="flex gap-2 ml-4">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEdit(expense)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDelete(expense.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+
+                      {/* Desktop Layout */}
+                      <div className="hidden sm:flex items-center justify-between p-4">
+                        <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-4">
+                          <div>
+                            <p className="font-medium">{expense.category}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {expense.note || 'No note'}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-muted-foreground">Date</p>
+                            <p className="font-medium">{formatDate(expense.date)}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-muted-foreground">Type</p>
+                            <Badge variant={expense.type === 'income' ? 'default' : 'secondary'}>
+                              {expense.type}
+                            </Badge>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm text-muted-foreground">Amount</p>
+                            <p className={`font-bold text-lg ${
+                              expense.type === 'income' ? 'text-green-600' : 'text-red-600'
+                            }`}>
+                              {expense.type === 'income' ? '+' : '-'}{formatAmount(expense.amount)}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2 ml-4">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEdit(expense)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDelete(expense.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -548,20 +603,22 @@ function ExpensesPageContent() {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-between mt-6">
-                  <p className="text-sm text-muted-foreground">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mt-4 sm:mt-6">
+                  <p className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left">
                     Showing {startIndex + 1} to {Math.min(endIndex, filteredAndSortedExpenses.length)} of {filteredAndSortedExpenses.length} expenses
                   </p>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-center gap-2">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                       disabled={currentPage === 1}
+                      className="h-8 w-8 p-0 sm:h-9 sm:w-auto sm:px-3"
                     >
                       <ChevronLeft className="h-4 w-4" />
+                      <span className="hidden sm:inline ml-1">Previous</span>
                     </Button>
-                    <span className="text-sm">
+                    <span className="text-xs sm:text-sm px-2">
                       Page {currentPage} of {totalPages}
                     </span>
                     <Button
@@ -569,7 +626,9 @@ function ExpensesPageContent() {
                       size="sm"
                       onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                       disabled={currentPage === totalPages}
+                      className="h-8 w-8 p-0 sm:h-9 sm:w-auto sm:px-3"
                     >
+                      <span className="hidden sm:inline mr-1">Next</span>
                       <ChevronRight className="h-4 w-4" />
                     </Button>
                   </div>

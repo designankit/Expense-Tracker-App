@@ -109,20 +109,20 @@ export function AccountSettings() {
   if (isLoading) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Settings className="h-5 w-5" />
+        <CardHeader className="pb-3 sm:pb-6">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <Settings className="h-4 w-4 sm:h-5 sm:w-5" />
             Account Settings
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-sm">
             Loading your account preferences...
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="animate-pulse space-y-4">
-            <div className="h-4 bg-muted rounded w-3/4"></div>
-            <div className="h-4 bg-muted rounded w-1/2"></div>
-            <div className="h-4 bg-muted rounded w-2/3"></div>
+          <div className="animate-pulse space-y-3 sm:space-y-4">
+            <div className="h-3 sm:h-4 bg-muted rounded w-3/4"></div>
+            <div className="h-3 sm:h-4 bg-muted rounded w-1/2"></div>
+            <div className="h-3 sm:h-4 bg-muted rounded w-2/3"></div>
           </div>
         </CardContent>
       </Card>
@@ -131,48 +131,48 @@ export function AccountSettings() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Settings className="h-5 w-5" />
+      <CardHeader className="pb-3 sm:pb-6">
+        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+          <Settings className="h-4 w-4 sm:h-5 sm:w-5" />
           Account Settings
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-sm">
           View your current account preferences and settings
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4 sm:space-y-6">
         {/* Currency & Timezone */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           <div className="space-y-2">
-            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+            <div className="flex items-center gap-2 text-xs sm:text-sm font-medium text-muted-foreground">
               <DollarSign className="h-4 w-4" />
               Currency
             </div>
-            <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
-              <span className="font-medium">{getCurrencyLabel(settings.currency)}</span>
+            <div className="flex items-center gap-2 p-2 sm:p-3 bg-muted rounded-lg">
+              <span className="font-medium text-sm sm:text-base">{getCurrencyLabel(settings.currency)}</span>
             </div>
           </div>
           
           <div className="space-y-2">
-            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+            <div className="flex items-center gap-2 text-xs sm:text-sm font-medium text-muted-foreground">
               <Globe className="h-4 w-4" />
               Timezone
             </div>
-            <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
-              <span className="font-medium">{getTimezoneLabel(settings.timezone)}</span>
+            <div className="flex items-center gap-2 p-2 sm:p-3 bg-muted rounded-lg">
+              <span className="font-medium text-sm sm:text-base">{getTimezoneLabel(settings.timezone)}</span>
             </div>
           </div>
         </div>
 
         {/* Expense Categories */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+        <div className="space-y-3 sm:space-y-4">
+          <div className="flex items-center gap-2 text-xs sm:text-sm font-medium text-muted-foreground">
             <Tag className="h-4 w-4" />
             Expense Categories
           </div>
           <div className="flex flex-wrap gap-2">
             {settings.categories.map((category) => (
-              <Badge key={category} variant="secondary" className="px-3 py-1">
+              <Badge key={category} variant="secondary" className="px-2 sm:px-3 py-1 text-xs">
                 {category}
               </Badge>
             ))}
@@ -180,19 +180,19 @@ export function AccountSettings() {
         </div> 
 
         {/* Notifications & Security */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+        <div className="space-y-3 sm:space-y-4">
+          <div className="flex items-center gap-2 text-xs sm:text-sm font-medium text-muted-foreground">
             <Bell className="h-4 w-4" />
             Notifications & Security
           </div>
           
-          <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-              <div className="flex items-center gap-3">
+          <div className="space-y-2 sm:space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between p-2 sm:p-3 bg-muted rounded-lg gap-2 sm:gap-0">
+              <div className="flex items-center gap-2 sm:gap-3">
                 <Bell className="h-4 w-4 text-muted-foreground" />
                 <div>
-                  <div className="font-medium">Email Notifications</div>
-                  <div className="text-sm text-muted-foreground">
+                  <div className="font-medium text-sm sm:text-base">Email Notifications</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground">
                     Receive email updates about your expenses
                   </div>
                 </div>
@@ -203,18 +203,18 @@ export function AccountSettings() {
                 ) : (
                   <EyeOff className="h-4 w-4 text-muted-foreground" />
                 )}
-                <span className="text-sm font-medium">
+                <span className="text-xs sm:text-sm font-medium">
                   {settings.emailNotif ? "Enabled" : "Disabled"}
                 </span>
               </div>
             </div>
 
-            <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-              <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between p-2 sm:p-3 bg-muted rounded-lg gap-2 sm:gap-0">
+              <div className="flex items-center gap-2 sm:gap-3">
                 <Shield className="h-4 w-4 text-muted-foreground" />
                 <div>
-                  <div className="font-medium">Two-Factor Authentication</div>
-                  <div className="text-sm text-muted-foreground">
+                  <div className="font-medium text-sm sm:text-base">Two-Factor Authentication</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground">
                     Add an extra layer of security to your account
                   </div>
                 </div>
@@ -225,7 +225,7 @@ export function AccountSettings() {
                 ) : (
                   <EyeOff className="h-4 w-4 text-muted-foreground" />
                 )}
-                <span className="text-sm font-medium">
+                <span className="text-xs sm:text-sm font-medium">
                   {settings.twoFA ? "Enabled" : "Disabled"}
                 </span>
               </div>
@@ -234,10 +234,10 @@ export function AccountSettings() {
         </div>
 
         {/* Note */}
-        <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+        <div className="p-3 sm:p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
           <div className="flex items-start gap-2">
             <Settings className="h-4 w-4 text-blue-600 mt-0.5" />
-            <div className="text-sm text-blue-800 dark:text-blue-200">
+            <div className="text-xs sm:text-sm text-blue-800 dark:text-blue-200">
               <strong>Note:</strong> To modify these settings, please use the setup wizard available in the settings page.
             </div>
           </div>

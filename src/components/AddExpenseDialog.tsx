@@ -197,23 +197,23 @@ export default function AddExpenseDialog({ open, onOpenChange, initialData, onSu
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[800px] p-0">
-        <div className="flex">
+      <DialogContent className="sm:max-w-[800px] p-0 max-h-[90vh] overflow-y-auto">
+        <div className="flex flex-col lg:flex-row">
           {/* Left side - Form */}
-          <div className="flex-1 p-6">
-            <DialogHeader className="mb-6">
-              <DialogTitle className="text-2xl font-bold">
+          <div className="flex-1 p-4 sm:p-6">
+            <DialogHeader className="mb-4 sm:mb-6">
+              <DialogTitle className="text-xl sm:text-2xl font-bold">
                 {initialData ? "Edit" : "Add"} {formData.type === "expense" ? "Expense" : "Income"}
               </DialogTitle>
-              <DialogDescription className="text-base">
+              <DialogDescription className="text-sm sm:text-base">
                 {initialData ? "Update" : "Enter"} the details for your {formData.type === "expense" ? "expense" : "income"} entry.
               </DialogDescription>
             </DialogHeader>
             
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
           {/* Type Selection */}
           <div className="space-y-2">
-            <Label htmlFor="type">Type</Label>
+            <Label htmlFor="type" className="text-sm sm:text-base">Type</Label>
             <Select
               value={formData.type}
               onValueChange={(value: "expense" | "income") => {
@@ -222,7 +222,7 @@ export default function AddExpenseDialog({ open, onOpenChange, initialData, onSu
                 handleInputChange("category", "")
               }}
             >
-              <SelectTrigger>
+              <SelectTrigger className="h-10 sm:h-11">
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
               <SelectContent>
@@ -234,7 +234,7 @@ export default function AddExpenseDialog({ open, onOpenChange, initialData, onSu
 
           {/* Amount */}
           <div className="space-y-2">
-            <Label htmlFor="amount">Amount</Label>
+            <Label htmlFor="amount" className="text-sm sm:text-base">Amount</Label>
             <Input
               id="amount"
               type="number"
@@ -243,7 +243,7 @@ export default function AddExpenseDialog({ open, onOpenChange, initialData, onSu
               placeholder="0.00"
               value={formData.amount}
               onChange={(e) => handleInputChange("amount", e.target.value)}
-              className={errors.amount ? "border-red-500" : ""}
+              className={`h-10 sm:h-11 ${errors.amount ? "border-red-500" : ""}`}
             />
             {errors.amount && (
               <p className="text-sm text-red-500">{errors.amount}</p>
@@ -252,12 +252,12 @@ export default function AddExpenseDialog({ open, onOpenChange, initialData, onSu
 
           {/* Category */}
           <div className="space-y-2">
-            <Label htmlFor="category">Category</Label>
+            <Label htmlFor="category" className="text-sm sm:text-base">Category</Label>
             <Select
               value={formData.category}
               onValueChange={(value) => handleInputChange("category", value)}
             >
-              <SelectTrigger className={errors.category ? "border-red-500" : ""}>
+              <SelectTrigger className={`h-10 sm:h-11 ${errors.category ? "border-red-500" : ""}`}>
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
               <SelectContent>
@@ -275,13 +275,13 @@ export default function AddExpenseDialog({ open, onOpenChange, initialData, onSu
 
           {/* Date */}
           <div className="space-y-2">
-            <Label htmlFor="date">Date</Label>
+            <Label htmlFor="date" className="text-sm sm:text-base">Date</Label>
             <Input
               id="date"
               type="date"
               value={formData.date}
               onChange={(e) => handleInputChange("date", e.target.value)}
-              className={errors.date ? "border-red-500" : ""}
+              className={`h-10 sm:h-11 ${errors.date ? "border-red-500" : ""}`}
             />
             {errors.date && (
               <p className="text-sm text-red-500">{errors.date}</p>
@@ -290,29 +290,30 @@ export default function AddExpenseDialog({ open, onOpenChange, initialData, onSu
 
           {/* Note */}
           <div className="space-y-2">
-            <Label htmlFor="note">Note (Optional)</Label>
+            <Label htmlFor="note" className="text-sm sm:text-base">Note (Optional)</Label>
             <Textarea
               id="note"
               placeholder="Add a note about this entry..."
               value={formData.note}
               onChange={(e) => handleInputChange("note", e.target.value)}
               rows={3}
+              className="resize-none"
             />
           </div>
 
-              <DialogFooter className="mt-8">
-                <Button type="button" variant="outline" onClick={handleClose}>
+              <DialogFooter className="mt-6 sm:mt-8 flex-col sm:flex-row gap-2 sm:gap-0">
+                <Button type="button" variant="outline" onClick={handleClose} className="w-full sm:w-auto">
                   Cancel
                 </Button>
-                <Button type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                <Button type="submit" className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground">
                   {initialData ? "Update" : "Add"} {formData.type === "expense" ? "Expense" : "Income"}
                 </Button>
               </DialogFooter>
             </form>
           </div>
           
-          {/* Right side - Animated Character */}
-          <div className="w-80 border-l border-border min-h-[500px]">
+          {/* Right side - Animated Character - Hidden on mobile */}
+          <div className="hidden lg:block w-80 border-l border-border min-h-[500px]">
             <MoneyCharacter />
           </div>
         </div>
