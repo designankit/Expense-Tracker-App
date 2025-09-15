@@ -17,7 +17,6 @@ export default function SignupPage() {
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
   const { toast } = useToast()
 
   // Check if we have real Supabase credentials
@@ -41,7 +40,7 @@ export default function SignupPage() {
     }
 
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -65,7 +64,7 @@ export default function SignupPage() {
         // Redirect to login page
         window.location.href = "/login"
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Signup Failed",
         description: "An unexpected error occurred. Please try again.",

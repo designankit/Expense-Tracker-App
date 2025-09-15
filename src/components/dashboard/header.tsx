@@ -34,7 +34,6 @@ interface HeaderProps {
 
 export function Header({ onMobileMenuToggle }: HeaderProps) {
   const { theme, setTheme } = useTheme()
-  const getSymbol = () => "₹" // Default to INR symbol
   const { searchQuery, setSearchQuery, isDropdownOpen, setIsDropdownOpen } = useSearch()
   const { unreadCount } = useNotifications()
   const { user } = useSupabase()
@@ -63,7 +62,7 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
         })
         router.push("/login")
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Logout Failed",
         description: "An unexpected error occurred. Please try again.",

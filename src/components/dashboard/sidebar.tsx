@@ -3,6 +3,7 @@
 import * as React from "react"
 import { useState } from "react"
 import { usePathname } from "next/navigation"
+import Image from "next/image"
 import {
   CreditCard,
   Home,
@@ -73,9 +74,11 @@ export function Sidebar({ className, isCollapsed = false, onToggle, ...props }: 
               <div className="flex h-14 sm:h-16 items-center px-2 sm:px-4 border-b relative">
         {!isCollapsed && (
           <div className="flex items-center justify-center w-full h-full">
-            <img
+            <Image
               src="/Expensio%20Tracker%20Logo.png"
               alt="Expensio Tracker"
+              width={200}
+              height={48}
               className="h-10 w-3/4 sm:h-12 sm:w-3/4 object-contain mx-auto"
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
@@ -95,9 +98,11 @@ export function Sidebar({ className, isCollapsed = false, onToggle, ...props }: 
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="flex items-center justify-center w-full h-full">
-                <img
+                <Image
                   src="/Favicon.png"
                   alt="Expensio Tracker"
+                  width={40}
+                  height={40}
                   className="h-8 w-8 sm:h-10 sm:w-10 object-contain"
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';

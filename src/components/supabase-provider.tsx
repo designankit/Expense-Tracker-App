@@ -72,7 +72,7 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
     )
 
     return () => subscription.unsubscribe()
-  }, [supabase.auth, hasRealCredentials])
+  }, [hasRealCredentials])
 
   return (
     <SupabaseContext.Provider value={{ user, session, loading }}>

@@ -23,21 +23,13 @@ interface Expense {
 }
 import { useToast } from "@/hooks/use-toast"
 import { useNotifications } from "@/contexts/NotificationContext"
-import { exportJSON, exportCSV, exportPDF, triggerJSONImport } from "@/lib/io"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { Download, Upload, FileText, FileSpreadsheet, FileType } from "lucide-react"
+import { Upload, FileText, FileSpreadsheet, FileType } from "lucide-react"
 
 export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true)
@@ -85,161 +77,10 @@ export default function DashboardPage() {
     }, 1000)
     
     return () => clearTimeout(timer)
-  }, [])
+  }, [addDemoNotifications])
 
-  const handleExport = (format: "json" | "csv" | "pdf") => {
-    try {
-      if (expenses.length === 0) {
-        toast({
-          title: "No Data",
-          description: "No expenses to export. Add some expenses first.",
-          variant: "destructive",
-        })
-        return
-      }
 
-      if (format === "json") {
-        exportJSON(expenses)
-        toast({
-          title: "Export Successful",
-          description: "Expenses exported to JSON file.",
-        })
-      } else if (format === "csv") {
-        exportCSV(expenses)
-        toast({
-          title: "Export Successful",
-          description: "Expenses exported to CSV file.",
-        })
-      } else if (format === "pdf") {
-        exportPDF(expenses)
-        toast({
-          title: "Export Successful",
-          description: "Expense report opened for printing/saving as PDF.",
-        })
-      }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (_error) {
-      toast({
-        title: "Export Failed",
-        description: "Failed to export expenses. Please try again.",
-        variant: "destructive",
-      })
-    }
-  }
 
-  const handleImport = async () => {
-    try {
-      const success = await triggerJSONImport(async (importedExpenses) => {
-        // Demo mode - just add to local state
-        const newExpenses = importedExpenses.map((expense, index) => ({
-          id: `imported-${index}`,
-          amount: expense.amount,
-          category: expense.category,
-          type: expense.type,
-          date: expense.date,
-          note: expense.note,
-          userId: "demo-user",
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        }))
-        setExpenses(prev => [...prev, ...newExpenses])
-      })
-
-      if (success) {
-        toast({
-          title: "Import Successful",
-          description: "Expenses imported successfully (demo mode).",
-        })
-      }
-    } catch (error) {
-      toast({
-        title: "Import Failed",
-        description: error instanceof Error ? error.message : "Failed to import expenses. Please check the file format.",
-        variant: "destructive",
-      })
-    }
-  }
-
-  const generateDemoData = () => {
-    try {
-      // Categories for expenses and income
-      const expenseCategories = ["Food", "Travel", "Shopping", "Bills", "Entertainment"]
-      const incomeCategory = "Income"
-      
-      // Sample notes for each category
-      const notesByCategory = {
-        "Food": ["Lunch", "Groceries", "Dinner", "Coffee", "Snacks", "Restaurant"],
-        "Travel": ["Taxi", "Bus fare", "Train ticket", "Flight", "Hotel", "Gas"],
-        "Shopping": ["Clothes", "Electronics", "Books", "Gifts", "Home items"],
-        "Bills": ["Electricity", "Water", "Internet", "Phone", "Rent", "Insurance"],
-        "Entertainment": ["Movie", "Concert", "Game", "Streaming", "Sports", "Theater"],
-        "Income": ["Salary", "Freelance", "Bonus", "Investment", "Refund", "Gift"]
-      }
-
-      const demoExpenses: Expense[] = []
-
-      // Generate 20 expenses
-      for (let i = 0; i < 20; i++) {
-        const category = expenseCategories[Math.floor(Math.random() * expenseCategories.length)]
-        const notes = notesByCategory[category as keyof typeof notesByCategory]
-        const note = notes[Math.floor(Math.random() * notes.length)]
-        
-        // Random date within last 90 days
-        const daysAgo = Math.floor(Math.random() * 90)
-        const date = new Date()
-        date.setDate(date.getDate() - daysAgo)
-        
-        demoExpenses.push({
-          id: `expense-${i}`,
-          amount: Math.floor(Math.random() * 4900) + 100, // 100 to 5000
-          category,
-          type: "expense",
-          date: date.toISOString(),
-          note: `${note} - ${new Date().toLocaleDateString()}`,
-          userId: "demo-user",
-          createdAt: date.toISOString(),
-          updatedAt: date.toISOString()
-        })
-      }
-
-      // Generate 5 income entries
-      for (let i = 0; i < 5; i++) {
-        const notes = notesByCategory["Income"]
-        const note = notes[Math.floor(Math.random() * notes.length)]
-        
-        // Random date within last 90 days
-        const daysAgo = Math.floor(Math.random() * 90)
-        const date = new Date()
-        date.setDate(date.getDate() - daysAgo)
-        
-        demoExpenses.push({
-          id: `income-${i}`, 
-          amount: Math.floor(Math.random() * 4900) + 100, // 100 to 5000
-          category: incomeCategory,
-          type: "income",
-          date: date.toISOString(),
-          note: `${note} - ${new Date().toLocaleDateString()}`,
-          userId: "demo-user",
-          createdAt: date.toISOString(),
-          updatedAt: date.toISOString()
-        })
-      }
-
-      // Set the demo expenses
-      setExpenses(demoExpenses)
-
-      toast({
-        title: "Demo Data Added",
-        description: "25 sample records have been generated for testing.",
-      })
-    } catch (error) {
-      toast({
-        title: "Demo Data Failed",
-        description: "Failed to generate demo data. Please try again.",
-        variant: "destructive",
-      })
-    }
-  }
 
   return (
     <AuthGuard>

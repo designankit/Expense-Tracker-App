@@ -16,7 +16,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
   const { toast } = useToast()
 
   // Check if we have real Supabase credentials
@@ -40,7 +39,7 @@ export default function LoginPage() {
     }
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
@@ -61,7 +60,7 @@ export default function LoginPage() {
           window.location.href = "/dashboard"
         }, 1000)
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Login Failed",
         description: "An unexpected error occurred. Please try again.",

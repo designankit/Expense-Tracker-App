@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 // Demo user data
 const demoUser = {
   name: "Demo User",
@@ -54,7 +54,7 @@ interface UserSettings {
 }
 
 export function AccountSettings() {
-  const session = { user: demoUser }
+  const session = useMemo(() => ({ user: demoUser }), [])
   const { toast } = useToast()
   const [settings, setSettings] = useState<UserSettings>({
     currency: "INR",

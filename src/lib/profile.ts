@@ -80,7 +80,7 @@ export class ProfileService {
   /**
    * Update profile from auth user metadata
    */
-  static async updateProfileFromAuth(userId: string, metadata: any): Promise<Profile | null> {
+  static async updateProfileFromAuth(userId: string, metadata: Record<string, unknown>): Promise<Profile | null> {
     const updates: ProfileUpdate = {}
     
     if (metadata?.full_name) {
