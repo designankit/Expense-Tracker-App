@@ -23,13 +23,6 @@ interface Expense {
 }
 import { useToast } from "@/hooks/use-toast"
 import { useNotifications } from "@/contexts/NotificationContext"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
-import { Upload, FileText, FileSpreadsheet, FileType } from "lucide-react"
 
 export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true)
@@ -125,97 +118,7 @@ export default function DashboardPage() {
                   </h3>
                   
                   <div className="space-y-3">
-                    {/* Export Options */}
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Export Data
-                      </h4>
-                      <div className="flex flex-wrap gap-2">
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => exportJSON(expenses)}
-                                className="flex items-center gap-2"
-                              >
-                                <FileType className="h-4 w-4" />
-                                JSON
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Export as JSON file</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                        
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => exportCSV(expenses)}
-                                className="flex items-center gap-2"
-                              >
-                                <FileSpreadsheet className="h-4 w-4" />
-                                CSV
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Export as CSV file</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                        
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => exportPDF(expenses)}
-                                className="flex items-center gap-2"
-                              >
-                                <FileText className="h-4 w-4" />
-                                PDF
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Export as PDF report</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </div>
-                    </div>
 
-                    {/* Import Options */}
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Import Data
-                      </h4>
-                      <div className="flex flex-wrap gap-2">
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => triggerJSONImport(() => {})}
-                                className="flex items-center gap-2"
-                              >
-                                <Upload className="h-4 w-4" />
-                                JSON
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Import from JSON file</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>

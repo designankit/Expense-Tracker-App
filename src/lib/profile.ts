@@ -6,7 +6,8 @@ export class ProfileService {
    * Get user profile by user ID
    */
   static async getProfile(userId: string): Promise<Profile | null> {
-    const { data, error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase as any)
       .from('profiles')
       .select('*')
       .eq('id', userId)
@@ -24,7 +25,8 @@ export class ProfileService {
    * Create a new user profile
    */
   static async createProfile(profile: ProfileInsert): Promise<Profile | null> {
-    const { data, error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase as any)
       .from('profiles')
       .insert(profile)
       .select()
@@ -42,7 +44,8 @@ export class ProfileService {
    * Update user profile
    */
   static async updateProfile(userId: string, updates: ProfileUpdate): Promise<Profile | null> {
-    const { data, error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase as any)
       .from('profiles')
       .update(updates)
       .eq('id', userId)
@@ -84,11 +87,11 @@ export class ProfileService {
     const updates: ProfileUpdate = {}
     
     if (metadata?.full_name) {
-      updates.full_name = metadata.full_name
+      updates.full_name = metadata.full_name as string | null
     }
     
     if (metadata?.avatar_url) {
-      updates.avatar_url = metadata.avatar_url
+      updates.avatar_url = metadata.avatar_url as string | null
     }
 
     if (Object.keys(updates).length > 0) {
