@@ -7,6 +7,9 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 import { useSearch } from "@/contexts/SearchContext"
 import { useNotifications } from "@/contexts/NotificationContext"
+import { useSupabase } from "@/components/supabase-provider"
+import { useToast } from "@/hooks/use-toast"
+import { supabase } from "@/lib/supabaseClient"
 import { SearchDropdown } from "./search-dropdown"
 import { NotificationDropdown } from "./notification-dropdown"
 
@@ -34,6 +37,8 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
   const getSymbol = () => "₹" // Default to INR symbol
   const { searchQuery, setSearchQuery, isDropdownOpen, setIsDropdownOpen } = useSearch()
   const { unreadCount } = useNotifications()
+  const { user } = useSupabase()
+  const { toast } = useToast()
   const [mounted, setMounted] = useState(false)
   const [isNotificationOpen, setIsNotificationOpen] = useState(false)
   const router = useRouter()
@@ -42,9 +47,29 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
     setMounted(true)
   }, [])
 
-  const handleLogout = () => {
-    // Demo mode - no actual logout
-    console.log("Demo mode - logout not implemented")
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut()
+      if (error) {
+        toast({
+          title: "Logout Failed",
+          description: error.message,
+          variant: "destructive",
+        })
+      } else {
+        toast({
+          title: "Logged Out",
+          description: "You have been successfully logged out.",
+        })
+        router.push("/login")
+      }
+    } catch (error) {
+      toast({
+        title: "Logout Failed",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      })
+    }
   }
 
   const handleSwitchAccount = () => {
@@ -84,6 +109,23 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
       return email.charAt(0).toUpperCase()
     }
     return "U"
+  }
+
+  const getUserDisplayName = () => {
+    if (user?.user_metadata?.full_name) {
+      return user.user_metadata.full_name
+    }
+    if (user?.user_metadata?.name) {
+      return user.user_metadata.name
+    }
+    if (user?.email) {
+      return user.email.split('@')[0]
+    }
+    return "User"
+  }
+
+  const getUserEmail = () => {
+    return user?.email || "demo@example.com"
   }
 
   return (
@@ -189,8 +231,9 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
               <Avatar className="h-8 w-8">
+                <AvatarImage src={user?.user_metadata?.avatar_url} />
                 <AvatarFallback className="text-sm font-medium bg-primary text-primary-foreground">
-                  DU
+                  {getUserInitials(user?.user_metadata?.full_name || user?.user_metadata?.name, user?.email)}
                 </AvatarFallback>
               </Avatar>
             </Button>
@@ -200,10 +243,10 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
                 <p className="text-sm font-medium leading-none">
-                  Demo User
+                  {getUserDisplayName()}
                 </p>
                 <p className="text-xs leading-none text-muted-foreground">
-                  Demo Mode
+                  {getUserEmail()}
                 </p>
               </div>
             </DropdownMenuLabel>
@@ -212,7 +255,7 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
               {/* Navigation Section */}
               <DropdownMenuGroup>
                 <DropdownMenuItem asChild>
-                  <Link href="/" className="flex items-center">
+                  <Link href="/dashboard" className="flex items-center">
                     <Home className="mr-2 h-4 w-4" />
                     <span>Dashboard</span>
                   </Link>

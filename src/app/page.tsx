@@ -1,382 +1,220 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { AppLayout } from "@/components/layout/app-layout"
-import { Cards } from "@/components/dashboard/cards"
-import { RecentExpenses } from "@/components/dashboard/recent-expenses"
 import { Button } from "@/components/ui/button"
-import { ExpenseCharts } from "@/components/dashboard/expense-charts"
-import { DashboardSkeleton } from "@/components/dashboard/dashboard-skeleton"
-import AddExpenseDialog from "@/components/AddExpenseDialog"
-// Demo expense type
-interface Expense {
-  id: string
-  amount: number
-  category: string
-  type: "expense" | "income"
-  date: string
-  note?: string
-  userId: string
-  createdAt: string
-  updatedAt: string
-}
-import { useToast } from "@/hooks/use-toast"
-import { useNotifications } from "@/contexts/NotificationContext"
-import { exportJSON, exportCSV, exportPDF, triggerJSONImport } from "@/lib/io"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
-import { Download, Upload, FileText, FileSpreadsheet, FileType } from "lucide-react"
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import Link from "next/link"
+import { ArrowRight, BarChart3, Shield, Zap } from "lucide-react"
 
 export default function Home() {
-  const [isLoading, setIsLoading] = useState(true)
-  const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false)
-  const [expenses, setExpenses] = useState<Expense[]>([])
-  const { toast } = useToast()
-  const { addDemoNotifications } = useNotifications()
-
-  useEffect(() => {
-    // Demo expenses data
-    const demoExpenses: Expense[] = [
-      {
-        id: "1",
-        amount: 1500,
-        category: "Food",
-        type: "expense",
-        date: new Date().toISOString(),
-        note: "Lunch at restaurant",
-        userId: "demo-user",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      },
-      {
-        id: "2", 
-        amount: 5000,
-        category: "Income",
-        type: "income",
-        date: new Date().toISOString(),
-        note: "Freelance work",
-        userId: "demo-user",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
-    ]
-    
-    // Set expenses and stop loading immediately
-    setExpenses(demoExpenses)
-    setIsLoading(false)
-  }, [])
-
-  // Add demo notifications only once on mount
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      addDemoNotifications()
-    }, 1000)
-    
-    return () => clearTimeout(timer)
-  }, [])
-
-  const handleExport = (format: "json" | "csv" | "pdf") => {
-    try {
-      if (expenses.length === 0) {
-        toast({
-          title: "No Data",
-          description: "No expenses to export. Add some expenses first.",
-          variant: "destructive",
-        })
-        return
-      }
-
-      if (format === "json") {
-        exportJSON(expenses)
-        toast({
-          title: "Export Successful",
-          description: "Expenses exported to JSON file.",
-        })
-      } else if (format === "csv") {
-        exportCSV(expenses)
-        toast({
-          title: "Export Successful",
-          description: "Expenses exported to CSV file.",
-        })
-      } else if (format === "pdf") {
-        exportPDF(expenses)
-        toast({
-          title: "Export Successful",
-          description: "Expense report opened for printing/saving as PDF.",
-        })
-      }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (_error) {
-      toast({
-        title: "Export Failed",
-        description: "Failed to export expenses. Please try again.",
-        variant: "destructive",
-      })
-    }
-  }
-
-  const handleImport = async () => {
-    try {
-      const success = await triggerJSONImport(async (importedExpenses) => {
-        // Demo mode - just add to local state
-        const newExpenses = importedExpenses.map((expense, index) => ({
-          id: `imported-${index}`,
-          amount: expense.amount,
-          category: expense.category,
-          type: expense.type,
-          date: expense.date,
-          note: expense.note,
-          userId: "demo-user",
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        }))
-        setExpenses(prev => [...prev, ...newExpenses])
-      })
-
-      if (success) {
-        toast({
-          title: "Import Successful",
-          description: "Expenses imported successfully (demo mode).",
-        })
-      }
-    } catch (error) {
-      toast({
-        title: "Import Failed",
-        description: error instanceof Error ? error.message : "Failed to import expenses. Please check the file format.",
-        variant: "destructive",
-      })
-    }
-  }
-
-  const generateDemoData = () => {
-    try {
-      // Categories for expenses and income
-      const expenseCategories = ["Food", "Travel", "Shopping", "Bills", "Entertainment"]
-      const incomeCategory = "Income"
-      
-      // Sample notes for each category
-      const notesByCategory = {
-        "Food": ["Lunch", "Groceries", "Dinner", "Coffee", "Snacks", "Restaurant"],
-        "Travel": ["Taxi", "Bus fare", "Train ticket", "Flight", "Hotel", "Gas"],
-        "Shopping": ["Clothes", "Electronics", "Books", "Gifts", "Home items"],
-        "Bills": ["Electricity", "Water", "Internet", "Phone", "Rent", "Insurance"],
-        "Entertainment": ["Movie", "Concert", "Game", "Streaming", "Sports", "Theater"],
-        "Income": ["Salary", "Freelance", "Bonus", "Investment", "Refund", "Gift"]
-      }
-
-      const demoExpenses: Expense[] = []
-
-      // Generate 20 expenses
-      for (let i = 0; i < 20; i++) {
-        const category = expenseCategories[Math.floor(Math.random() * expenseCategories.length)]
-        const notes = notesByCategory[category as keyof typeof notesByCategory]
-        const note = notes[Math.floor(Math.random() * notes.length)]
-        
-        // Random date within last 90 days
-        const daysAgo = Math.floor(Math.random() * 90)
-        const date = new Date()
-        date.setDate(date.getDate() - daysAgo)
-        
-        demoExpenses.push({
-          id: `expense-${i}`,
-          amount: Math.floor(Math.random() * 4900) + 100, // 100 to 5000
-          category,
-          type: "expense",
-          date: date.toISOString(),
-          note: `${note} - ${new Date().toLocaleDateString()}`,
-          userId: "demo-user",
-          createdAt: date.toISOString(),
-          updatedAt: date.toISOString()
-        })
-      }
-
-      // Generate 5 income entries
-      for (let i = 0; i < 5; i++) {
-        const notes = notesByCategory["Income"]
-        const note = notes[Math.floor(Math.random() * notes.length)]
-        
-        // Random date within last 90 days
-        const daysAgo = Math.floor(Math.random() * 90)
-        const date = new Date()
-        date.setDate(date.getDate() - daysAgo)
-        
-        demoExpenses.push({
-          id: `income-${i}`, 
-          amount: Math.floor(Math.random() * 4900) + 100, // 100 to 5000
-          category: incomeCategory,
-          type: "income",
-          date: date.toISOString(),
-          note: `${note} - ${new Date().toLocaleDateString()}`,
-          userId: "demo-user",
-          createdAt: date.toISOString(),
-          updatedAt: date.toISOString()
-        })
-      }
-
-      // Set the demo expenses
-      setExpenses(demoExpenses)
-
-      toast({
-        title: "Demo Data Added",
-        description: "25 sample records have been generated for testing.",
-      })
-    } catch (error) {
-      toast({
-        title: "Demo Data Failed",
-        description: "Failed to generate demo data. Please try again.",
-        variant: "destructive",
-      })
-    }
-  }
+  // Check if we have real Supabase credentials
+  const hasRealCredentials = process.env.NEXT_PUBLIC_SUPABASE_URL && 
+    process.env.NEXT_PUBLIC_SUPABASE_URL !== 'https://placeholder.supabase.co' &&
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY && 
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY !== 'placeholder-key'
 
   return (
-    <AppLayout>
-        <div className="p-3 sm:p-4 lg:p-6">
-          {isLoading ? (
-            <DashboardSkeleton />
-          ) : (
-            <div className="space-y-4 sm:space-y-6">
-              <Cards expenses={expenses} />
-              <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
-                <div className="lg:col-span-2">
-                  <RecentExpenses expenses={expenses} />
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-blue-900 dark:to-indigo-900">
+      {/* Banking/Financial Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        {/* Financial Chart Lines */}
+        <div className="absolute inset-0 opacity-10">
+          <svg className="w-full h-full" viewBox="0 0 100 100" fill="none" preserveAspectRatio="none">
+            <path
+              d="M0,50 Q25,25 50,35 T100,30"
+              stroke="url(#gradient1)"
+              strokeWidth="0.5"
+              fill="none"
+              className="animate-pulse"
+            />
+            <path
+              d="M0,60 Q25,45 50,50 T100,45"
+              stroke="url(#gradient2)"
+              strokeWidth="0.5"
+              fill="none"
+              className="animate-pulse"
+              style={{animationDelay: '1s'}}
+            />
+            <path
+              d="M0,40 Q25,20 50,25 T100,20"
+              stroke="url(#gradient3)"
+              strokeWidth="0.5"
+              fill="none"
+              className="animate-pulse"
+              style={{animationDelay: '2s'}}
+            />
+            <path
+              d="M0,70 Q25,55 50,60 T100,55"
+              stroke="url(#gradient1)"
+              strokeWidth="0.3"
+              fill="none"
+              className="animate-pulse"
+              style={{animationDelay: '0.5s'}}
+            />
+            <path
+              d="M0,30 Q25,15 50,20 T100,15"
+              stroke="url(#gradient2)"
+              strokeWidth="0.3"
+              fill="none"
+              className="animate-pulse"
+              style={{animationDelay: '1.5s'}}
+            />
+            <defs>
+              <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#3B82F6" />
+                <stop offset="100%" stopColor="#8B5CF6" />
+              </linearGradient>
+              <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#10B981" />
+                <stop offset="100%" stopColor="#3B82F6" />
+              </linearGradient>
+              <linearGradient id="gradient3" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#F59E0B" />
+                <stop offset="100%" stopColor="#EF4444" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+
+        {/* Floating Financial Icons */}
+        <div className="absolute inset-0">
+          {/* Dollar Signs */}
+          {Array.from({length: 8}).map((_, i) => (
+            <div
+              key={`dollar-${i}`}
+              className="absolute text-green-500/20 text-2xl font-bold animate-float"
+              style={{
+                left: `${10 + (i * 12)}%`,
+                top: `${20 + (i % 3) * 25}%`,
+                animationDelay: `${i * 0.5}s`,
+                animationDuration: `${3 + (i % 2)}s`
+              }}
+            >
+              $
                 </div>
-                <TooltipProvider>
-                  <div className="bg-card border rounded-lg p-4 sm:p-6">
-                    <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Quick Actions</h3>
-                    <div className="space-y-2 sm:space-y-3">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button 
-                            className="w-full justify-start text-sm sm:text-base" 
-                            variant="default"
-                            onClick={() => setIsAddExpenseOpen(true)}
-                          >
-                            Add New Expense
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Add a new expense to your tracker</p>
-                        </TooltipContent>
-                      </Tooltip>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button className="w-full justify-start text-sm sm:text-base" variant="secondary">
-                            View Reports
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>View detailed expense reports and analytics</p>
-                        </TooltipContent>
-                      </Tooltip>
-                      
-                      {/* Export Data Dropdown */}
-                      <div className="space-y-2">
-                        <label className="text-xs sm:text-sm font-medium text-muted-foreground">Export Data</label>
-                        <Select onValueChange={(value) => handleExport(value as "json" | "csv" | "pdf")}>
-                          <SelectTrigger className="w-full text-sm sm:text-base">
-                            <SelectValue placeholder="Choose export format" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="json">
-                              <div className="flex items-center gap-2">
-                                <FileText className="h-4 w-4" />
-                                <span className="text-sm sm:text-base">Export as JSON</span>
+          ))}
+          
+          {/* Percentage Signs */}
+          {Array.from({length: 6}).map((_, i) => (
+            <div
+              key={`percent-${i}`}
+              className="absolute text-blue-500/20 text-xl font-bold animate-float"
+              style={{
+                left: `${15 + (i * 15)}%`,
+                top: `${30 + (i % 2) * 30}%`,
+                animationDelay: `${i * 0.7}s`,
+                animationDuration: `${4 + (i % 2)}s`
+              }}
+            >
+              %
+            </div>
+          ))}
+
+          {/* Plus Signs */}
+          {Array.from({length: 5}).map((_, i) => (
+            <div
+              key={`plus-${i}`}
+              className="absolute text-indigo-500/20 text-lg font-bold animate-float"
+              style={{
+                left: `${20 + (i * 18)}%`,
+                top: `${25 + (i % 2) * 35}%`,
+                animationDelay: `${i * 0.9}s`,
+                animationDuration: `${2.5 + (i % 2)}s`
+              }}
+            >
+              +
+            </div>
+          ))}
                               </div>
-                            </SelectItem>
-                            <SelectItem value="csv">
-                              <div className="flex items-center gap-2">
-                                <FileSpreadsheet className="h-4 w-4" />
-                                <span className="text-sm sm:text-base">Export as CSV</span>
+
+        {/* Subtle Grid Pattern */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="grid grid-cols-24 gap-2 h-full">
+            {Array.from({length: 480}).map((_, i) => (
+              <div 
+                key={i} 
+                className="bg-blue-500 animate-pulse" 
+                style={{
+                  animationDelay: `${i * 0.05}s`,
+                  animationDuration: '4s'
+                }}
+              ></div>
+            ))}
                               </div>
-                            </SelectItem>
-                            <SelectItem value="pdf">
-                              <div className="flex items-center gap-2">
-                                <FileType className="h-4 w-4" />
-                                <span className="text-sm sm:text-base">Export as PDF</span>
                               </div>
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
                       </div>
 
-                      {/* Import Data Button */}
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button 
-                            className="w-full justify-start text-sm sm:text-base" 
-                            variant="outline"
-                            onClick={handleImport}
-                          >
-                            <Upload className="h-4 w-4 mr-2" />
-                            Import Data
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Import expenses from JSON file</p>
-                        </TooltipContent>
-                      </Tooltip>
-
-                      {/* Seed Demo Data Button - Development Only */}
-                      {process.env.NODE_ENV !== "production" && (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button 
-                              className="w-full justify-start text-sm sm:text-base" 
-                              variant="secondary"
-                              onClick={generateDemoData}
-                            >
-                              <Download className="h-4 w-4 mr-2" />
-                              Seed Demo Data
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Generate 25 sample records for testing (dev only)</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      )}
-                    </div>
+      {/* Main Content */}
+      <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
+        <div className="text-center mb-12 sm:mb-16 lg:mb-20">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6 animate-fade-in-up leading-tight">
+            Expensio Tracker
+          </h1>
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 dark:text-gray-300 mb-6 sm:mb-8 max-w-xs sm:max-w-lg md:max-w-2xl lg:max-w-3xl mx-auto animate-fade-in-up leading-relaxed" style={{animationDelay: '0.2s'}}>
+            Take control of your finances with our intuitive expense tracking app.
+            Monitor your spending, analyze trends, and achieve your financial goals.
+          </p>
                   </div>
-                </TooltipProvider>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-12 sm:mb-16 lg:mb-20">
+          <Card className="hover:scale-105 transition-all duration-300 hover:shadow-xl animate-fade-in-up p-4 sm:p-6" style={{animationDelay: '0.6s'}}>
+            <CardHeader className="text-center sm:text-left">
+              <BarChart3 className="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 text-blue-600 mb-3 sm:mb-4 animate-bounce mx-auto sm:mx-0" style={{animationDuration: '2s'}} />
+              <CardTitle className="text-lg sm:text-xl lg:text-2xl">Smart Analytics</CardTitle>
+              <CardDescription className="text-sm sm:text-base">
+                Get insights into your spending patterns with beautiful charts and detailed reports.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          <Card className="hover:scale-105 transition-all duration-300 hover:shadow-xl animate-fade-in-up p-4 sm:p-6" style={{animationDelay: '0.8s'}}>
+            <CardHeader className="text-center sm:text-left">
+              <Shield className="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 text-green-600 mb-3 sm:mb-4 animate-pulse mx-auto sm:mx-0" style={{animationDuration: '3s'}} />
+              <CardTitle className="text-lg sm:text-xl lg:text-2xl">Secure & Private</CardTitle>
+              <CardDescription className="text-sm sm:text-base">
+                Your financial data is encrypted and secure. We never share your personal information.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          <Card className="hover:scale-105 transition-all duration-300 hover:shadow-xl animate-fade-in-up p-4 sm:p-6 sm:col-span-2 lg:col-span-1" style={{animationDelay: '1s'}}>
+            <CardHeader className="text-center sm:text-left">
+              <Zap className="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 text-purple-600 mb-3 sm:mb-4 animate-pulse mx-auto sm:mx-0" style={{animationDuration: '1.5s'}} />
+              <CardTitle className="text-lg sm:text-xl lg:text-2xl">Lightning Fast</CardTitle>
+              <CardDescription className="text-sm sm:text-base">
+                Add expenses in seconds with our streamlined interface designed for speed and efficiency.
+              </CardDescription>
+            </CardHeader>
+          </Card>
               </div>
 
-              {/* Charts Section */}
-              <ExpenseCharts expenses={expenses} />
+        <div className="text-center animate-fade-in-up" style={{animationDelay: '1.2s'}}>
+          <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-4 sm:mb-6">
+            Ready to take control of your finances?
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+            <Button asChild size="lg" className="text-sm sm:text-base md:text-lg px-6 sm:px-8 py-4 sm:py-6 hover:scale-105 transition-transform duration-200 animate-glow w-full sm:w-auto">
+              <Link href="/signup">
+                Get Started
+                <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="text-sm sm:text-base md:text-lg px-6 sm:px-8 py-4 sm:py-6 hover:scale-105 transition-transform duration-200 w-full sm:w-auto">
+              <Link href="/login">
+                Sign In
+              </Link>
+            </Button>
+          </div>
+
+          {!hasRealCredentials && (
+            <div className="mt-6 sm:mt-8 p-3 sm:p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg animate-pulse max-w-2xl mx-auto">
+              <p className="text-xs sm:text-sm text-yellow-800 dark:text-yellow-200">
+                <strong>Demo Mode:</strong> To enable full authentication, please configure your Supabase project.
+                See <code className="bg-yellow-100 dark:bg-yellow-800 px-1 rounded text-xs">SUPABASE_SETUP.md</code> for instructions.
+              </p>
             </div>
           )}
         </div>
-        
-        {/* Add Expense Dialog */}
-        <AddExpenseDialog 
-          open={isAddExpenseOpen} 
-          onOpenChange={setIsAddExpenseOpen}
-          onSubmit={() => {
-            // Demo mode - just show success message
-            toast({
-              title: "Demo Mode",
-              description: "Expense would be saved in demo mode.",
-            })
-          }}
-          onExpenseAdded={async () => {
-            // For demo purposes, just close the dialog
-            setIsAddExpenseOpen(false)
-            toast({
-              title: "Demo Mode",
-              description: "In demo mode, expenses are not actually saved.",
-            })
-          }}
-        />
-    </AppLayout>
+      </div>
+    </div>
   )
 }

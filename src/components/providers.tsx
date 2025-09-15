@@ -3,6 +3,7 @@
 import { ThemeProvider } from "next-themes"
 import { SearchProvider } from "@/contexts/SearchContext"
 import { NotificationProvider } from "@/contexts/NotificationContext"
+import { SupabaseProvider } from "@/components/supabase-provider"
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -12,11 +13,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
       enableSystem
       disableTransitionOnChange
     >
-      <SearchProvider>
-        <NotificationProvider>
-          {children}
-        </NotificationProvider>
-      </SearchProvider>
+      <SupabaseProvider>
+        <SearchProvider>
+          <NotificationProvider>
+            {children}
+          </NotificationProvider>
+        </SearchProvider>
+      </SupabaseProvider>
     </ThemeProvider>
   )
 }
