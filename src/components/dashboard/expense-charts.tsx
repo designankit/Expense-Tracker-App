@@ -1,20 +1,21 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Line, Doughnut } from "react-chartjs-2"
+import { Line, Doughnut, Bar } from "react-chartjs-2"
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
   PointElement,
   LineElement,
+  BarElement,
   Title,
   Tooltip as ChartTooltip,
   Legend,
   ArcElement,
 } from "chart.js"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Expense } from "@/lib/api"
+import { Expense } from "@/types/expense"
 import { TrendingUp, PieChart, BarChart3 } from "lucide-react"
 import {
   Tooltip,
@@ -28,6 +29,7 @@ ChartJS.register(
   LinearScale,
   PointElement,
   LineElement,
+  BarElement,
   Title,
   ChartTooltip,
   Legend,
@@ -53,8 +55,8 @@ export function ExpenseCharts({ expenses }: ExpenseChartsProps) {
     return () => observer.disconnect()
   }, [])
 
-  // Generate sample data for the last 6 months
-  const generateSampleData = () => {
+  // Generate real data from expenses for the last 6 months
+  const generateRealData = () => {
     const months = []
     const expenseData = []
     const incomeData = []
@@ -62,17 +64,28 @@ export function ExpenseCharts({ expenses }: ExpenseChartsProps) {
     for (let i = 5; i >= 0; i--) {
       const date = new Date()
       date.setMonth(date.getMonth() - i)
-      months.push(date.toLocaleDateString('en-US', { month: 'short' }))
+      const monthStr = date.toLocaleDateString('en-US', { month: 'short' })
+      months.push(monthStr)
       
-      // Generate realistic sample data
-      expenseData.push(Math.floor(Math.random() * 5000) + 2000)
-      incomeData.push(Math.floor(Math.random() * 8000) + 5000)
+      // Calculate actual expenses for this month
+      const monthExpenses = expenses.filter(expense => {
+        const expenseDate = new Date(expense.transaction_date)
+        return expenseDate.getMonth() === date.getMonth() && 
+               expenseDate.getFullYear() === date.getFullYear()
+      })
+      
+      const monthTotal = monthExpenses.reduce((sum, expense) => sum + expense.amount, 0)
+      expenseData.push(monthTotal)
+      
+      // For now, we'll use a placeholder for income since we don't track income
+      // You can modify this later to track income if needed
+      incomeData.push(0)
     }
     
     return { months, expenseData, incomeData }
   }
 
-  const { months, expenseData, incomeData } = generateSampleData()
+  const { months, expenseData, incomeData } = generateRealData()
 
   const lineData = {
     labels: months,
@@ -99,41 +112,70 @@ export function ExpenseCharts({ expenses }: ExpenseChartsProps) {
   const getLineOptions = (isDark: boolean) => ({
     responsive: true,
     maintainAspectRatio: false,
+    interaction: {
+      intersect: false,
+      mode: 'index' as const,
+    },
     plugins: {
       legend: {
         position: 'top' as const,
         labels: {
           color: isDark ? '#e5e7eb' : '#374151',
+          usePointStyle: true,
+          padding: 20,
         },
+      },
+      tooltip: {
+        backgroundColor: isDark ? '#1f2937' : '#ffffff',
+        titleColor: isDark ? '#e5e7eb' : '#374151',
+        bodyColor: isDark ? '#e5e7eb' : '#374151',
+        borderColor: isDark ? '#374151' : '#e5e7eb',
+        borderWidth: 1,
+        cornerRadius: 8,
+        displayColors: true,
+        callbacks: {
+          label: function(context: any) {
+            return `${context.dataset.label}: ₹${context.parsed.y.toLocaleString()}`
+          }
+        }
       },
     },
     scales: {
       x: {
         grid: {
           color: isDark ? '#374151' : '#f3f4f6',
+          drawBorder: false,
         },
         ticks: {
           color: isDark ? '#9ca3af' : '#6b7280',
+          font: {
+            size: 12,
+          },
         },
       },
       y: {
         grid: {
           color: isDark ? '#374151' : '#f3f4f6',
+          drawBorder: false,
         },
         ticks: {
           color: isDark ? '#9ca3af' : '#6b7280',
+          font: {
+            size: 12,
+          },
+          callback: function(value: any) {
+            return '₹' + value.toLocaleString()
+          }
         },
       },
     },
   })
 
   // Category data
-  const categoryData = expenses
-    .filter(expense => expense.type === 'expense')
-    .reduce((acc, expense) => {
-      acc[expense.category] = (acc[expense.category] || 0) + expense.amount
-      return acc
-    }, {} as Record<string, number>)
+  const categoryData = expenses.reduce((acc, expense) => {
+    acc[expense.category] = (acc[expense.category] || 0) + expense.amount
+    return acc
+  }, {} as Record<string, number>)
 
   const categories = Object.keys(categoryData)
   const categoryAmounts = Object.values(categoryData)
@@ -167,12 +209,101 @@ export function ExpenseCharts({ expenses }: ExpenseChartsProps) {
   const getDoughnutOptions = (isDark: boolean) => ({
     responsive: true,
     maintainAspectRatio: false,
+    cutout: '60%',
     plugins: {
       legend: {
         position: 'bottom' as const,
         labels: {
           color: isDark ? '#e5e7eb' : '#374151',
           padding: 20,
+          usePointStyle: true,
+          font: {
+            size: 12,
+          },
+        },
+      },
+      tooltip: {
+        backgroundColor: isDark ? '#1f2937' : '#ffffff',
+        titleColor: isDark ? '#e5e7eb' : '#374151',
+        bodyColor: isDark ? '#e5e7eb' : '#374151',
+        borderColor: isDark ? '#374151' : '#e5e7eb',
+        borderWidth: 1,
+        cornerRadius: 8,
+        displayColors: true,
+        callbacks: {
+          label: function(context: any) {
+            const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0)
+            const percentage = ((context.parsed / total) * 100).toFixed(1)
+            return `${context.label}: ₹${context.parsed.toLocaleString()} (${percentage}%)`
+          }
+        }
+      },
+    },
+  })
+
+  // Bar chart data for monthly comparison
+  const barData = {
+    labels: months,
+    datasets: [
+      {
+        label: 'Monthly Expenses',
+        data: expenseData,
+        backgroundColor: 'rgba(59, 130, 246, 0.8)',
+        borderColor: 'rgb(59, 130, 246)',
+        borderWidth: 1,
+        borderRadius: 4,
+        borderSkipped: false,
+      },
+    ],
+  }
+
+  const getBarOptions = (isDark: boolean) => ({
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        backgroundColor: isDark ? '#1f2937' : '#ffffff',
+        titleColor: isDark ? '#e5e7eb' : '#374151',
+        bodyColor: isDark ? '#e5e7eb' : '#374151',
+        borderColor: isDark ? '#374151' : '#e5e7eb',
+        borderWidth: 1,
+        cornerRadius: 8,
+        callbacks: {
+          label: function(context: any) {
+            return `Expenses: ₹${context.parsed.y.toLocaleString()}`
+          }
+        }
+      },
+    },
+    scales: {
+      x: {
+        grid: {
+          color: isDark ? '#374151' : '#f3f4f6',
+          drawBorder: false,
+        },
+        ticks: {
+          color: isDark ? '#9ca3af' : '#6b7280',
+          font: {
+            size: 12,
+          },
+        },
+      },
+      y: {
+        grid: {
+          color: isDark ? '#374151' : '#f3f4f6',
+          drawBorder: false,
+        },
+        ticks: {
+          color: isDark ? '#9ca3af' : '#6b7280',
+          font: {
+            size: 12,
+          },
+          callback: function(value: any) {
+            return '₹' + value.toLocaleString()
+          }
         },
       },
     },
@@ -180,7 +311,9 @@ export function ExpenseCharts({ expenses }: ExpenseChartsProps) {
 
   return (
     <TooltipProvider>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="space-y-6">
+        {/* Top row - Line and Doughnut charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Tooltip>
           <TooltipTrigger asChild>
             <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-lg hover:shadow-md transition-all duration-300 cursor-pointer group">
@@ -238,7 +371,7 @@ export function ExpenseCharts({ expenses }: ExpenseChartsProps) {
                       <PieChart className="h-8 w-8" />
                     </div>
                     <p className="text-sm sm:text-base">No expenses to display</p>
-                    <p className="text-xs">Add some transactions to see categories</p>
+                    <p className="text-xs">Add some expenses to see categories</p>
                   </div>
                 )}
               </CardContent>
@@ -246,6 +379,42 @@ export function ExpenseCharts({ expenses }: ExpenseChartsProps) {
           </TooltipTrigger>
           <TooltipContent>
             <p>View how your expenses are distributed across categories</p>
+          </TooltipContent>
+        </Tooltip>
+        </div>
+
+        {/* Bottom row - Bar chart */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-lg hover:shadow-md transition-all duration-300 cursor-pointer group">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+                <div className="space-y-1">
+                  <CardTitle className="text-base sm:text-lg font-bold">Monthly Spending</CardTitle>
+                  <p className="text-xs text-muted-foreground">Compare expenses across months</p>
+                </div>
+                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <BarChart3 className="h-5 w-5 text-white" />
+                </div>
+              </CardHeader>
+              <CardContent className="h-72 sm:h-80 flex items-center justify-center">
+                {expenses.length > 0 ? (
+                  <div className="w-full h-full">
+                    <Bar data={barData} options={getBarOptions(isDark)} />
+                  </div>
+                ) : (
+                  <div className="text-center text-muted-foreground">
+                    <div className="w-16 h-16 mx-auto bg-muted/30 rounded-full flex items-center justify-center mb-4">
+                      <BarChart3 className="h-8 w-8" />
+                    </div>
+                    <p className="text-sm font-medium">No data to display</p>
+                    <p className="text-xs">Add some expenses to see monthly trends</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Compare your monthly spending patterns</p>
           </TooltipContent>
         </Tooltip>
       </div>

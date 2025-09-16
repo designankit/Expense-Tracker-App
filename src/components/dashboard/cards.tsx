@@ -15,7 +15,7 @@ import {
   Zap
 } from "lucide-react"
 import { formatPercentage } from "@/lib/format"
-import { Expense } from "@/lib/api"
+import { Expense } from "@/types/expense"
 // Currency formatting function
 const formatCurrency = (amount: number, currency: string = "INR"): string => {
   const symbols = {
@@ -52,9 +52,7 @@ export function Cards({ expenses }: CardsProps) {
   
   // Helper functions for calculations
   const getTotal = () => {
-    return expenses
-      .filter(expense => expense.type === 'expense')
-      .reduce((sum, expense) => sum + expense.amount, 0)
+    return expenses.reduce((sum, expense) => sum + expense.amount, 0)
   }
 
   const getTotalThisMonth = () => {
@@ -64,9 +62,8 @@ export function Cards({ expenses }: CardsProps) {
 
     return expenses
       .filter(expense => {
-        const expenseDate = new Date(expense.date)
+        const expenseDate = new Date(expense.transaction_date)
         return (
-          expense.type === 'expense' &&
           expenseDate.getMonth() === currentMonth &&
           expenseDate.getFullYear() === currentYear
         )
@@ -75,12 +72,10 @@ export function Cards({ expenses }: CardsProps) {
   }
 
   const getByCategory = () => {
-    return expenses
-      .filter(expense => expense.type === 'expense')
-      .reduce((acc, expense) => {
-        acc[expense.category] = (acc[expense.category] || 0) + expense.amount
-        return acc
-      }, {} as Record<string, number>)
+    return expenses.reduce((acc, expense) => {
+      acc[expense.category] = (acc[expense.category] || 0) + expense.amount
+      return acc
+    }, {} as Record<string, number>)
   }
   
   // Calculate real data

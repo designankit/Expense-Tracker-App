@@ -22,9 +22,9 @@ export function DashboardSkeleton() {
         ))}
       </div>
 
-      {/* Recent Transactions and Quick Actions */}
+      {/* Recent Expenses and Quick Actions */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {/* Recent Transactions Skeleton */}
+        {/* Recent Expenses Skeleton */}
         <div className="md:col-span-2">
           <Card>
             <CardHeader>

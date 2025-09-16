@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Expense } from "@/lib/api"
+import { Expense } from "@/types/expense"
 import { formatCurrency } from "@/lib/format"
 import {
   Tooltip,
@@ -41,7 +41,7 @@ export function RecentExpenses({ expenses }: RecentExpensesProps) {
   }
 
   const recentExpenses = expenses
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .sort((a, b) => new Date(b.transaction_date).getTime() - new Date(a.transaction_date).getTime())
     .slice(0, 5)
 
   return (
@@ -50,7 +50,7 @@ export function RecentExpenses({ expenses }: RecentExpensesProps) {
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <CardTitle className="text-base sm:text-lg font-bold">Recent Transactions</CardTitle>
+              <CardTitle className="text-base sm:text-lg font-bold">Recent Expenses</CardTitle>
               <p className="text-xs text-muted-foreground">Your latest financial activity</p>
             </div>
             <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
@@ -65,7 +65,7 @@ export function RecentExpenses({ expenses }: RecentExpensesProps) {
                 <div className="w-16 h-16 mx-auto bg-muted/30 rounded-full flex items-center justify-center mb-4">
                   <span className="text-2xl">💳</span>
                 </div>
-                <p className="text-sm sm:text-base font-medium">No transactions yet</p>
+                <p className="text-sm sm:text-base font-medium">No expenses yet</p>
                 <p className="text-xs sm:text-sm">Add your first expense or income to get started</p>
               </div>
             ) : (
@@ -78,8 +78,8 @@ export function RecentExpenses({ expenses }: RecentExpensesProps) {
                           expense.type === 'income' ? 'bg-green-500' : 'bg-red-500'
                         } group-hover:scale-125 transition-transform duration-200`} />
                         <div className="min-w-0 flex-1">
-                          <p className="text-xs font-medium truncate">{expense.note || 'No description'}</p>
-                          <p className="text-xs text-muted-foreground">{formatDate(expense.date)}</p>
+                          <p className="text-xs font-medium truncate">{expense.title || 'No description'}</p>
+                          <p className="text-xs text-muted-foreground">{formatDate(expense.transaction_date)}</p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-2 flex-shrink-0">

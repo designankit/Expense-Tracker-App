@@ -2,14 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { useToast } from "@/hooks/use-toast"
-// Demo expense data type
-interface CreateExpenseData {
-  amount: number
-  category: string
-  type: "expense" | "income"
-  date: string
-  note?: string
-}
+import { useSupabase } from "@/components/supabase-provider"
+import { CreateExpense } from "@/types/expense"
 import {
   Dialog,
   DialogContent,
@@ -29,13 +23,12 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
-import { MoneyCharacter } from "@/components/expense/money-character"
 
 interface AddExpenseDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  initialData?: CreateExpenseData & { id?: string }
-  onSubmit?: (data: CreateExpenseData) => void
+  initialData?: CreateExpense & { id?: string }
+  onSubmit?: (data: CreateExpense) => void
   onExpenseAdded?: () => Promise<void>
 }
 
@@ -57,25 +50,37 @@ const incomeCategories = [
   "Investment",
   "Business",
   "Gift",
+  "Bonus",
+  "Rental",
   "Other",
 ]
 
-export default function AddExpenseDialog({ open, onOpenChange, initialData, onSubmit, onExpenseAdded }: AddExpenseDialogProps) {
+export default function AddExpenseDialog({ 
+  open, 
+  onOpenChange, 
+  initialData, 
+  onSubmit, 
+  onExpenseAdded 
+}: AddExpenseDialogProps) {
   const { toast } = useToast()
+  const { user, supabase } = useSupabase()
   
   const [formData, setFormData] = useState({
+    title: initialData?.title || "",
     amount: initialData?.amount?.toString() || "",
-    type: initialData?.type || "expense" as "expense" | "income",
     category: initialData?.category || "",
-    date: initialData?.date || new Date().toISOString().split("T")[0],
-    note: initialData?.note || "",
+    transaction_date: initialData?.transaction_date || new Date().toISOString().split("T")[0],
+    transaction_type: initialData?.transaction_type || "expense",
   })
   
   const [errors, setErrors] = useState<{
+    title?: string
     amount?: string
-    date?: string
+    transaction_date?: string
     category?: string
   }>({})
+
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -88,6 +93,11 @@ export default function AddExpenseDialog({ open, onOpenChange, initialData, onSu
   const validateForm = () => {
     const newErrors: typeof errors = {}
     
+    // Validate title
+    if (!formData.title.trim()) {
+      newErrors.title = "Title is required"
+    }
+    
     // Validate amount
     const amount = parseFloat(formData.amount)
     if (!formData.amount || isNaN(amount) || amount <= 0) {
@@ -95,8 +105,8 @@ export default function AddExpenseDialog({ open, onOpenChange, initialData, onSu
     }
     
     // Validate date
-    if (!formData.date) {
-      newErrors.date = "Date is required"
+    if (!formData.transaction_date) {
+      newErrors.transaction_date = "Date is required"
     }
     
     // Validate category
@@ -114,27 +124,56 @@ export default function AddExpenseDialog({ open, onOpenChange, initialData, onSu
     if (!validateForm()) {
       return
     }
+
+    if (!user || !supabase) {
+      toast({
+        title: "Error",
+        description: "Please log in to add expenses.",
+        variant: "destructive",
+      })
+      return
+    }
+    
+    setIsSubmitting(true)
     
     try {
-      const expenseData: CreateExpenseData = {
+      const expenseData: CreateExpense = {
+        title: formData.title,
         amount: parseFloat(formData.amount),
-        type: formData.type,
         category: formData.category,
-        date: formData.date,
-        note: formData.note || undefined,
+        transaction_date: formData.transaction_date,
+        transaction_type: formData.transaction_type as 'income' | 'expense',
       }
 
       if (initialData?.id) {
-        // Demo mode - simulate update
+        // Update existing expense
+        const { error } = await supabase
+          .from('expenses')
+          .update(expenseData)
+          .eq('id', initialData.id)
+          .eq('user_id', user.id)
+
+        if (error) {
+          throw error
+        }
+
         toast({
-          title: "Demo Mode",
-          description: `${expenseData.type === 'expense' ? 'Expense' : 'Income'} would be updated in demo mode.`,
+          title: "Success",
+          description: "Expense updated successfully.",
         })
       } else {
-        // Demo mode - simulate creation
+        // Create new expense
+        const { error } = await supabase
+          .from('expenses')
+          .insert([{ ...expenseData, user_id: user.id }])
+
+        if (error) {
+          throw error
+        }
+
         toast({
-          title: "Demo Mode",
-          description: `${expenseData.type === 'expense' ? 'Expense' : 'Income'} would be added in demo mode.`,
+          title: "Success",
+          description: "Expense added successfully.",
         })
       }
 
@@ -148,33 +187,35 @@ export default function AddExpenseDialog({ open, onOpenChange, initialData, onSu
       
       // Reset form
       setFormData({
+        title: "",
         amount: "",
-        type: "expense",
         category: "",
-        date: new Date().toISOString().split("T")[0],
-        note: "",
+        transaction_date: new Date().toISOString().split("T")[0],
+        transaction_type: "expense",
       })
       setErrors({})
       
       // Close dialog
       onOpenChange(false)
     } catch (error) {
-      console.error("Error adding expense:", error)
+      console.error("Error submitting expense:", error)
       toast({
         title: "Error",
         description: "Failed to save expense. Please try again.",
         variant: "destructive",
       })
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
   const handleClose = () => {
     setFormData({
+      title: "",
       amount: "",
-      type: "expense",
       category: "",
-      date: new Date().toISOString().split("T")[0],
-      note: "",
+      transaction_date: new Date().toISOString().split("T")[0],
+      transaction_type: "expense",
     })
     setErrors({})
     onOpenChange(false)
@@ -184,139 +225,121 @@ export default function AddExpenseDialog({ open, onOpenChange, initialData, onSu
   useEffect(() => {
     if (initialData) {
       setFormData({
+        title: initialData.title || "",
         amount: initialData.amount?.toString() || "",
-        type: initialData.type || "expense",
         category: initialData.category || "",
-        date: initialData.date || new Date().toISOString().split("T")[0],
-        note: initialData.note || "",
+        transaction_date: initialData.transaction_date || new Date().toISOString().split("T")[0],
+        transaction_type: initialData.transaction_type || "expense",
       })
     }
   }, [initialData])
 
-  const currentCategories = formData.type === "expense" ? expenseCategories : incomeCategories
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[800px] p-0 max-h-[90vh] overflow-y-auto rounded-lg shadow-sm">
-        <div className="flex flex-col lg:flex-row">
-          {/* Left side - Form */}
-          <div className="flex-1 p-4 sm:p-6">
-            <DialogHeader className="mb-4 sm:mb-6">
-              <DialogTitle className="text-lg sm:text-xl font-semibold">
-                {initialData ? "Edit" : "Add"} {formData.type === "expense" ? "Expense" : "Income"}
-              </DialogTitle>
-              <DialogDescription className="text-sm text-gray-600 dark:text-gray-400">
-                {initialData ? "Update" : "Enter"} the details for your {formData.type === "expense" ? "expense" : "income"} entry.
-              </DialogDescription>
-            </DialogHeader>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Add Transaction</DialogTitle>
+          <DialogDescription>
+            Add a new income or expense to track your finances.
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit}>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="title">Title</Label>
+              <Input
+                id="title"
+                value={formData.title}
+                onChange={(e) => handleInputChange("title", e.target.value)}
+                placeholder="Enter transaction title"
+                className={errors.title ? "border-red-500" : ""}
+              />
+              {errors.title && (
+                <p className="text-sm text-red-500">{errors.title}</p>
+              )}
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="transaction_type">Type</Label>
+              <Select
+                value={formData.transaction_type}
+                onValueChange={(value) => {
+                  handleInputChange("transaction_type", value)
+                  // Reset category when type changes
+                  handleInputChange("category", "")
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="expense">Expense</SelectItem>
+                  <SelectItem value="income">Income</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             
-            <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
-          {/* Type Selection */}
-          <div className="space-y-2">
-            <Label htmlFor="type" className="text-sm font-medium">Type</Label>
-            <Select
-              value={formData.type}
-              onValueChange={(value: "expense" | "income") => {
-                handleInputChange("type", value)
-                // Reset category when type changes
-                handleInputChange("category", "")
-              }}
-            >
-              <SelectTrigger className="h-10 sm:h-11">
-                <SelectValue placeholder="Select type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="expense">Expense</SelectItem>
-                <SelectItem value="income">Income</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="grid gap-2">
+              <Label htmlFor="amount">Amount</Label>
+              <Input
+                id="amount"
+                type="number"
+                step="0.01"
+                value={formData.amount}
+                onChange={(e) => handleInputChange("amount", e.target.value)}
+                placeholder="0.00"
+                className={errors.amount ? "border-red-500" : ""}
+              />
+              {errors.amount && (
+                <p className="text-sm text-red-500">{errors.amount}</p>
+              )}
+            </div>
+            
+            <div className="grid gap-2">
+              <Label htmlFor="category">Category</Label>
+              <Select
+                value={formData.category}
+                onValueChange={(value) => handleInputChange("category", value)}
+              >
+                <SelectTrigger className={errors.category ? "border-red-500" : ""}>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {(formData.transaction_type === 'income' ? incomeCategories : expenseCategories).map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.category && (
+                <p className="text-sm text-red-500">{errors.category}</p>
+              )}
+            </div>
+            
+            <div className="grid gap-2">
+              <Label htmlFor="date">Date</Label>
+              <Input
+                id="date"
+                type="date"
+                value={formData.transaction_date}
+                onChange={(e) => handleInputChange("transaction_date", e.target.value)}
+                className={errors.transaction_date ? "border-red-500" : ""}
+              />
+              {errors.transaction_date && (
+                <p className="text-sm text-red-500">{errors.transaction_date}</p>
+              )}
+            </div>
           </div>
-
-          {/* Amount */}
-          <div className="space-y-2">
-            <Label htmlFor="amount" className="text-sm font-medium">Amount</Label>
-            <Input
-              id="amount"
-              type="number"
-              step="0.01"
-              min="0"
-              placeholder="0.00"
-              value={formData.amount}
-              onChange={(e) => handleInputChange("amount", e.target.value)}
-              className={`h-10 sm:h-11 ${errors.amount ? "border-red-500" : ""}`}
-            />
-            {errors.amount && (
-              <p className="text-sm text-red-500">{errors.amount}</p>
-            )}
-          </div>
-
-          {/* Category */}
-          <div className="space-y-2">
-            <Label htmlFor="category" className="text-sm font-medium">Category</Label>
-            <Select
-              value={formData.category}
-              onValueChange={(value) => handleInputChange("category", value)}
-            >
-              <SelectTrigger className={`h-10 sm:h-11 ${errors.category ? "border-red-500" : ""}`}>
-                <SelectValue placeholder="Select category" />
-              </SelectTrigger>
-              <SelectContent>
-                {currentCategories.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.category && (
-              <p className="text-sm text-red-500">{errors.category}</p>
-            )}
-          </div>
-
-          {/* Date */}
-          <div className="space-y-2">
-            <Label htmlFor="date" className="text-sm font-medium">Date</Label>
-            <Input
-              id="date"
-              type="date"
-              value={formData.date}
-              onChange={(e) => handleInputChange("date", e.target.value)}
-              className={`h-10 sm:h-11 ${errors.date ? "border-red-500" : ""}`}
-            />
-            {errors.date && (
-              <p className="text-sm text-red-500">{errors.date}</p>
-            )}
-          </div>
-
-          {/* Note */}
-          <div className="space-y-2">
-            <Label htmlFor="note" className="text-sm font-medium">Note (Optional)</Label>
-            <Textarea
-              id="note"
-              placeholder="Add a note about this entry..."
-              value={formData.note}
-              onChange={(e) => handleInputChange("note", e.target.value)}
-              rows={3}
-              className="resize-none"
-            />
-          </div>
-
-              <DialogFooter className="mt-6 sm:mt-8 flex-col sm:flex-row gap-2 sm:gap-0">
-                <Button type="button" variant="outline" onClick={handleClose} className="w-full sm:w-auto">
-                  Cancel
-                </Button>
-                <Button type="submit" className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground">
-                  {initialData ? "Update" : "Add"} {formData.type === "expense" ? "Expense" : "Income"}
-                </Button>
-              </DialogFooter>
-            </form>
-          </div>
-          
-          {/* Right side - Animated Character - Hidden on mobile */}
-          <div className="hidden lg:block w-80 border-l border-border min-h-[500px]">
-            <MoneyCharacter />
-          </div>
-        </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={handleClose}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Saving..." : "Save Transaction"}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   )

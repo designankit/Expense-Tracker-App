@@ -8,9 +8,9 @@ import {
   Receipt, 
   BarChart3, 
   Settings, 
-  Plus,
   Menu,
-  X
+  X,
+  PiggyBank
 } from "lucide-react"
 import {
   Tooltip,
@@ -18,7 +18,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import AddExpenseDialog from "@/components/AddExpenseDialog"
+import { useSupabase } from "@/components/supabase-provider"
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   isCollapsed?: boolean
@@ -35,6 +35,11 @@ const navigationItems = [
     title: "Expenses",
     icon: Receipt,
     url: "/expenses",
+  },
+  {
+    title: "Savings",
+    icon: PiggyBank,
+    url: "/savings",
   },
   {
     title: "Analytics",
@@ -54,132 +59,111 @@ export function Sidebar({
   onToggle,
   ...props 
 }: SidebarProps) {
-  const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false)
+  const { user } = useSupabase()
 
   return (
     <TooltipProvider>
       <div
         className={cn(
-          "flex h-full flex-col bg-background/80 backdrop-blur-md border-r border-border/50 transition-all duration-300 relative",
-          isCollapsed ? "w-16 sm:w-20" : "w-72",
-          "hidden sm:flex", // Hide on mobile by default
-          "sm:relative sm:translate-x-0", // Desktop positioning
-          "fixed inset-y-0 left-0 z-50 translate-x-0", // Mobile positioning when shown
+          "flex h-full w-full flex-col bg-background border-r border-border/50 transition-all duration-300",
+          isCollapsed ? "w-16" : "w-64",
           className
         )}
         {...props}
       >
         {/* Header */}
-        <div className="flex h-16 sm:h-18 items-center px-3 sm:px-4 border-b border-border/50 relative">
+        <div className="flex items-center justify-between p-3 sm:p-4 border-b border-border/50">
           {!isCollapsed && (
-            <div className="flex items-center justify-center w-full h-full">
-              <div className="text-center">
-                <div className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">Finance Tracker</div>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                <span className="text-white text-sm font-bold">E</span>
               </div>
+              <span className="font-semibold text-foreground">Expensio</span>
             </div>
           )}
-          {isCollapsed && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="flex items-center justify-center w-full h-full">
-                  <div className="text-lg font-bold text-gray-900 dark:text-white">F</div>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="right">
-                <p>Finance Tracker</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggle}
+            className="h-8 w-8 p-0"
+          >
+            {isCollapsed ? (
+              <Menu className="h-4 w-4" />
+            ) : (
+              <X className="h-4 w-4" />
+            )}
+          </Button>
         </div>
 
         {/* Navigation */}
         <nav className="flex-1 p-3 sm:p-4 space-y-2">
-          {navigationItems.map((item) => {
-            const isActive = false // You can implement active state logic here
-            const Icon = item.icon
-
-            return (
-              <div key={item.title}>
-                {isCollapsed ? (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant={isActive ? "default" : "ghost"}
-                        className={cn(
-                          "w-full justify-center px-2 h-10 rounded-xl transition-all duration-200",
-                          isActive && "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md"
-                        )}
-                        asChild
-                      >
-                        <a href={item.url}>
-                          <Icon className="h-4 w-4" />
-                        </a>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="right">
-                      <p>{item.title}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                ) : (
-                  <Button
-                    variant={isActive ? "default" : "ghost"}
-                    className={cn(
-                      "w-full justify-start px-4 h-11 text-sm font-medium rounded-xl transition-all duration-200",
-                      isActive && "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md"
-                    )}
-                    asChild
-                  >
-                    <a href={item.url} className="flex items-center space-x-3">
-                      <Icon className="h-4 w-4 flex-shrink-0" />
-                      <span className="truncate">{item.title}</span>
-                    </a>
-                  </Button>
-                )}
-              </div>
-            )
-          })}
-        </nav>
-
-        {/* Add Expense Button */}
-        <div className="p-3 sm:p-4 border-t border-border/50">
-          {isCollapsed ? (
-            <Tooltip>
+          {navigationItems.map((item) => (
+            <Tooltip key={item.title} delayDuration={0}>
               <TooltipTrigger asChild>
-                <Button 
-                  className="w-full px-2 h-11 bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md hover:shadow-lg transition-all duration-200 rounded-xl" 
+                <Button
+                  variant="ghost"
                   size="sm"
-                  onClick={() => setIsAddExpenseOpen(true)}
+                  className={cn(
+                    "w-full justify-start gap-3 h-10",
+                    isCollapsed ? "px-2" : "px-3"
+                  )}
+                  onClick={() => {
+                    if (typeof window !== 'undefined') {
+                      window.location.href = item.url
+                    }
+                  }}
                 >
-                  <Plus className="h-4 w-4" />
+                  <item.icon className="h-4 w-4 flex-shrink-0" />
+                  {!isCollapsed && (
+                    <span className="truncate">{item.title}</span>
+                  )}
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="right">
-                <p>Add Expense</p>
-              </TooltipContent>
+              {isCollapsed && (
+                <TooltipContent side="right">
+                  <p>{item.title}</p>
+                </TooltipContent>
+              )}
             </Tooltip>
-          ) : (
-            <Button 
-              className="w-full px-4 h-11 text-sm font-medium bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md hover:shadow-lg transition-all duration-200 rounded-xl" 
-              size="sm"
-              onClick={() => setIsAddExpenseOpen(true)}
-            >
-              <Plus className="h-4 w-4 flex-shrink-0" />
-              <span className="ml-2 truncate">Add Expense</span>
-            </Button>
-          )}
-        </div>
+          ))}
+        </nav>
 
-        {/* Add Expense Dialog */}
-        <AddExpenseDialog 
-          open={isAddExpenseOpen} 
-          onOpenChange={setIsAddExpenseOpen}
-          onSubmit={() => {
-            setIsAddExpenseOpen(false)
-          }}
-          onExpenseAdded={async () => {
-            setIsAddExpenseOpen(false)
-          }}
-        />
+        {/* User Info */}
+        {user && (
+          <div className="p-3 sm:p-4 border-t border-border/50">
+            {isCollapsed ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center mx-auto">
+                    <span className="text-white text-sm font-medium">
+                      {user.user_metadata?.full_name?.charAt(0) || user.email?.charAt(0) || 'U'}
+                    </span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="right">
+                  <p>{user.user_metadata?.full_name || user.email}</p>
+                </TooltipContent>
+              </Tooltip>
+            ) : (
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+                  <span className="text-white text-sm font-medium">
+                    {user.user_metadata?.full_name?.charAt(0) || user.email?.charAt(0) || 'U'}
+                  </span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">
+                    {user.user_metadata?.full_name || 'User'}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {user.email}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </TooltipProvider>
   )

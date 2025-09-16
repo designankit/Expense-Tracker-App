@@ -8,12 +8,14 @@ type SupabaseContextType = {
   user: User | null
   session: Session | null
   loading: boolean
+  supabase: typeof supabase
 }
 
 const SupabaseContext = createContext<SupabaseContextType>({
   user: null,
   session: null,
   loading: true,
+  supabase: supabase,
 })
 
 export const useSupabase = () => {
@@ -76,7 +78,7 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
   }, [hasRealCredentials])
 
   return (
-    <SupabaseContext.Provider value={{ user, session, loading }}>
+    <SupabaseContext.Provider value={{ user, session, loading, supabase }}>
       {children}
     </SupabaseContext.Provider>
   )
