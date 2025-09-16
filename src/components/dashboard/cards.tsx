@@ -165,23 +165,26 @@ export function Cards({ expenses }: CardsProps) {
 
   return (
     <TooltipProvider>
-      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Card className="border hover:shadow-sm transition-shadow cursor-pointer">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-xs sm:text-sm font-medium">
+            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-lg hover:shadow-md transition-all duration-300 cursor-pointer group hover:scale-105">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
                   Total Expenses
                 </CardTitle>
-                <IconBadge color={getTotalExpensesColor()}>
+                <div className={`p-2 rounded-xl ${getTotalExpensesColor()} group-hover:scale-110 transition-transform duration-300`}>
                   {getTotalExpensesIcon()}
-                </IconBadge>
+                </div>
               </CardHeader>
-              <CardContent>
-                <div className="text-lg sm:text-xl lg:text-2xl font-bold">{formatAmount(totalExpenses)}</div>
+              <CardContent className="space-y-2">
+                <div className="text-xl sm:text-2xl lg:text-3xl font-bold">{formatAmount(totalExpenses)}</div>
                 <p className="text-xs text-muted-foreground">
                   All time expenses
                 </p>
+                <div className="w-full bg-muted/30 rounded-full h-1.5">
+                  <div className="bg-gradient-to-r from-blue-500 to-indigo-500 h-1.5 rounded-full w-3/4 transition-all duration-500"></div>
+                </div>
               </CardContent>
             </Card>
           </TooltipTrigger>
@@ -192,20 +195,23 @@ export function Cards({ expenses }: CardsProps) {
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Card className="border hover:shadow-sm transition-shadow cursor-pointer">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-xs sm:text-sm font-medium">
+            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-lg hover:shadow-md transition-all duration-300 cursor-pointer group hover:scale-105">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
                   This Month
                 </CardTitle>
-                <IconBadge color={getThisMonthColor()}>
+                <div className={`p-2 rounded-xl ${getThisMonthColor()} group-hover:scale-110 transition-transform duration-300`}>
                   {getThisMonthIcon()}
-                </IconBadge>
+                </div>
               </CardHeader>
-              <CardContent>
-                <div className="text-lg sm:text-xl lg:text-2xl font-bold">{formatAmount(thisMonthExpenses)}</div>
+              <CardContent className="space-y-2">
+                <div className="text-xl sm:text-2xl lg:text-3xl font-bold">{formatAmount(thisMonthExpenses)}</div>
                 <p className="text-xs text-muted-foreground">
                   Current month expenses
                 </p>
+                <div className="w-full bg-muted/30 rounded-full h-1.5">
+                  <div className="bg-gradient-to-r from-green-500 to-emerald-500 h-1.5 rounded-full w-2/3 transition-all duration-500"></div>
+                </div>
               </CardContent>
             </Card>
           </TooltipTrigger>
@@ -216,18 +222,21 @@ export function Cards({ expenses }: CardsProps) {
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Card className="border hover:shadow-sm transition-shadow cursor-pointer">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-xs sm:text-sm font-medium">Categories</CardTitle>
-                <IconBadge color={getCategoriesColor()}>
+            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-lg hover:shadow-md transition-all duration-300 cursor-pointer group hover:scale-105">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Categories</CardTitle>
+                <div className={`p-2 rounded-xl ${getCategoriesColor()} group-hover:scale-110 transition-transform duration-300`}>
                   {getCategoriesIcon()}
-                </IconBadge>
+                </div>
               </CardHeader>
-              <CardContent>
-                <div className="text-lg sm:text-xl lg:text-2xl font-bold">{uniqueCategories}</div>
+              <CardContent className="space-y-2">
+                <div className="text-xl sm:text-2xl lg:text-3xl font-bold">{uniqueCategories}</div>
                 <p className="text-xs text-muted-foreground">
                   Active categories
                 </p>
+                <div className="w-full bg-muted/30 rounded-full h-1.5">
+                  <div className="bg-gradient-to-r from-blue-500 to-indigo-500 h-1.5 rounded-full w-1/2 transition-all duration-500"></div>
+                </div>
               </CardContent>
             </Card>
           </TooltipTrigger>
@@ -238,18 +247,26 @@ export function Cards({ expenses }: CardsProps) {
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Card className="border hover:shadow-sm transition-shadow cursor-pointer">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-xs sm:text-sm font-medium">Savings Rate</CardTitle>
-                <IconBadge color={getSavingsRateColor()}>
+            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-lg hover:shadow-md transition-all duration-300 cursor-pointer group hover:scale-105">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Savings Rate</CardTitle>
+                <div className={`p-2 rounded-xl ${getSavingsRateColor()} group-hover:scale-110 transition-transform duration-300`}>
                   {getSavingsRateIcon()}
-                </IconBadge>
+                </div>
               </CardHeader>
-              <CardContent>
-                <div className="text-lg sm:text-xl lg:text-2xl font-bold">{formatPercentage(savingsRate / 100)}</div>
+              <CardContent className="space-y-2">
+                <div className="text-xl sm:text-2xl lg:text-3xl font-bold">{formatPercentage(savingsRate)}</div>
                 <p className="text-xs text-muted-foreground">
-                  This month savings
+                  This month's savings
                 </p>
+                <div className="w-full bg-muted/30 rounded-full h-1.5">
+                  <div className={`h-1.5 rounded-full transition-all duration-500 ${
+                    savingsRate < 0 ? 'bg-gradient-to-r from-red-500 to-red-600 w-1/4' :
+                    savingsRate < 10 ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 w-1/3' :
+                    savingsRate < 30 ? 'bg-gradient-to-r from-blue-500 to-blue-600 w-2/3' :
+                    'bg-gradient-to-r from-green-500 to-green-600 w-4/5'
+                  }`}></div>
+                </div>
               </CardContent>
             </Card>
           </TooltipTrigger>

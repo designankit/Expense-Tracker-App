@@ -32,7 +32,7 @@ interface HeaderProps {
   onMobileMenuToggle?: () => void
 }
 
-export function Header({ onMobileMenuToggle }: HeaderProps) {
+export function DashboardHeader({ onMobileMenuToggle }: HeaderProps) {
   const { theme, setTheme } = useTheme()
   const { searchQuery, setSearchQuery, isDropdownOpen, setIsDropdownOpen } = useSearch()
   const { unreadCount } = useNotifications()
@@ -128,29 +128,29 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
   }
 
   return (
-    <header className="flex h-14 sm:h-16 items-center gap-2 sm:gap-4 border-b bg-background px-3 sm:px-6">
+    <header className="flex h-16 sm:h-18 items-center gap-3 sm:gap-4 border-b border-border/50 bg-background/80 backdrop-blur-md px-4 sm:px-6 sticky top-0 z-40">
       {/* Mobile Menu Button */}
       <Button
         variant="ghost"
         size="icon"
         onClick={onMobileMenuToggle}
-        className="sm:hidden h-8 w-8"
+        className="sm:hidden h-9 w-9 rounded-xl hover:bg-muted/50"
       >
         <Menu className="h-4 w-4" />
       </Button>
       
-      <div className="flex-1 flex items-center gap-2 sm:gap-3 min-w-0">
-        <h1 className="text-lg sm:text-2xl font-semibold truncate">Dashboard</h1>
+      <div className="flex-1 flex items-center gap-3 sm:gap-4 min-w-0">
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
       </div>
       
       <div className="flex items-center gap-2 sm:gap-4">
         {/* Search - Hidden on mobile, shown on larger screens */}
         <div className="relative w-48 sm:w-72 hidden md:block">
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 transition-colors duration-200 group-focus-within:text-blue-500 z-10" />
+            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors duration-200 group-focus-within:text-primary z-10" />
             <Input
               placeholder="Search expenses..."
-              className="pl-11 pr-4 py-2.5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-gray-200 dark:border-gray-700 rounded-xl shadow-sm hover:shadow-md focus:shadow-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 placeholder:text-gray-400 relative z-0"
+              className="pl-11 pr-4 py-2.5 bg-card/50 backdrop-blur-sm border-border/50 rounded-xl shadow-sm hover:shadow-md focus:shadow-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 placeholder:text-muted-foreground relative z-0"
               value={searchQuery}
               onChange={handleSearchInputChange}
               onFocus={handleSearchInputFocus}
@@ -162,7 +162,7 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
                   setSearchQuery('')
                   setIsDropdownOpen(false)
                 }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200 z-10"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors duration-200 z-10"
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -182,25 +182,25 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="md:hidden h-8 w-8"
+          className="md:hidden h-9 w-9 rounded-xl hover:bg-muted/50"
         >
           <Search className="h-4 w-4" />
         </Button>
         
-        <Separator orientation="vertical" className="h-6 hidden sm:block" />
+        <Separator orientation="vertical" className="h-6 hidden sm:block bg-border/50" />
         
         <div className="relative">
           <Button 
             variant="ghost" 
             size="icon"
             onClick={() => setIsNotificationOpen(!isNotificationOpen)}
-            className="relative h-8 w-8 sm:h-10 sm:w-10"
+            className="relative h-9 w-9 sm:h-10 sm:w-10 rounded-xl hover:bg-muted/50"
           >
             <Bell className="h-4 w-4" />
             {unreadCount > 0 && (
               <Badge 
                 variant="destructive" 
-                className="absolute -top-1 -right-1 h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center text-xs p-0"
+                className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center text-xs p-0 rounded-full"
               >
                 {unreadCount > 9 ? '9+' : unreadCount}
               </Badge>
@@ -213,7 +213,12 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
         </div>
         
         {/* Theme Toggle Button */}
-        <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-8 w-8 sm:h-10 sm:w-10">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={toggleTheme} 
+          className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl hover:bg-muted/50"
+        >
           {mounted ? (
             theme === "dark" ? (
               <Sun className="h-4 w-4" />
@@ -228,10 +233,10 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
         {/* User Avatar Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-              <Avatar className="h-8 w-8">
+            <Button variant="ghost" className="relative h-9 w-9 sm:h-10 sm:w-10 rounded-full hover:bg-muted/50">
+              <Avatar className="h-8 w-8 sm:h-9 sm:w-9">
                 <AvatarImage src={user?.user_metadata?.avatar_url} />
-                <AvatarFallback className="text-sm font-medium bg-primary text-primary-foreground">
+                <AvatarFallback className="text-sm font-medium bg-gradient-to-br from-primary to-purple-600 text-white">
                   {getUserInitials(user?.user_metadata?.full_name || user?.user_metadata?.name, user?.email)}
                 </AvatarFallback>
               </Avatar>

@@ -197,15 +197,15 @@ export default function AddExpenseDialog({ open, onOpenChange, initialData, onSu
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[800px] p-0 max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[800px] p-0 max-h-[90vh] overflow-y-auto rounded-lg shadow-sm">
         <div className="flex flex-col lg:flex-row">
           {/* Left side - Form */}
           <div className="flex-1 p-4 sm:p-6">
             <DialogHeader className="mb-4 sm:mb-6">
-              <DialogTitle className="text-xl sm:text-2xl font-bold">
+              <DialogTitle className="text-lg sm:text-xl font-semibold">
                 {initialData ? "Edit" : "Add"} {formData.type === "expense" ? "Expense" : "Income"}
               </DialogTitle>
-              <DialogDescription className="text-sm sm:text-base">
+              <DialogDescription className="text-sm text-gray-600 dark:text-gray-400">
                 {initialData ? "Update" : "Enter"} the details for your {formData.type === "expense" ? "expense" : "income"} entry.
               </DialogDescription>
             </DialogHeader>
@@ -213,7 +213,7 @@ export default function AddExpenseDialog({ open, onOpenChange, initialData, onSu
             <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
           {/* Type Selection */}
           <div className="space-y-2">
-            <Label htmlFor="type" className="text-sm sm:text-base">Type</Label>
+            <Label htmlFor="type" className="text-sm font-medium">Type</Label>
             <Select
               value={formData.type}
               onValueChange={(value: "expense" | "income") => {
@@ -234,7 +234,7 @@ export default function AddExpenseDialog({ open, onOpenChange, initialData, onSu
 
           {/* Amount */}
           <div className="space-y-2">
-            <Label htmlFor="amount" className="text-sm sm:text-base">Amount</Label>
+            <Label htmlFor="amount" className="text-sm font-medium">Amount</Label>
             <Input
               id="amount"
               type="number"
@@ -252,7 +252,7 @@ export default function AddExpenseDialog({ open, onOpenChange, initialData, onSu
 
           {/* Category */}
           <div className="space-y-2">
-            <Label htmlFor="category" className="text-sm sm:text-base">Category</Label>
+            <Label htmlFor="category" className="text-sm font-medium">Category</Label>
             <Select
               value={formData.category}
               onValueChange={(value) => handleInputChange("category", value)}
@@ -275,7 +275,7 @@ export default function AddExpenseDialog({ open, onOpenChange, initialData, onSu
 
           {/* Date */}
           <div className="space-y-2">
-            <Label htmlFor="date" className="text-sm sm:text-base">Date</Label>
+            <Label htmlFor="date" className="text-sm font-medium">Date</Label>
             <Input
               id="date"
               type="date"
@@ -290,7 +290,7 @@ export default function AddExpenseDialog({ open, onOpenChange, initialData, onSu
 
           {/* Note */}
           <div className="space-y-2">
-            <Label htmlFor="note" className="text-sm sm:text-base">Note (Optional)</Label>
+            <Label htmlFor="note" className="text-sm font-medium">Note (Optional)</Label>
             <Textarea
               id="note"
               placeholder="Add a note about this entry..."
