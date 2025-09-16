@@ -39,23 +39,18 @@ interface CardsProps {
   expenses: Expense[]
 }
 
-function IconBadge({ children, color }: { children: React.ReactNode; color: string }) {
-  return (
-    <div className={`h-8 w-8 rounded-md flex items-center justify-center ${color}`}>
-      {children}
-    </div>
-  )
-}
 
 export function Cards({ expenses }: CardsProps) {
   const formatAmount = (amount: number) => formatCurrency(amount, "INR")
   
   // Helper functions for calculations
-  const getTotal = () => {
-    return expenses.reduce((sum, expense) => sum + expense.amount, 0)
+  const getTotalExpenses = () => {
+    return expenses
+      .filter(expense => expense.transaction_type === 'expense')
+      .reduce((sum, expense) => sum + expense.amount, 0)
   }
 
-  const getTotalThisMonth = () => {
+  const getTotalThisMonthExpenses = () => {
     const now = new Date()
     const currentMonth = now.getMonth()
     const currentYear = now.getFullYear()
@@ -64,6 +59,30 @@ export function Cards({ expenses }: CardsProps) {
       .filter(expense => {
         const expenseDate = new Date(expense.transaction_date)
         return (
+          expense.transaction_type === 'expense' &&
+          expenseDate.getMonth() === currentMonth &&
+          expenseDate.getFullYear() === currentYear
+        )
+      })
+      .reduce((sum, expense) => sum + expense.amount, 0)
+  }
+
+  const getTotalIncome = () => {
+    return expenses
+      .filter(expense => expense.transaction_type === 'income')
+      .reduce((sum, expense) => sum + expense.amount, 0)
+  }
+
+  const getTotalThisMonthIncome = () => {
+    const now = new Date()
+    const currentMonth = now.getMonth()
+    const currentYear = now.getFullYear()
+
+    return expenses
+      .filter(expense => {
+        const expenseDate = new Date(expense.transaction_date)
+        return (
+          expense.transaction_type === 'income' &&
           expenseDate.getMonth() === currentMonth &&
           expenseDate.getFullYear() === currentYear
         )
@@ -79,24 +98,14 @@ export function Cards({ expenses }: CardsProps) {
   }
   
   // Calculate real data
-  const totalExpenses = getTotal()
-  const thisMonthExpenses = getTotalThisMonth()
+  const totalExpenses = getTotalExpenses()
+  const thisMonthExpenses = getTotalThisMonthExpenses()
+  const totalIncome = getTotalIncome()
+  const thisMonthIncome = getTotalThisMonthIncome()
   const categoriesData = getByCategory()
   const uniqueCategories = Object.keys(categoriesData).length
   
-  // Calculate savings rate (simplified: assume income - expenses = savings)
-  const thisMonthIncome = expenses
-    .filter(expense => {
-      const expenseDate = new Date(expense.date)
-      const now = new Date()
-      return (
-        expense.type === 'income' &&
-        expenseDate.getMonth() === now.getMonth() &&
-        expenseDate.getFullYear() === now.getFullYear()
-      )
-    })
-    .reduce((sum, expense) => sum + expense.amount, 0)
-  
+  // Calculate savings rate (income - expenses = savings)
   const savingsRate = thisMonthIncome > 0 
     ? ((thisMonthIncome - thisMonthExpenses) / thisMonthIncome) * 100 
     : 0
@@ -173,18 +182,18 @@ export function Cards({ expenses }: CardsProps) {
                 </div>
               </CardHeader>
               <CardContent className="space-y-2">
-                <div className="text-xl sm:text-2xl lg:text-3xl font-bold">{formatAmount(totalExpenses)}</div>
+                <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-red-600 dark:text-red-400">{formatAmount(totalExpenses)}</div>
                 <p className="text-xs text-muted-foreground">
                   All time expenses
                 </p>
                 <div className="w-full bg-muted/30 rounded-full h-1.5">
-                  <div className="bg-gradient-to-r from-blue-500 to-indigo-500 h-1.5 rounded-full w-3/4 transition-all duration-500"></div>
+                  <div className="bg-gradient-to-r from-red-500 to-red-600 h-1.5 rounded-full w-3/4 transition-all duration-500"></div>
                 </div>
               </CardContent>
             </Card>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Total amount spent across all categories</p>
+            <p>Total amount spent across all expense categories</p>
           </TooltipContent>
         </Tooltip>
 
@@ -200,12 +209,12 @@ export function Cards({ expenses }: CardsProps) {
                 </div>
               </CardHeader>
               <CardContent className="space-y-2">
-                <div className="text-xl sm:text-2xl lg:text-3xl font-bold">{formatAmount(thisMonthExpenses)}</div>
+                <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-red-600 dark:text-red-400">{formatAmount(thisMonthExpenses)}</div>
                 <p className="text-xs text-muted-foreground">
                   Current month expenses
                 </p>
                 <div className="w-full bg-muted/30 rounded-full h-1.5">
-                  <div className="bg-gradient-to-r from-green-500 to-emerald-500 h-1.5 rounded-full w-2/3 transition-all duration-500"></div>
+                  <div className="bg-gradient-to-r from-red-500 to-red-600 h-1.5 rounded-full w-2/3 transition-all duration-500"></div>
                 </div>
               </CardContent>
             </Card>
@@ -219,24 +228,24 @@ export function Cards({ expenses }: CardsProps) {
           <TooltipTrigger asChild>
             <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-lg hover:shadow-md transition-all duration-300 cursor-pointer group hover:scale-105">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Categories</CardTitle>
-                <div className={`p-2 rounded-xl ${getCategoriesColor()} group-hover:scale-110 transition-transform duration-300`}>
-                  {getCategoriesIcon()}
+                <CardTitle className="text-sm font-medium text-muted-foreground">Total Income</CardTitle>
+                <div className="p-2 rounded-xl bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300 group-hover:scale-110 transition-transform duration-300">
+                  <DollarSign className="h-4 w-4" />
                 </div>
               </CardHeader>
               <CardContent className="space-y-2">
-                <div className="text-xl sm:text-2xl lg:text-3xl font-bold">{uniqueCategories}</div>
+                <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-green-600 dark:text-green-400">{formatAmount(totalIncome)}</div>
                 <p className="text-xs text-muted-foreground">
-                  Active categories
+                  All time income
                 </p>
                 <div className="w-full bg-muted/30 rounded-full h-1.5">
-                  <div className="bg-gradient-to-r from-blue-500 to-indigo-500 h-1.5 rounded-full w-1/2 transition-all duration-500"></div>
+                  <div className="bg-gradient-to-r from-green-500 to-emerald-500 h-1.5 rounded-full w-3/4 transition-all duration-500"></div>
                 </div>
               </CardContent>
             </Card>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Number of expense categories used</p>
+            <p>Total income from all sources</p>
           </TooltipContent>
         </Tooltip>
 
@@ -252,7 +261,7 @@ export function Cards({ expenses }: CardsProps) {
               <CardContent className="space-y-2">
                 <div className="text-xl sm:text-2xl lg:text-3xl font-bold">{formatPercentage(savingsRate)}</div>
                 <p className="text-xs text-muted-foreground">
-                  This month's savings
+                  This month&apos;s savings
                 </p>
                 <div className="w-full bg-muted/30 rounded-full h-1.5">
                   <div className={`h-1.5 rounded-full transition-all duration-500 ${

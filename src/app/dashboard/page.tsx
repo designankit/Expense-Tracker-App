@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button"
 import { ExpenseCharts } from "@/components/dashboard/expense-charts"
 import { DashboardSkeleton } from "@/components/dashboard/dashboard-skeleton"
 import AddExpenseDialog from "@/components/AddExpenseDialog"
-import { Plus } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useNotifications } from "@/contexts/NotificationContext"
 import { useSupabase } from "@/components/supabase-provider"
@@ -90,7 +89,7 @@ export default function DashboardPage() {
                           Welcome Back{user?.user_metadata?.full_name ? `, ${user.user_metadata.full_name.split(' ')[0]}` : ''}!
                         </h1>
                         <p className="text-gray-600 dark:text-gray-300 text-base">
-                          Here's your financial overview for today
+                          Here&apos;s your financial overview for today
                         </p>
                         <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
                           <div className="flex items-center gap-2">

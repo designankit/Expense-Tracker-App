@@ -51,7 +51,7 @@ export default function SavingsPage() {
 
   useEffect(() => {
     fetchSavings()
-  }, [user, supabase])
+  }, [user, supabase, fetchSavings])
 
   const handleEdit = (savings: Savings) => {
     setEditingSavings(savings)
