@@ -6,5 +6,6 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholde
 
 console.log('Supabase Client: Creating client with URL:', supabaseUrl)
 console.log('Supabase Client: Anon key exists:', !!supabaseAnonKey)
+console.log('Supabase Client: Environment check - URL is placeholder:', supabaseUrl === 'https://placeholder.supabase.co')
 
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey)
