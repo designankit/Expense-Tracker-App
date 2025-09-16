@@ -4,11 +4,9 @@ import {
   TrendingUp, 
   TrendingDown, 
   DollarSign, 
-  CreditCard, 
   Wallet, 
   PiggyBank, 
   BarChart3, 
-  Target,
   AlertCircle,
   CheckCircle,
   XCircle,
@@ -103,7 +101,6 @@ export function Cards({ expenses }: CardsProps) {
   const totalIncome = getTotalIncome()
   const thisMonthIncome = getTotalThisMonthIncome()
   const categoriesData = getByCategory()
-  const uniqueCategories = Object.keys(categoriesData).length
   
   // Calculate savings rate (income - expenses = savings)
   const savingsRate = thisMonthIncome > 0 

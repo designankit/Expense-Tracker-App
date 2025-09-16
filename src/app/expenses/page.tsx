@@ -641,7 +641,14 @@ function ExpensesPageContent() {
           <AddExpenseDialog
             open={isAddExpenseOpen}
             onOpenChange={setIsAddExpenseOpen}
-            initialData={editingExpense || undefined}
+            initialData={editingExpense ? {
+              id: editingExpense.id,
+              title: editingExpense.title,
+              amount: editingExpense.amount,
+              category: editingExpense.category,
+              transaction_date: editingExpense.transaction_date,
+              transaction_type: editingExpense.transaction_type
+            } : undefined}
             onSubmit={() => {
               // Demo mode - just show success message
               toast({
