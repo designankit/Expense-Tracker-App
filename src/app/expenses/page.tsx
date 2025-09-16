@@ -84,9 +84,9 @@ function ExpensesPageContent() {
         // Search filter
         if (filters.search) {
           const searchLower = filters.search.toLowerCase()
-          const matchesNote = expense.note?.toLowerCase().includes(searchLower) || false
+          const matchesTitle = expense.title?.toLowerCase().includes(searchLower) || false
           const matchesCategory = expense.category.toLowerCase().includes(searchLower)
-          if (!matchesNote && !matchesCategory) return false
+          if (!matchesTitle && !matchesCategory) return false
         }
 
         // Category filter
@@ -263,9 +263,9 @@ function ExpensesPageContent() {
       // Search filter
       if (filters.search) {
         const searchLower = filters.search.toLowerCase()
-        const matchesNote = expense.note?.toLowerCase().includes(searchLower) || false
+        const matchesTitle = expense.title?.toLowerCase().includes(searchLower) || false
         const matchesCategory = expense.category.toLowerCase().includes(searchLower)
-        if (!matchesNote && !matchesCategory) return false
+        if (!matchesTitle && !matchesCategory) return false
       }
 
       // Category filter
@@ -504,7 +504,7 @@ function ExpensesPageContent() {
                               </Badge>
                             </div>
                             <p className="text-sm text-muted-foreground truncate mb-1">
-                              {expense.note || 'No note'}
+                              {expense.title || 'No title'}
                             </p>
                             <p className="text-xs text-muted-foreground">
                               {formatDate(expense.transaction_date)}
@@ -544,7 +544,7 @@ function ExpensesPageContent() {
                           <div>
                             <p className="font-medium">{expense.category}</p>
                             <p className="text-sm text-muted-foreground">
-                              {expense.note || 'No note'}
+                              {expense.title || 'No title'}
                             </p>
                           </div>
                           <div>
