@@ -113,8 +113,8 @@ function ExpensesPageContent() {
         let aValue: number, bValue: number
 
         if (sortField === 'date') {
-          aValue = new Date(a.date).getTime()
-          bValue = new Date(b.date).getTime()
+          aValue = new Date(a.transaction_date).getTime()
+          bValue = new Date(b.transaction_date).getTime()
         } else {
           aValue = a.amount
           bValue = b.amount
@@ -291,9 +291,9 @@ function ExpensesPageContent() {
     return filtered.sort((a, b) => {
       let aValue: number, bValue: number
 
-      if (sortField === 'date') {
-        aValue = new Date(a.date).getTime()
-        bValue = new Date(b.date).getTime()
+        if (sortField === 'date') {
+          aValue = new Date(a.transaction_date).getTime()
+          bValue = new Date(b.transaction_date).getTime()
       } else {
         aValue = a.amount
         bValue = b.amount
