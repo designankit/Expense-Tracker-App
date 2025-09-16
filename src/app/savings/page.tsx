@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { AppLayout } from "@/components/layout/app-layout"
 import { AuthGuard } from "@/components/auth-guard"
 import { Button } from "@/components/ui/button"
@@ -21,7 +21,7 @@ export default function SavingsPage() {
   const { toast } = useToast()
   const { user, supabase } = useSupabase()
 
-  const fetchSavings = async () => {
+  const fetchSavings = useCallback(async () => {
     if (!user || !supabase) {
       setIsLoading(false)
       return
@@ -47,7 +47,7 @@ export default function SavingsPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [user, supabase, toast])
 
   useEffect(() => {
     fetchSavings()

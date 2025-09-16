@@ -139,19 +139,6 @@ export function Cards({ expenses }: CardsProps) {
     return "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300"
   }
 
-  const getCategoriesIcon = () => {
-    if (uniqueCategories === 0) return <XCircle className="h-4 w-4" />
-    if (uniqueCategories < 3) return <CreditCard className="h-4 w-4" />
-    if (uniqueCategories < 6) return <BarChart3 className="h-4 w-4" />
-    return <Target className="h-4 w-4" />
-  }
-
-  const getCategoriesColor = () => {
-    if (uniqueCategories === 0) return "bg-gray-100 text-gray-700 dark:bg-gray-900/40 dark:text-gray-300"
-    if (uniqueCategories < 3) return "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
-    if (uniqueCategories < 6) return "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300"
-    return "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300"
-  }
 
   const getSavingsRateIcon = () => {
     if (savingsRate < 0) return <XCircle className="h-4 w-4" />

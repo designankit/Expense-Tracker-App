@@ -163,7 +163,7 @@ export function ExpenseCharts({ expenses }: ExpenseChartsProps) {
           font: {
             size: 12,
           },
-          callback: function(value: any) {
+          callback: function(value: number) {
             return '₹' + value.toLocaleString()
           }
         },
@@ -301,7 +301,7 @@ export function ExpenseCharts({ expenses }: ExpenseChartsProps) {
           font: {
             size: 12,
           },
-          callback: function(value: any) {
+          callback: function(value: number) {
             return '₹' + value.toLocaleString()
           }
         },
