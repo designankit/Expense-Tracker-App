@@ -2,18 +2,7 @@
 
 import { useState, useMemo, useEffect, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
-// Demo expense type
-interface Expense {
-  id: string
-  amount: number
-  category: string
-  type: "expense" | "income"
-  date: string
-  note?: string
-  userId: string
-  createdAt: string
-  updatedAt: string
-}
+import { Expense } from "@/types/expense"
 import { formatDate } from "@/lib/format"
 import { useToast } from "@/hooks/use-toast"
 import { AppLayout } from "@/components/layout/app-layout"
@@ -105,13 +94,13 @@ function ExpensesPageContent() {
 
         // Date range filter
         if (filters.dateFrom) {
-          const expenseDate = new Date(expense.date)
+          const expenseDate = new Date(expense.transaction_date)
           const fromDate = new Date(filters.dateFrom)
           if (expenseDate < fromDate) return false
         }
 
         if (filters.dateTo) {
-          const expenseDate = new Date(expense.date)
+          const expenseDate = new Date(expense.transaction_date)
           const toDate = new Date(filters.dateTo)
           if (expenseDate > toDate) return false
         }
@@ -239,25 +228,23 @@ function ExpensesPageContent() {
     const demoExpenses: Expense[] = [
       {
         id: "1",
+        user_id: "demo-user",
+        title: "Lunch at restaurant",
         amount: 1500,
         category: "Food",
-        type: "expense",
-        date: new Date().toISOString(),
-        note: "Lunch at restaurant",
-        userId: "demo-user",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        transaction_date: new Date().toISOString().split('T')[0],
+        transaction_type: "expense",
+        created_at: new Date().toISOString()
       },
       {
         id: "2", 
+        user_id: "demo-user",
+        title: "Freelance work",
         amount: 5000,
-        category: "Income",
-        type: "income",
-        date: new Date().toISOString(),
-        note: "Freelance work",
-        userId: "demo-user",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        category: "Salary",
+        transaction_date: new Date().toISOString().split('T')[0],
+        transaction_type: "income",
+        created_at: new Date().toISOString()
       }
     ]
     setExpenses(demoExpenses)
@@ -286,13 +273,13 @@ function ExpensesPageContent() {
 
       // Date range filter
       if (filters.dateFrom) {
-        const expenseDate = new Date(expense.date)
+        const expenseDate = new Date(expense.transaction_date)
         const fromDate = new Date(filters.dateFrom)
         if (expenseDate < fromDate) return false
       }
 
       if (filters.dateTo) {
-        const expenseDate = new Date(expense.date)
+        const expenseDate = new Date(expense.transaction_date)
         const toDate = new Date(filters.dateTo)
         if (expenseDate > toDate) return false
       }
@@ -510,24 +497,24 @@ function ExpensesPageContent() {
                             <div className="flex items-center gap-2 mb-2">
                               <h3 className="font-semibold text-base truncate">{expense.category}</h3>
                               <Badge 
-                                variant={expense.type === 'income' ? 'default' : 'secondary'}
+                                variant={expense.transaction_type === 'income' ? 'default' : 'secondary'}
                                 className="text-xs flex-shrink-0"
                               >
-                                {expense.type}
+                                {expense.transaction_type}
                               </Badge>
                             </div>
                             <p className="text-sm text-muted-foreground truncate mb-1">
                               {expense.note || 'No note'}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              {formatDate(expense.date)}
+                              {formatDate(expense.transaction_date)}
                             </p>
                           </div>
                           <div className="flex flex-col items-end gap-3">
                             <p className={`font-bold text-lg ${
-                              expense.type === 'income' ? 'text-green-600' : 'text-red-600'
+                              expense.transaction_type === 'income' ? 'text-green-600' : 'text-red-600'
                             }`}>
-                              {expense.type === 'income' ? '+' : '-'}{formatAmount(expense.amount)}
+                              {expense.transaction_type === 'income' ? '+' : '-'}{formatAmount(expense.amount)}
                             </p>
                             <div className="flex gap-1">
                               <Button
@@ -562,20 +549,20 @@ function ExpensesPageContent() {
                           </div>
                           <div>
                             <p className="text-sm text-muted-foreground">Date</p>
-                            <p className="font-medium">{formatDate(expense.date)}</p>
+                            <p className="font-medium">{formatDate(expense.transaction_date)}</p>
                           </div>
                           <div>
                             <p className="text-sm text-muted-foreground">Type</p>
-                            <Badge variant={expense.type === 'income' ? 'default' : 'secondary'}>
-                              {expense.type}
+                            <Badge variant={expense.transaction_type === 'income' ? 'default' : 'secondary'}>
+                              {expense.transaction_type}
                             </Badge>
                           </div>
                           <div className="text-right">
                             <p className="text-sm text-muted-foreground">Amount</p>
                             <p className={`font-bold text-lg ${
-                              expense.type === 'income' ? 'text-green-600' : 'text-red-600'
+                              expense.transaction_type === 'income' ? 'text-green-600' : 'text-red-600'
                             }`}>
-                              {expense.type === 'income' ? '+' : '-'}{formatAmount(expense.amount)}
+                              {expense.transaction_type === 'income' ? '+' : '-'}{formatAmount(expense.amount)}
                             </p>
                           </div>
                         </div>

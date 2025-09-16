@@ -88,19 +88,11 @@ export function Cards({ expenses }: CardsProps) {
       .reduce((sum, expense) => sum + expense.amount, 0)
   }
 
-  const getByCategory = () => {
-    return expenses.reduce((acc, expense) => {
-      acc[expense.category] = (acc[expense.category] || 0) + expense.amount
-      return acc
-    }, {} as Record<string, number>)
-  }
-  
   // Calculate real data
   const totalExpenses = getTotalExpenses()
   const thisMonthExpenses = getTotalThisMonthExpenses()
   const totalIncome = getTotalIncome()
   const thisMonthIncome = getTotalThisMonthIncome()
-  const categoriesData = getByCategory()
   
   // Calculate savings rate (income - expenses = savings)
   const savingsRate = thisMonthIncome > 0 

@@ -67,6 +67,7 @@ export function convertCurrency(
 // Get user's currency preference from session/database
 // Note: This function should be called from server-side API routes only
 // For client-side usage, use the session data instead
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function getUserCurrency(_userId: string): Promise<CurrencyCode> {
   // This function is deprecated - use session data instead
   console.warn("getUserCurrency is deprecated. Use session data instead.")
