@@ -93,7 +93,7 @@ export function RecentExpenses({ expenses }: RecentExpensesProps) {
                         </div>
                       </div>
                       <div className="flex items-center space-x-2 flex-shrink-0">
-                        <Badge className={`text-xs px-2 py-1 rounded-lg ${categoryColors[expense.category] || categoryColors.Other} hidden sm:inline-flex`}>
+                        <Badge className={`text-xs px-2 py-1 rounded-lg ${categoryColors[expense.category as keyof typeof categoryColors] || categoryColors.Other} hidden sm:inline-flex`}>
                           {expense.category}
                         </Badge>
                         <span className={`text-xs font-semibold ${

@@ -106,7 +106,8 @@ export default function SavingsDialog({
 
       if (initialData) {
         // Update existing savings goal
-        const { error } = await supabase
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error } = await (supabase as any)
           .from('savings')
           .update(savingsData)
           .eq('id', initialData.id)
@@ -119,7 +120,8 @@ export default function SavingsDialog({
         })
       } else {
         // Create new savings goal
-        const { error } = await supabase
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error } = await (supabase as any)
           .from('savings')
           .insert([{
             ...savingsData,

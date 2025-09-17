@@ -146,9 +146,16 @@ export default function AddExpenseDialog({
 
       if (initialData?.id) {
         // Update existing expense
-        const { error } = await supabase
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error } = await (supabase as any)
           .from('expenses')
-          .update(expenseData)
+          .update({
+            title: expenseData.title,
+            amount: expenseData.amount,
+            category: expenseData.category,
+            transaction_date: expenseData.transaction_date,
+            transaction_type: expenseData.transaction_type,
+          })
           .eq('id', initialData.id)
           .eq('user_id', user.id)
 
@@ -162,7 +169,8 @@ export default function AddExpenseDialog({
         })
       } else {
         // Create new expense
-        const { error } = await supabase
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error } = await (supabase as any)
           .from('expenses')
           .insert([{ ...expenseData, user_id: user.id }])
 

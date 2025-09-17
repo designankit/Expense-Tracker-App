@@ -134,7 +134,8 @@ export function ExpenseCharts({ expenses }: ExpenseChartsProps) {
         cornerRadius: 8,
         displayColors: true,
         callbacks: {
-          label: function(context: { dataset: { label: string }; parsed: { y: number } }) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          label: function(context: any) {
             return `${context.dataset.label}: ₹${context.parsed.y.toLocaleString()}`
           }
         }
@@ -163,7 +164,8 @@ export function ExpenseCharts({ expenses }: ExpenseChartsProps) {
           font: {
             size: 12,
           },
-          callback: function(value: number) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          callback: function(value: any) {
             return '₹' + value.toLocaleString()
           }
         },
@@ -231,10 +233,11 @@ export function ExpenseCharts({ expenses }: ExpenseChartsProps) {
         cornerRadius: 8,
         displayColors: true,
         callbacks: {
-          label: function(context: { dataset: { label: string }; parsed: { y: number } }) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          label: function(context: any) {
             const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0)
-            const percentage = ((context.parsed / total) * 100).toFixed(1)
-            return `${context.label}: ₹${context.parsed.toLocaleString()} (${percentage}%)`
+            const percentage = ((context.parsed.y / total) * 100).toFixed(1)
+            return `${context.dataset.label}: ₹${context.parsed.y.toLocaleString()} (${percentage}%)`
           }
         }
       },
@@ -272,7 +275,8 @@ export function ExpenseCharts({ expenses }: ExpenseChartsProps) {
         borderWidth: 1,
         cornerRadius: 8,
         callbacks: {
-          label: function(context: { dataset: { label: string }; parsed: { y: number } }) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          label: function(context: any) {
             return `Expenses: ₹${context.parsed.y.toLocaleString()}`
           }
         }
@@ -301,7 +305,8 @@ export function ExpenseCharts({ expenses }: ExpenseChartsProps) {
           font: {
             size: 12,
           },
-          callback: function(value: number) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          callback: function(value: any) {
             return '₹' + value.toLocaleString()
           }
         },
