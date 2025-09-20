@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { useSupabase } from "@/components/supabase-provider"
+import { useUserPreferences } from "@/contexts/UserPreferencesContext"
+import { getLocalizedText } from "@/lib/user-preferences"
 import { CreateExpense } from "@/types/expense"
 import {
   Dialog,
@@ -63,6 +65,7 @@ export default function AddExpenseDialog({
 }: AddExpenseDialogProps) {
   const { toast } = useToast()
   const { user, supabase } = useSupabase()
+  const { preferences } = useUserPreferences()
   
   const [formData, setFormData] = useState({
     title: initialData?.title || "",
@@ -245,7 +248,7 @@ export default function AddExpenseDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add Transaction</DialogTitle>
+          <DialogTitle>{getLocalizedText('action.add', preferences.language)} {getLocalizedText('form.type', preferences.language)}</DialogTitle>
           <DialogDescription>
             Add a new income or expense to track your finances.
           </DialogDescription>
@@ -253,7 +256,7 @@ export default function AddExpenseDialog({
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="title">Title</Label>
+              <Label htmlFor="title">{getLocalizedText('form.title', preferences.language)}</Label>
               <Input
                 id="title"
                 value={formData.title}
@@ -287,7 +290,7 @@ export default function AddExpenseDialog({
             </div>
             
             <div className="grid gap-2">
-              <Label htmlFor="amount">Amount</Label>
+              <Label htmlFor="amount">{getLocalizedText('form.amount', preferences.language)}</Label>
               <Input
                 id="amount"
                 type="number"
@@ -303,7 +306,7 @@ export default function AddExpenseDialog({
             </div>
             
             <div className="grid gap-2">
-              <Label htmlFor="category">Category</Label>
+              <Label htmlFor="category">{getLocalizedText('form.category', preferences.language)}</Label>
               <Select
                 value={formData.category}
                 onValueChange={(value) => handleInputChange("category", value)}
@@ -340,10 +343,10 @@ export default function AddExpenseDialog({
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={handleClose}>
-              Cancel
+              {getLocalizedText('action.cancel', preferences.language)}
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : "Save Transaction"}
+              {isSubmitting ? getLocalizedText('message.loading', preferences.language) : getLocalizedText('action.save', preferences.language) + " " + getLocalizedText('form.type', preferences.language)}
             </Button>
           </DialogFooter>
         </form>

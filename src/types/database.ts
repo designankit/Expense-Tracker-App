@@ -53,6 +53,41 @@ export interface Database {
           created_at?: string
         }
       }
+      notifications: {
+        Row: {
+          id: string
+          user_id: string
+          title: string
+          message: string
+          type: 'info' | 'success' | 'warning' | 'error'
+          read: boolean
+          action_url: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          title: string
+          message: string
+          type: 'info' | 'success' | 'warning' | 'error'
+          read?: boolean
+          action_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          title?: string
+          message?: string
+          type?: 'info' | 'success' | 'warning' | 'error'
+          read?: boolean
+          action_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
@@ -73,3 +108,7 @@ export type ProfileUpdate = Database['public']['Tables']['profiles']['Update']
 export type Expense = Database['public']['Tables']['expenses']['Row']
 export type ExpenseInsert = Database['public']['Tables']['expenses']['Insert']
 export type ExpenseUpdate = Database['public']['Tables']['expenses']['Update']
+
+export type Notification = Database['public']['Tables']['notifications']['Row']
+export type NotificationInsert = Database['public']['Tables']['notifications']['Insert']
+export type NotificationUpdate = Database['public']['Tables']['notifications']['Update']

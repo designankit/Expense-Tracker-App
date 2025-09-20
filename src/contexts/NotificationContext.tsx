@@ -1,6 +1,7 @@
 "use client"
 
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
+import { useSupabase } from '@/components/supabase-provider'
 
 export interface Notification {
   id: string
@@ -15,106 +16,201 @@ export interface Notification {
 interface NotificationContextType {
   notifications: Notification[]
   unreadCount: number
-  addNotification: (notification: Omit<Notification, 'id' | 'read' | 'createdAt'>) => void
-  markAsRead: (id: string) => void
-  markAllAsRead: () => void
-  removeNotification: (id: string) => void
-  clearAllNotifications: () => void
-  addDemoNotifications: () => void
+  isLoading: boolean
+  addNotification: (notification: Omit<Notification, 'id' | 'read' | 'createdAt'>) => Promise<void>
+  markAsRead: (id: string) => Promise<void>
+  markAllAsRead: () => Promise<void>
+  removeNotification: (id: string) => Promise<void>
+  clearAllNotifications: () => Promise<void>
+  refreshNotifications: () => Promise<void>
+  addDemoNotifications: () => Promise<void>
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined)
 
-export function NotificationProvider({ children }: { children: React.ReactNode }) {
+export function NotificationProvider({ children }: { children: ReactNode }) {
   const [notifications, setNotifications] = useState<Notification[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const { user } = useSupabase()
 
-  // Load notifications from localStorage on mount
+  // Load notifications from Supabase on mount and when user changes
   useEffect(() => {
-    const savedNotifications = localStorage.getItem('notifications')
-    if (savedNotifications) {
+    const fetchNotifications = async () => {
+      if (!user?.id) {
+        setNotifications([])
+        return
+      }
+
+      setIsLoading(true)
       try {
-        setNotifications(JSON.parse(savedNotifications))
+        const response = await fetch(`/api/notifications?userId=${encodeURIComponent(user.id)}`)
+        if (response.ok) {
+          const data = await response.json()
+          setNotifications(data.notifications || [])
+        }
       } catch (error) {
-        console.error('Failed to parse saved notifications:', error)
+        console.error('Failed to fetch notifications:', error)
+      } finally {
+        setIsLoading(false)
       }
     }
-  }, [])
 
-  // Save notifications to localStorage whenever they change
-  useEffect(() => {
-    localStorage.setItem('notifications', JSON.stringify(notifications))
-  }, [notifications])
+    fetchNotifications()
+  }, [user?.id])
 
   const unreadCount = notifications.filter(n => !n.read).length
 
-  const addNotification = (notification: Omit<Notification, 'id' | 'read' | 'createdAt'>) => {
-    const newNotification: Notification = {
-      ...notification,
-      id: `notification-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      read: false,
-      createdAt: new Date().toISOString()
-    }
-    
-    setNotifications(prev => {
-      // Check if notification with same title and message already exists
-      const exists = prev.some(n => n.title === notification.title && n.message === notification.message)
-      if (exists) return prev
-      
-      return [newNotification, ...prev]
-    })
-    
-    // Auto-remove after 10 seconds for non-error notifications
-    if (notification.type !== 'error') {
-      setTimeout(() => {
-        setNotifications(prev => prev.filter(n => n.id !== newNotification.id))
-      }, 10000)
-    }
-  }
+  const addNotification = async (notification: Omit<Notification, 'id' | 'read' | 'createdAt'>) => {
+    if (!user?.id) return
 
-  const markAsRead = (id: string) => {
-    setNotifications(prev => 
-      prev.map(notification => 
-        notification.id === id 
-          ? { ...notification, read: true }
-          : notification
-      )
-    )
-  }
-
-  const markAllAsRead = () => {
-    setNotifications(prev => 
-      prev.map(notification => ({ ...notification, read: true }))
-    )
-  }
-
-  const removeNotification = (id: string) => {
-    setNotifications(prev => prev.filter(n => n.id !== id))
-  }
-
-  const clearAllNotifications = () => {
-    setNotifications([])
-  }
-
-  const addDemoNotifications = () => {
-    // Only add demo notifications if none exist
-    if (notifications.length === 0) {
-      // Add welcome notification immediately
-      addNotification({
-        title: "Welcome!",
-        message: "Your expense tracker is ready to use.",
-        type: "success",
-        actionUrl: "/"
+    try {
+      const response = await fetch('/api/notifications', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          title: notification.title,
+          message: notification.message,
+          type: notification.type,
+          actionUrl: notification.actionUrl
+        })
       })
 
-      // Add feature notification after a delay
-      setTimeout(() => {
-        addNotification({
-          title: "New Feature",
-          message: "Search functionality has been added to the header.",
-          type: "info",
-          actionUrl: "/expenses"
+      if (response.ok) {
+        const data = await response.json()
+        setNotifications(prev => [data.notification, ...prev])
+      }
+    } catch (error) {
+      console.error('Failed to add notification:', error)
+    }
+  }
+
+  const markAsRead = async (id: string) => {
+    if (!user?.id) return
+
+    try {
+      const response = await fetch(`/api/notifications/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          read: true
         })
-      }, 3000)
+      })
+
+      if (response.ok) {
+        setNotifications(prev => 
+          prev.map(notification => 
+            notification.id === id 
+              ? { ...notification, read: true }
+              : notification
+          )
+        )
+      }
+    } catch (error) {
+      console.error('Failed to mark notification as read:', error)
+    }
+  }
+
+  const markAllAsRead = async () => {
+    if (!user?.id) return
+
+    try {
+      const response = await fetch('/api/notifications/mark-all-read', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id
+        })
+      })
+
+      if (response.ok) {
+        setNotifications(prev => 
+          prev.map(notification => ({ ...notification, read: true }))
+        )
+      }
+    } catch (error) {
+      console.error('Failed to mark all notifications as read:', error)
+    }
+  }
+
+  const removeNotification = async (id: string) => {
+    if (!user?.id) return
+
+    try {
+      const response = await fetch(`/api/notifications/${id}?userId=${encodeURIComponent(user.id)}`, {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        setNotifications(prev => prev.filter(n => n.id !== id))
+      }
+    } catch (error) {
+      console.error('Failed to remove notification:', error)
+    }
+  }
+
+  const clearAllNotifications = async () => {
+    if (!user?.id) return
+
+    try {
+      // Delete all notifications one by one (or implement a bulk delete endpoint)
+      const deletePromises = notifications.map(notification => 
+        fetch(`/api/notifications/${notification.id}?userId=${encodeURIComponent(user.id)}`, {
+          method: 'DELETE'
+        })
+      )
+
+      await Promise.all(deletePromises)
+      setNotifications([])
+    } catch (error) {
+      console.error('Failed to clear all notifications:', error)
+    }
+  }
+
+  const refreshNotifications = async () => {
+    if (!user?.id) return
+
+    setIsLoading(true)
+    try {
+      const response = await fetch(`/api/notifications?userId=${encodeURIComponent(user.id)}`)
+      if (response.ok) {
+        const data = await response.json()
+        setNotifications(data.notifications || [])
+      }
+    } catch (error) {
+      console.error('Failed to refresh notifications:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const addDemoNotifications = async () => {
+    if (!user?.id) return
+
+    try {
+      const response = await fetch('/api/notifications/demo', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id
+        })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setNotifications(prev => [...data.notifications, ...prev])
+      }
+    } catch (error) {
+      console.error('Failed to add demo notifications:', error)
     }
   }
 
@@ -122,11 +218,13 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     <NotificationContext.Provider value={{
       notifications,
       unreadCount,
+      isLoading,
       addNotification,
       markAsRead,
       markAllAsRead,
       removeNotification,
       clearAllNotifications,
+      refreshNotifications,
       addDemoNotifications
     }}>
       {children}

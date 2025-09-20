@@ -1,450 +1,706 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useToast } from "@/hooks/use-toast"
 import { AppLayout } from "@/components/layout/app-layout"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { AuthGuard } from "@/components/auth-guard"
+import { useSupabase } from "@/components/supabase-provider"
+import { useUserPreferences } from "@/contexts/UserPreferencesContext"
+import { useToast } from "@/hooks/use-toast"
+import { LoadingSpinner } from "@/components/LoadingSpinner"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
-import { 
-  Sun, 
-  Moon, 
-  Monitor, 
-  Trash2, 
-  AlertTriangle,
-  Tag,
-  DollarSign,
-  Settings2
+import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
+import {
+  User,
+  Shield,
+  Save,
+  Globe,
+  Settings as SettingsIcon,
+  CheckCircle,
+  Loader2,
+  Camera,
+  DollarSign
 } from "lucide-react"
-import { useTheme } from "next-themes"
-import { useRouter } from "next/navigation"
-// Demo expense type
-interface Expense {
-  id: string
-  amount: number
-  category: string
-  type: string
-  date: string
-  note?: string
-  userId: string
+
+interface SettingsData {
+  // Profile & Personalization
+  fullName: string
+  email: string
+  language: string
+  timeFormat: '12h' | '24h'
+  currency: string
+  defaultDashboardView: 'overview' | 'goals' | 'savings'
 }
 
-// Demo user data
-const demoUser = {
-  name: "Demo User",
-  email: "demo@example.com",
-  image: undefined,
-  currency: "INR",
-  timezone: "Asia/Kolkata",
-  categories: ["Food", "Travel", "Shopping", "Bills"],
-  emailNotif: false,
-  twoFA: false
-}
-import { AccountSettings } from "@/components/account-settings"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { User, Mail } from "lucide-react"
+const CURRENCIES = [
+  { value: 'USD', label: 'US Dollar ($)', symbol: '$' },
+  { value: 'EUR', label: 'Euro (€)', symbol: '€' },
+  { value: 'GBP', label: 'British Pound (£)', symbol: '£' },
+  { value: 'JPY', label: 'Japanese Yen (¥)', symbol: '¥' },
+  { value: 'INR', label: 'Indian Rupee (₹)', symbol: '₹' },
+  { value: 'CAD', label: 'Canadian Dollar (C$)', symbol: 'C$' },
+  { value: 'AUD', label: 'Australian Dollar (A$)', symbol: 'A$' },
+  { value: 'SGD', label: 'Singapore Dollar (S$)', symbol: 'S$' },
+]
+
+const LANGUAGES = [
+  { value: 'en', label: 'English' },
+  { value: 'hi', label: 'हिन्दी (Hindi)' },
+  { value: 'es', label: 'Español (Spanish)' },
+  { value: 'fr', label: 'Français (French)' },
+  { value: 'de', label: 'Deutsch (German)' },
+  { value: 'zh', label: '中文 (Chinese)' },
+  { value: 'ja', label: '日本語 (Japanese)' },
+  { value: 'ko', label: '한국어 (Korean)' },
+]
+
 
 export default function SettingsPage() {
-  const [expenses, setExpenses] = useState<Expense[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const { user, supabase } = useSupabase()
+  const { preferences, isLoading: preferencesLoading, refreshPreferences } = useUserPreferences()
   const { toast } = useToast()
-  const { theme, setTheme } = useTheme()
-  const router = useRouter()
-  // Currency formatting function
-  const formatAmount = (amount: number) => {
-    return `₹${amount.toLocaleString()}`
-  }
-  // Demo session data
-  const session = { user: demoUser }
+  
+  const [settings, setSettings] = useState<SettingsData>({
+    fullName: user?.user_metadata?.full_name || '',
+    email: user?.email || '',
+    language: preferences.language,
+    timeFormat: '12h',
+    currency: preferences.currency,
+    defaultDashboardView: 'overview'
+  })
 
-  const getUserInitials = (name?: string | null, email?: string) => {
-    if (name) {
-      return name.charAt(0).toUpperCase()
-    }
-    if (email) {
-      return email.charAt(0).toUpperCase()
-    }
-    return "U"
-  }
+  const [isLoading, setIsLoading] = useState(false)
+  const [profileData, setProfileData] = useState<{ avatar_url?: string; full_name?: string } | null>(null)
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
+  const [newAvatarUrl, setNewAvatarUrl] = useState<string | null>(null)
 
+  // Fetch profile data including avatar
   useEffect(() => {
-    // Demo data
-    const demoExpenses: Expense[] = [
-      {
-        id: "1",
-        amount: 1500,
-        category: "Food",
-        type: "expense",
-        date: new Date().toISOString(),
-        note: "Lunch",
-        userId: "demo"
-      },
-      {
-        id: "2",
-        amount: 5000,
-        category: "Income",
-        type: "income",
-        date: new Date().toISOString(),
-        note: "Salary",
-        userId: "demo"
+    const fetchProfileData = async () => {
+      if (!user || !supabase) return
+
+      try {
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('avatar_url, full_name')
+          .eq('id', user.id)
+          .single()
+
+        if (error) throw error
+
+        setProfileData(profile)
+        
+        // Update settings with profile data
+        if (profile && 'full_name' in profile) {
+          setSettings(prev => ({ ...prev, fullName: (profile as Record<string, unknown>).full_name as string }))
+        }
+      } catch (error) {
+        console.error('Error fetching profile data:', error)
       }
-    ]
-    setExpenses(demoExpenses)
-    setIsLoading(false)
-  }, [])
+    }
 
-  const clearExpenses = () => {
-    // Demo mode - just clear local state
-    setExpenses([])
-    toast({
-      title: "Demo Mode",
-      description: "In demo mode, expenses are cleared locally only.",
-    })
-  }
+    fetchProfileData()
+  }, [user, supabase])
 
-  const getByCategory = () => {
-    const categoryTotals = expenses
-      .filter(expense => expense.type === 'expense')
-      .reduce((acc, expense) => {
-        acc[expense.category] = (acc[expense.category] || 0) + expense.amount
-        return acc
-      }, {} as Record<string, number>)
-
-    return Object.entries(categoryTotals).map(([category, total]) => ({
-      category,
-      total
-    }))
-  }
-  const [mounted, setMounted] = useState(false)
-
+  // Update settings when preferences change
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    setSettings(prev => ({
+      ...prev,
+      language: preferences.language,
+      currency: preferences.currency
+    }))
+  }, [preferences.language, preferences.currency])
 
-  const handleClearAllExpenses = () => {
-    if (window.confirm(
-      'Are you sure you want to clear ALL expenses? This action cannot be undone and will permanently delete all your expense data.'
-    )) {
-      clearExpenses()
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file || !supabase || !user) return
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
       toast({
-        title: "All Data Cleared",
-        description: "All expenses and income data have been deleted successfully.",
+        title: "File too large",
+        description: "Please select an image smaller than 5MB.",
         variant: "destructive",
       })
+      return
+    }
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file type",
+        description: "Please select a valid image file.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setIsUploadingAvatar(true)
+    try {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`
+      const filePath = `avatars/${fileName}`
+
+      // Upload to Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file)
+
+      if (uploadError) throw uploadError
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath)
+
+      // Store the new avatar URL temporarily (don't update database yet)
+      setNewAvatarUrl(publicUrl)
+      
+      toast({
+        title: "Image uploaded",
+        description: "Click 'Save Settings' to apply the new profile picture.",
+      })
+    } catch (error) {
+      console.error('Error uploading avatar:', error)
+      toast({
+        title: "Upload failed",
+        description: "Failed to update profile picture. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsUploadingAvatar(false)
     }
   }
 
-  const categories = getByCategory()
-  const categoryList = Object.keys(categories).sort()
+  const handleSaveSettings = async () => {
+    setIsLoading(true)
+    try {
+      // Prepare update data
+      const updateData: Record<string, unknown> = {
+        language: settings.language,
+        currency: settings.currency
+      }
 
-  if (!mounted || isLoading) {
+      // Include avatar URL if a new one was uploaded
+      if (newAvatarUrl) {
+        updateData.avatar_url = newAvatarUrl
+      }
+
+      // Update user preferences in Supabase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await (supabase as any)
+        .from('profiles')
+        .update(updateData)
+        .eq('id', user?.id)
+
+      if (error) throw error
+
+      // Update local profile data if avatar was changed
+      if (newAvatarUrl) {
+        setProfileData(prev => prev ? { ...prev, avatar_url: newAvatarUrl } : { avatar_url: newAvatarUrl })
+        
+        // Dispatch custom event to notify other components of avatar update
+        window.dispatchEvent(new CustomEvent('avatarUpdated', { detail: { avatarUrl: newAvatarUrl } }))
+        
+        // Clear the temporary avatar URL
+        setNewAvatarUrl(null)
+      }
+
+      // Refresh preferences context
+      await refreshPreferences()
+
+      // Dispatch custom event to notify other components of time format update
+      window.dispatchEvent(new CustomEvent('timeFormatUpdated', { detail: { timeFormat: settings.timeFormat } }))
+
+      toast({
+        title: "Settings Saved",
+        description: "Your preferences have been updated successfully.",
+      })
+    } catch {
+      toast({
+        title: "Error",
+        description: "Failed to save settings. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+
+  const handleLogoutEverywhere = async () => {
+    setIsLoading(true)
+    try {
+      const { error } = await supabase.auth.signOut()
+      if (error) throw error
+      
+      toast({
+        title: "Logged Out",
+        description: "You have been logged out from all devices.",
+      })
+    } catch {
+      toast({
+        title: "Error",
+        description: "Failed to logout. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+
+  // Show loading state while preferences are loading
+  if (preferencesLoading) {
     return (
-      <AppLayout>
-        <div className="p-3 sm:p-4 lg:p-6">
-          <div className="space-y-4 sm:space-y-6">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold">Settings</h1>
-              <p className="text-sm sm:text-base text-muted-foreground">
-                Manage your application preferences and data
-              </p>
-            </div>
-            <div className="animate-pulse">
-              <div className="h-24 sm:h-32 bg-muted rounded-lg"></div>
-            </div>
+      <AuthGuard requireOnboarding={true}>
+        <AppLayout>
+          <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+            <LoadingSpinner message="Loading settings..." size="lg" className="min-h-screen" />
           </div>
-        </div>
-      </AppLayout>
+        </AppLayout>
+      </AuthGuard>
     )
   }
 
   return (
-    <AppLayout>
-      <div className="p-3 sm:p-4 lg:p-6">
-        <div className="space-y-4 sm:space-y-6">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold">Settings</h1>
-              <p className="text-sm sm:text-base text-muted-foreground">
-                Manage your application preferences and data
-              </p>
+    <AuthGuard requireOnboarding={true}>
+      <AppLayout>
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-gray-900 dark:to-slate-800">
+          <div className="p-6 sm:p-8 lg:p-12">
+            {/* Header */}
+            <div className="mb-10">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg">
+                  <SettingsIcon className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                    Settings
+                  </h1>
+                  <p className="text-base text-gray-600 dark:text-gray-400 mt-1">
+                    Customize your experience and manage your account
+                  </p>
+                </div>
+              </div>
+              
+              {/* Quick Stats */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+                <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 hover:shadow-lg transition-all duration-300">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                      <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">Account Status</p>
+                      <p className="text-xs text-green-600 dark:text-green-400">
+                        {user?.email_confirmed_at ? 'Verified & Active' : 'Pending Verification'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 hover:shadow-lg transition-all duration-300">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                      <Globe className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">Language</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">
+                        {LANGUAGES.find(lang => lang.value === settings.language)?.label || settings.language.toUpperCase()}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 hover:shadow-lg transition-all duration-300">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                      <SettingsIcon className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">Time Format</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">
+                        {settings.timeFormat === '12h' ? '12 Hour (AM/PM)' : '24 Hour'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 hover:shadow-lg transition-all duration-300">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
+                      <DollarSign className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">Currency</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">
+                        {CURRENCIES.find(curr => curr.value === settings.currency)?.symbol || settings.currency}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* Profile Information (Read-only) */}
-            <Card>
-              <CardHeader className="pb-3 sm:pb-6">
-                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                  <User className="h-4 w-4 sm:h-5 sm:w-5" />
-                  Profile Information
-                </CardTitle>
-                <CardDescription className="text-sm">
-                  Your profile details (editable through setup wizard)
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
-                  {/* Profile Picture */}
-                  <Avatar className="h-12 w-12 sm:h-16 sm:w-16 mx-auto sm:mx-0">
-                    <AvatarImage 
-                      src={session?.user?.image || undefined} 
-                      alt={session?.user?.name || session?.user?.email || ""} 
-                    />
-                    <AvatarFallback className="text-base sm:text-lg bg-primary text-primary-foreground">
-                      {getUserInitials(session?.user?.name || null, session?.user?.email || undefined)}
-                    </AvatarFallback>
-                  </Avatar>
-                  
-                  {/* Profile Details */}
-                  <div className="space-y-2 flex-1 text-center sm:text-left">
-                    <div className="flex items-center justify-center sm:justify-start gap-2">
-                      <User className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium text-sm sm:text-base">
-                        {session?.user?.name || "No name set"}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-center sm:justify-start gap-2">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-xs sm:text-sm text-muted-foreground">
-                        {session?.user?.email}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  {/* Edit Hint */}
-                  <div className="text-center sm:text-right">
-                    <p className="text-xs text-muted-foreground">
-                      To edit profile details, use the setup wizard
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Account Settings */}
-            <AccountSettings />
-
-            {/* Quick Setup */}
-            <Card>
-              <CardHeader className="pb-3 sm:pb-6">
-                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                  <Settings2 className="h-4 w-4 sm:h-5 sm:w-5" />
-                  Quick Setup
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 sm:space-y-4">
-                <div>
-                  <h3 className="text-sm font-medium mb-2">Setup Wizard</h3>
-                  <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
-                    Complete or redo your account setup to configure all preferences at once.
-                  </p>
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <Button 
-                      variant="outline" 
-                      onClick={() => router.push("/setup-account")}
-                      className="flex items-center gap-2 w-full sm:w-auto"
-                    >
-                      <Settings2 className="h-4 w-4" />
-                      Go to Setup Wizard
-                    </Button>
-                    <Button 
-                      variant="destructive" 
-                      size="sm"
-                      onClick={async () => {
-                        if (window.confirm("This will reset your setup status and allow you to go through the setup wizard again. Continue?")) {
-                          try {
-                            const response = await fetch("/api/user/reset-setup", { method: "POST" })
-                            if (response.ok) {
-                              toast({
-                                title: "Setup Reset",
-                                description: "Setup status has been reset. You can now go through the setup wizard.",
-                              })
-                              router.push("/setup-account")
-                            }
-                          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                          } catch (_error) {
-                            toast({
-                              title: "Error",
-                              description: "Failed to reset setup status.",
-                              variant: "destructive"
-                            })
-                          }
-                        }
-                      }}
-                      className="w-full sm:w-auto"
-                    >
-                      Reset Setup
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Theme Settings */}
-            <Card>
-              <CardHeader className="pb-3 sm:pb-6">
-                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                  <Monitor className="h-4 w-4 sm:h-5 sm:w-5" />
-                  Appearance
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 sm:space-y-4">
-                <div>
-                  <h3 className="text-sm font-medium mb-3">Theme</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    <Button
-                      variant={theme === "light" ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => {
-                        setTheme("light")
-                        toast({
-                          title: "Theme Changed",
-                          description: "Switched to light theme",
-                        })
-                      }}
-                      className="flex items-center gap-2 w-full"
-                    >
-                      <Sun className="h-4 w-4" />
-                      Light
-                    </Button>
-                    <Button
-                      variant={theme === "dark" ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => {
-                        setTheme("dark")
-                        toast({
-                          title: "Theme Changed",
-                          description: "Switched to dark theme",
-                        })
-                      }}
-                      className="flex items-center gap-2 w-full"
-                    >
-                      <Moon className="h-4 w-4" />
-                      Dark
-                    </Button>
-                    <Button
-                      variant={theme === "system" ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => {
-                        setTheme("system")
-                        toast({
-                          title: "Theme Changed",
-                          description: "Switched to system theme",
-                        })
-                      }}
-                      className="flex items-center gap-2 w-full"
-                    >
-                      <Monitor className="h-4 w-4" />
-                      System
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Choose how the application looks to you
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Categories Information */}
-            <Card>
-              <CardHeader className="pb-3 sm:pb-6">
-                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                  <Tag className="h-4 w-4 sm:h-5 sm:w-5" />
-                  Categories
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3 sm:space-y-4">
-                  <div>
-                    <h3 className="text-sm font-medium mb-3">
-                      Active Categories ({categoryList.length})
-                    </h3>
-                    {categoryList.length > 0 ? (
-                      <div className="flex flex-wrap gap-2">
-                        {categoryList.map((category) => (
-                          <Badge key={category} variant="secondary" className="text-xs">
-                            {category}
-                          </Badge>
-                        ))}
+            <div className="max-w-4xl space-y-6">
+              <Accordion type="multiple" defaultValue={["profile"]} className="space-y-4">
+                {/* Profile & Personalization */}
+                <AccordionItem value="profile" className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 hover:shadow-xl transition-all duration-300">
+                  <AccordionTrigger className="px-8 py-6 hover:no-underline group">
+                    <div className="flex items-center gap-4">
+                      <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-md group-hover:scale-110 transition-transform duration-200">
+                        <User className="h-5 w-5 text-white" />
                       </div>
-                    ) : (
-                      <p className="text-xs sm:text-sm text-muted-foreground">
-                        No categories found. Add some expenses to see categories here.
-                      </p>
-                    )}
-                  </div>
-                  
-                  <Separator />
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-2 text-center sm:text-left">
-                      <h4 className="text-sm font-medium">Total Expenses</h4>
-                      <p className="text-xl sm:text-2xl font-bold text-red-600">
-                        {formatAmount(expenses
-                          .filter(expense => expense.type === 'expense')
-                          .reduce((sum, expense) => sum + expense.amount, 0))}
-                      </p>
+                      <div className="text-left">
+                        <span className="text-lg font-semibold text-gray-900 dark:text-white">Profile & Personalization</span>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">Manage your personal information and preferences</p>
+                      </div>
                     </div>
-                    <div className="space-y-2 text-center sm:text-left">
-                      <h4 className="text-sm font-medium">Total Income</h4>
-                      <p className="text-xl sm:text-2xl font-bold text-green-600">
-                        {formatAmount(expenses
-                          .filter(expense => expense.type === 'income')
-                          .reduce((sum, expense) => sum + expense.amount, 0))}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                  </AccordionTrigger>
+                  <AccordionContent className="px-8 pb-8">
+                    <div className="space-y-8">
+                      {/* User Information - Read Only */}
+                      <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-2xl p-8 border border-gray-200/50 dark:border-gray-600/50">
+                        <h3 className="text-lg font-semibold mb-6 flex items-center gap-3">
+                          <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                            <User className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                          </div>
+                          User Information
+                        </h3>
+                        <div className="flex items-center gap-6">
+                          <div className="relative">
+                            <Avatar className={`h-20 w-20 border-4 shadow-lg transition-all duration-300 ${newAvatarUrl ? 'border-orange-400 dark:border-orange-500 ring-4 ring-orange-200 dark:ring-orange-800' : 'border-white dark:border-gray-500'}`}>
+                              <AvatarImage src={newAvatarUrl || profileData?.avatar_url} />
+                              <AvatarFallback className="text-xl font-semibold bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
+                                {settings.fullName.charAt(0) || user?.email?.charAt(0) || 'U'}
+                              </AvatarFallback>
+                            </Avatar>
+                            {newAvatarUrl && (
+                              <div className="absolute -top-2 -right-2 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center shadow-lg animate-pulse">
+                                <span className="text-xs text-white font-bold">!</span>
+                              </div>
+                            )}
+                            <label
+                              htmlFor="avatar-upload-settings"
+                              className="absolute -bottom-2 -right-2 w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-all duration-200 shadow-lg"
+                            >
+                              {isUploadingAvatar ? (
+                                <Loader2 className="h-4 w-4 text-white animate-spin" />
+                              ) : (
+                                <Camera className="h-4 w-4 text-white" />
+                              )}
+                            </label>
+                            <input
+                              id="avatar-upload-settings"
+                              type="file"
+                              accept="image/*"
+                              onChange={handleAvatarUpload}
+                              className="hidden"
+                              disabled={isUploadingAvatar}
+                            />
+                          </div>
+                          <div className="flex-1 space-y-4">
+                            <div>
+                              <Label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Full Name</Label>
+                              <p className="text-lg font-semibold text-gray-900 dark:text-white mt-1">
+                                {settings.fullName || 'Not provided'}
+                              </p>
+                            </div>
+                            <div>
+                              <Label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Email Address</Label>
+                              <p className="text-base text-gray-700 dark:text-gray-300 mt-1 font-medium">{settings.email}</p>
+                            </div>
+                            <Badge variant="secondary" className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full">
+                              <CheckCircle className="h-4 w-4" />
+                              Verified Account
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
 
-            {/* Danger Zone */}
-            <Card className="border-red-200 dark:border-red-800">
-              <CardHeader className="pb-3 sm:pb-6">
-                <CardTitle className="flex items-center gap-2 text-red-600 dark:text-red-400 text-base sm:text-lg">
-                  <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5" />
-                  Danger Zone
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 sm:space-y-4">
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium">Clear All Data</h3>
-                  <p className="text-xs sm:text-sm text-muted-foreground">
-                    Permanently delete all expenses and income data. This action cannot be undone.
-                  </p>
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-                    <Button
-                      variant="destructive"
-                      onClick={handleClearAllExpenses}
-                      className="flex items-center gap-2 w-full sm:w-auto"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      Clear All Expenses
-                    </Button>
-                    <div className="text-xs text-muted-foreground text-center sm:text-left">
-                      {expenses.length} entries will be deleted
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                      <Separator />
 
-            {/* App Information */}
-            <Card>
-              <CardHeader className="pb-3 sm:pb-6">
-                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                  <DollarSign className="h-4 w-4 sm:h-5 sm:w-5" />
-                  About
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2 text-xs sm:text-sm text-muted-foreground">
-                  <p><strong>ExpenseTracker</strong> - A simple and effective expense management application</p>
-                  <p>Built with Next.js, TypeScript, and Tailwind CSS</p>
-                  <p>Data is stored locally in your browser</p>
-                </div>
-              </CardContent>
-            </Card>
+                      {/* Preferences - Editable */}
+                      <div>
+                        <h3 className="text-lg font-semibold mb-6 flex items-center gap-3">
+                          <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                            <SettingsIcon className="h-4 w-4 text-green-600 dark:text-green-400" />
+                          </div>
+                          Preferences
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="space-y-3">
+                            <Label htmlFor="language" className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Language</Label>
+                            <Select value={settings.language} onValueChange={(value) => setSettings(prev => ({ ...prev, language: value }))}>
+                              <SelectTrigger className="h-12 w-full bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 rounded-xl hover:border-blue-300 dark:hover:border-blue-500 transition-colors">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {LANGUAGES.map((lang) => (
+                                  <SelectItem key={lang.value} value={lang.value}>
+                                    {lang.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div className="space-y-3">
+                            <Label htmlFor="currency" className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Currency</Label>
+                            <Select value={settings.currency} onValueChange={(value) => setSettings(prev => ({ ...prev, currency: value }))}>
+                              <SelectTrigger className="h-12 w-full bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 rounded-xl hover:border-blue-300 dark:hover:border-blue-500 transition-colors">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {CURRENCIES.map((currency) => (
+                                  <SelectItem key={currency.value} value={currency.value}>
+                                    {currency.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div className="space-y-3">
+                            <Label htmlFor="timeFormat" className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Time Format</Label>
+                            <Select value={settings.timeFormat} onValueChange={(value: '12h' | '24h') => setSettings(prev => ({ ...prev, timeFormat: value }))}>
+                              <SelectTrigger className="h-12 w-full bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 rounded-xl hover:border-blue-300 dark:hover:border-blue-500 transition-colors">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="12h">12 Hour (AM/PM)</SelectItem>
+                                <SelectItem value="24h">24 Hour</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div className="space-y-3">
+                            <Label htmlFor="dashboardView" className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Default Dashboard View</Label>
+                            <Select value={settings.defaultDashboardView} onValueChange={(value: 'overview' | 'goals' | 'savings') => setSettings(prev => ({ ...prev, defaultDashboardView: value }))}>
+                              <SelectTrigger className="h-12 w-full bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 rounded-xl hover:border-blue-300 dark:hover:border-blue-500 transition-colors">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="overview">Overview</SelectItem>
+                                <SelectItem value="goals">Goals</SelectItem>
+                                <SelectItem value="savings">Savings</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+
+                {/* Account Settings */}
+                <AccordionItem value="account" className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 hover:shadow-xl transition-all duration-300">
+                  <AccordionTrigger className="px-8 py-6 hover:no-underline group">
+                    <div className="flex items-center gap-4">
+                      <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-md group-hover:scale-110 transition-transform duration-200">
+                        <Shield className="h-5 w-5 text-white" />
+                      </div>
+                      <div className="text-left">
+                        <span className="text-lg font-semibold text-gray-900 dark:text-white">Account Settings</span>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">Security and account management</p>
+                      </div>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="px-6 pb-6">
+                    <div className="space-y-6">
+                      {/* Account Information - Read Only */}
+                      <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
+                        <h3 className="text-base font-medium mb-4 flex items-center gap-2">
+                          <Shield className="h-4 w-4 text-green-600 dark:text-green-400" />
+                          Account Information
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Account Status</Label>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Badge variant="secondary" className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
+                                <CheckCircle className="h-3 w-3" />
+                                Active
+                              </Badge>
+                            </div>
+                          </div>
+                          <div>
+                            <Label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Member Since</Label>
+                            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mt-1">
+                              {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'Unknown'}
+                            </p>
+                          </div>
+                          <div>
+                            <Label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Last Sign In</Label>
+                            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mt-1">
+                              {user?.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleDateString() : 'Unknown'}
+                            </p>
+                          </div>
+                          <div>
+                            <Label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Email Verified</Label>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Badge variant="secondary" className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
+                                <CheckCircle className="h-3 w-3" />
+                                Verified
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      {/* Session Management */}
+                      <div className="space-y-4">
+                        <h3 className="text-base font-medium flex items-center gap-2">
+                          <Globe className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                          Session Management
+                        </h3>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Logout Everywhere</p>
+                            <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+                              Sign out from all devices and sessions
+                            </p>
+                          </div>
+                          <Button 
+                            variant="outline" 
+                            onClick={handleLogoutEverywhere} 
+                            disabled={isLoading}
+                            size="sm"
+                            className="text-xs"
+                          >
+                            {isLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Logout Everywhere'}
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+
+                {/* App Version */}
+                <AccordionItem value="version" className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 hover:shadow-xl transition-all duration-300">
+                  <AccordionTrigger className="px-8 py-6 hover:no-underline group">
+                    <div className="flex items-center gap-4">
+                      <div className="p-3 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl shadow-md group-hover:scale-110 transition-transform duration-200">
+                        <SettingsIcon className="h-5 w-5 text-white" />
+                      </div>
+                      <div className="text-left">
+                        <span className="text-lg font-semibold text-gray-900 dark:text-white">App Information</span>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">Version details and features</p>
+                      </div>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="px-6 pb-6">
+                    <div className="space-y-6">
+                      {/* App Version Information */}
+                      <div>
+                        <h3 className="text-base font-medium mb-4 flex items-center gap-2">
+                          <SettingsIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                          Version Information
+                        </h3>
+                        <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                              <Label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">App Version</Label>
+                              <p className="text-lg font-semibold text-gray-900 dark:text-white mt-1">v0.1.0</p>
+                            </div>
+                            <div>
+                              <Label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Build Date</Label>
+                              <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mt-1">
+                                {new Date().toLocaleDateString('en-US', {
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric'
+                                })}
+                              </p>
+                            </div>
+                            <div>
+                              <Label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Environment</Label>
+                              <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mt-1">
+                                {process.env.NODE_ENV === 'production' ? 'Production' : 'Development'}
+                              </p>
+                            </div>
+                            <div>
+                              <Label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Framework</Label>
+                              <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mt-1">Next.js 15.5.2</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      {/* App Features */}
+                      <div className="space-y-4">
+                        <h3 className="text-base font-medium flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                          Features
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          {[
+                            'Expense Tracking',
+                            'Analytics & Reports',
+                            'Multi-Currency Support',
+                            'Dark/Light Theme',
+                            'Real-time Notifications',
+                            'Data Export',
+                            'Secure Authentication',
+                            'Responsive Design'
+                          ].map((feature) => (
+                            <div key={feature} className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400 flex-shrink-0" />
+                              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{feature}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+
+              </Accordion>
+
+              {/* Save Button */}
+              <div className="flex justify-center pt-8">
+                <Button 
+                  onClick={handleSaveSettings} 
+                  disabled={isLoading}
+                  className={`px-8 py-4 text-base font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 ${
+                    newAvatarUrl 
+                      ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600' 
+                      : 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700'
+                  }`}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin mr-3" />
+                      Saving Changes...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-5 w-5 mr-3" />
+                      {newAvatarUrl ? 'Save Settings & Apply Avatar' : 'Save Settings'}
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </AppLayout>
+
+      </AppLayout>
+    </AuthGuard>
   )
 }

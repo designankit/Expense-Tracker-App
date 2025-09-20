@@ -56,9 +56,10 @@ export default function LoginPage() {
           description: "You have been successfully logged in.",
         })
         // Wait a moment for the session to be established, then redirect
+        // The AuthGuard will handle the proper redirect based on onboarding status
         setTimeout(() => {
           window.location.href = "/dashboard"
-        }, 1000)
+        }, 500) // Reduced timeout to make it faster
       }
     } catch {
       toast({

@@ -1,8 +1,8 @@
 "use client"
 
 import { ThemeProvider } from "next-themes"
-import { SearchProvider } from "@/contexts/SearchContext"
 import { NotificationProvider } from "@/contexts/NotificationContext"
+import { UserPreferencesProvider } from "@/contexts/UserPreferencesContext"
 import { SupabaseProvider } from "@/components/supabase-provider"
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -14,11 +14,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
       disableTransitionOnChange
     >
       <SupabaseProvider>
-        <SearchProvider>
+        <UserPreferencesProvider>
           <NotificationProvider>
             {children}
           </NotificationProvider>
-        </SearchProvider>
+        </UserPreferencesProvider>
       </SupabaseProvider>
     </ThemeProvider>
   )

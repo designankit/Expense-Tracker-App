@@ -61,8 +61,10 @@ export default function SignupPage() {
           title: "Check your email",
           description: "We sent you a confirmation link to complete your signup.",
         })
-        // Redirect to login page
-        window.location.href = "/login"
+        // Redirect to login page - user needs to confirm email first
+        setTimeout(() => {
+          window.location.href = "/login"
+        }, 2000)
       }
     } catch {
       toast({

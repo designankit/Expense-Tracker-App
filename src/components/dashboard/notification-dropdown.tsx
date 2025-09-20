@@ -29,10 +29,12 @@ export function NotificationDropdown({ isOpen, onClose }: NotificationDropdownPr
   const {
     notifications,
     unreadCount,
+    isLoading,
     markAsRead,
     markAllAsRead,
     removeNotification,
-    clearAllNotifications
+    clearAllNotifications,
+    addDemoNotifications
   } = useNotifications()
 
   // Close dropdown when clicking outside
@@ -90,8 +92,8 @@ export function NotificationDropdown({ isOpen, onClose }: NotificationDropdownPr
     return `${Math.floor(diffInMinutes / 1440)}d ago`
   }
 
-  const handleNotificationClick = (notification: Notification) => {
-    markAsRead(notification.id)
+  const handleNotificationClick = async (notification: Notification) => {
+    await markAsRead(notification.id)
     if (notification.actionUrl) {
       router.push(notification.actionUrl)
       onClose()
@@ -126,7 +128,7 @@ export function NotificationDropdown({ isOpen, onClose }: NotificationDropdownPr
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={markAllAsRead}
+                  onClick={() => markAllAsRead()}
                   className="h-8 w-8 p-0"
                   title="Mark all as read"
                 >
@@ -135,7 +137,7 @@ export function NotificationDropdown({ isOpen, onClose }: NotificationDropdownPr
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={clearAllNotifications}
+                  onClick={() => clearAllNotifications()}
                   className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
                   title="Clear all"
                 >
@@ -149,7 +151,14 @@ export function NotificationDropdown({ isOpen, onClose }: NotificationDropdownPr
 
       {/* Notifications List */}
       <div className="max-h-80 overflow-y-auto">
-        {notifications.length === 0 ? (
+        {isLoading ? (
+          <div className="p-8 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-200 dark:border-gray-700 mx-auto mb-3"></div>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Loading notifications...
+            </p>
+          </div>
+        ) : notifications.length === 0 ? (
           <div className="p-8 text-center">
             <Bell className="h-12 w-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
             <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -197,9 +206,9 @@ export function NotificationDropdown({ isOpen, onClose }: NotificationDropdownPr
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={(e) => {
+                          onClick={async (e) => {
                             e.stopPropagation()
-                            removeNotification(notification.id)
+                            await removeNotification(notification.id)
                           }}
                           className="h-6 w-6 p-0 text-gray-400 hover:text-red-600"
                         >
@@ -216,13 +225,24 @@ export function NotificationDropdown({ isOpen, onClose }: NotificationDropdownPr
       </div>
 
       {/* Footer */}
-      {notifications.length > 0 && (
-        <div className="p-3 border-t border-gray-200/50 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-800/50">
+      <div className="p-3 border-t border-gray-200/50 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-800/50">
+        {notifications.length > 0 ? (
           <p className="text-xs text-center text-gray-500 dark:text-gray-400">
             {notifications.length} notification{notifications.length !== 1 ? 's' : ''}
           </p>
-        </div>
-      )}
+        ) : (
+          <div className="flex justify-center">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => addDemoNotifications()}
+              className="text-xs"
+            >
+              Add Demo Notifications
+            </Button>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

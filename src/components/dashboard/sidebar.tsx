@@ -18,35 +18,38 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { useSupabase } from "@/components/supabase-provider"
+import { useUserPreferences } from "@/contexts/UserPreferencesContext"
+import { getLocalizedText } from "@/lib/user-preferences"
+import { usePathname } from "next/navigation"
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   isCollapsed?: boolean
   onToggle?: () => void
 }
 
-const navigationItems = [
+const getNavigationItems = (language: string) => [
   {
-    title: "Dashboard",
+    title: getLocalizedText('nav.dashboard', language),
     icon: LayoutDashboard,
     url: "/dashboard",
   },
   {
-    title: "Expenses",
+    title: getLocalizedText('nav.expenses', language),
     icon: Receipt,
     url: "/expenses",
   },
   {
-    title: "Savings",
+    title: getLocalizedText('nav.savings', language),
     icon: PiggyBank,
     url: "/savings",
   },
   {
-    title: "Analytics",
+    title: getLocalizedText('nav.analytics', language),
     icon: BarChart3,
     url: "/analytics",
   },
   {
-    title: "Settings",
+    title: getLocalizedText('nav.settings', language),
     icon: Settings,
     url: "/settings",
   },
@@ -59,6 +62,10 @@ export function Sidebar({
   ...props 
 }: SidebarProps) {
   const { user } = useSupabase()
+  const { preferences } = useUserPreferences()
+  const pathname = usePathname()
+  
+  const navigationItems = getNavigationItems(preferences.language)
 
   return (
     <TooltipProvider>
@@ -97,35 +104,47 @@ export function Sidebar({
 
         {/* Navigation */}
         <nav className="flex-1 p-3 sm:p-4 space-y-2">
-          {navigationItems.map((item) => (
-            <Tooltip key={item.title} delayDuration={0}>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={cn(
-                    "w-full justify-start gap-3 h-10",
-                    isCollapsed ? "px-2" : "px-3"
-                  )}
-                  onClick={() => {
-                    if (typeof window !== 'undefined') {
-                      window.location.href = item.url
-                    }
-                  }}
-                >
-                  <item.icon className="h-4 w-4 flex-shrink-0" />
-                  {!isCollapsed && (
-                    <span className="truncate">{item.title}</span>
-                  )}
-                </Button>
-              </TooltipTrigger>
-              {isCollapsed && (
-                <TooltipContent side="right">
-                  <p>{item.title}</p>
-                </TooltipContent>
-              )}
-            </Tooltip>
-          ))}
+          {navigationItems.map((item) => {
+            const isActive = pathname === item.url
+            return (
+              <Tooltip key={item.title} delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn(
+                      "w-full justify-start gap-3 h-10 transition-all duration-200",
+                      isCollapsed ? "px-2" : "px-3",
+                      isActive 
+                        ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-r-2 border-blue-500" 
+                        : "hover:bg-gray-100 dark:hover:bg-gray-800"
+                    )}
+                    onClick={() => {
+                      if (typeof window !== 'undefined') {
+                        window.location.href = item.url
+                      }
+                    }}
+                  >
+                    <item.icon className={cn(
+                      "h-4 w-4 flex-shrink-0",
+                      isActive ? "text-blue-600 dark:text-blue-400" : ""
+                    )} />
+                    {!isCollapsed && (
+                      <span className={cn(
+                        "truncate font-medium",
+                        isActive ? "text-blue-700 dark:text-blue-300" : ""
+                      )}>{item.title}</span>
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                {isCollapsed && (
+                  <TooltipContent side="right">
+                    <p>{item.title}</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            )
+          })}
         </nav>
 
         {/* User Info */}
