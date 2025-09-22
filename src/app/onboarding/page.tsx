@@ -8,8 +8,6 @@ import { checkUserOnboardingStatus, createUserProfile } from "@/lib/auth-utils"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { useToast } from "@/hooks/use-toast"
-import { useUserPreferences } from "@/contexts/UserPreferencesContext"
-import { getLocalizedText } from "@/lib/user-preferences"
 import { 
   ChevronLeft, 
   User, 
@@ -26,39 +24,39 @@ import PersonalizationStep from "@/components/onboarding/PersonalizationStep"
 import FinancePreferencesStep from "@/components/onboarding/FinancePreferencesStep"
 import ConfirmationStep from "@/components/onboarding/ConfirmationStep"
 
-// Step configuration - will be localized in component
-const getSteps = (language: string) => [
+// Step configuration
+const STEPS = [
   {
     id: 'welcome',
-    title: getLocalizedText('onboarding.welcome', language),
+    title: 'Welcome',
     description: 'Get started with your expense tracker',
     icon: User,
     component: WelcomeStep
   },
   {
     id: 'basic-info',
-    title: getLocalizedText('onboarding.basicInfo', language),
+    title: 'Basic Information',
     description: 'Tell us about yourself',
     icon: User,
     component: BasicInfoStep
   },
   {
     id: 'personalization',
-    title: getLocalizedText('onboarding.personalization', language),
+    title: 'Personalization',
     description: 'Set your preferences',
     icon: Globe,
     component: PersonalizationStep
   },
   {
     id: 'finance-preferences',
-    title: getLocalizedText('onboarding.financePreferences', language),
+    title: 'Finance Preferences',
     description: 'Configure your financial settings',
     icon: DollarSign,
     component: FinancePreferencesStep
   },
   {
     id: 'confirmation',
-    title: getLocalizedText('onboarding.confirmation', language),
+    title: 'Confirmation',
     description: 'Ready to start tracking',
     icon: CheckCircle,
     component: ConfirmationStep
@@ -86,9 +84,6 @@ export default function OnboardingPage() {
   const { user, supabase } = useSupabase()
   const router = useRouter()
   const { toast } = useToast()
-  const { preferences } = useUserPreferences()
-  
-  const STEPS = getSteps(preferences.language)
 
   // const createInitialProfile = useCallback(async () => {
   //   if (!user || !supabase) return

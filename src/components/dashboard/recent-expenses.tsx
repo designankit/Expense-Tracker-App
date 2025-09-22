@@ -3,7 +3,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Expense } from "@/types/expense"
-import { formatCurrency } from "@/lib/format"
+// Currency formatting function
+const formatCurrency = (amount: number, currency: string = "INR"): string => {
+  const symbols = {
+    INR: "₹",
+    USD: "$",
+    EUR: "€",
+    GBP: "£"
+  }
+  return `${symbols[currency as keyof typeof symbols] || "₹"}${amount.toLocaleString()}`
+}
 import {
   Tooltip,
   TooltipContent,
@@ -18,13 +27,13 @@ interface RecentExpensesProps {
 const categoryColors = {
   // Expense categories
   Food: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",
-  Transportation: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-  Entertainment: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
+  Transportation: "bg-blue-100 text-blue-800 dark:bg-slate-900/30 dark:text-slate-300",
+  Entertainment: "bg-purple-100 text-purple-800 dark:bg-indigo-900/30 dark:text-indigo-300",
   Shopping: "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300",
-  Healthcare: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+  Healthcare: "bg-green-100 text-green-800 dark:bg-emerald-900/30 dark:text-emerald-300",
   Education: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300",
   Travel: "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300",
-  Bills: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
+  Bills: "bg-red-100 text-red-800 dark:bg-rose-900/30 dark:text-rose-300",
   // Income categories
   Salary: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300",
   Freelance: "bg-lime-100 text-lime-800 dark:bg-lime-900/30 dark:text-lime-300",
@@ -97,7 +106,7 @@ export function RecentExpenses({ expenses }: RecentExpensesProps) {
                           {expense.category}
                         </Badge>
                         <span className={`text-xs font-semibold ${
-                          expense.transaction_type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+                          expense.transaction_type === 'income' ? 'text-green-600 dark:text-emerald-400' : 'text-red-600 dark:text-rose-400'
                         }`}>
                           {expense.transaction_type === 'income' ? '+' : '-'}{formatAmount(expense.amount)}
                         </span>

@@ -3,8 +3,7 @@
 import { useState, useEffect, useMemo, useCallback, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { useSupabase } from "@/components/supabase-provider"
-import { useUserPreferences } from "@/contexts/UserPreferencesContext"
-import { getLocalizedText } from "@/lib/user-preferences"
+// Note: Language support removed
 import { AuthGuard } from "@/components/auth-guard"
 import { AppLayout } from "@/components/layout/app-layout"
 import { Expense } from "@/types/database"
@@ -86,7 +85,7 @@ interface ExpenseFormData {
 
 function ExpensesPageContent() {
   const { user, supabase } = useSupabase()
-  const { preferences } = useUserPreferences()
+  // Note: Language preferences removed
   const { toast } = useToast()
   const searchParams = useSearchParams()
 
@@ -510,10 +509,10 @@ function ExpensesPageContent() {
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4">
               <div className="min-w-0 flex-1">
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white truncate">
-                  {getLocalizedText('page.expenses', preferences.language)}
+                  Expenses
                 </h1>
                 <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1">
-                  {getLocalizedText('expenses.manage', preferences.language)}
+                  Manage your income and expenses
                 </p>
               </div>
               <Button 
@@ -521,7 +520,7 @@ function ExpensesPageContent() {
                 className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 sm:px-6 py-2 sm:py-2.5 text-sm sm:text-base font-medium rounded-lg sm:rounded-xl shadow-sm hover:shadow-md transition-all duration-200 w-full sm:w-auto"
               >
                 <Plus className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">{getLocalizedText('expenses.addExpense', preferences.language)}</span>
+                <span className="hidden sm:inline">Add Expense</span>
                 <span className="sm:hidden">Add Expense</span>
               </Button>
             </div>
@@ -533,11 +532,11 @@ function ExpensesPageContent() {
                 <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-pink-500/5 dark:from-red-500/10 dark:to-pink-500/10" />
                 <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-2 sm:pb-3">
                   <div className="space-y-1 min-w-0 flex-1">
-                    <CardTitle className="text-xs sm:text-sm font-semibold text-red-700 dark:text-red-300 truncate">
-                      {getLocalizedText('expenses.thisMonthExpenses', preferences.language)}
+                    <CardTitle className="text-xs sm:text-sm font-semibold text-red-700 dark:text-rose-300 truncate">
+                      This Month&apos;s Expenses
                     </CardTitle>
-                    <p className="text-xs text-red-600/70 dark:text-red-400/70 hidden sm:block">
-                      {getLocalizedText('expenses.totalSpentThisMonth', preferences.language)}
+                    <p className="text-xs text-red-600/70 dark:text-rose-400/70 hidden sm:block">
+                      Total spent this month
                     </p>
                   </div>
                   <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-red-500 to-pink-600 text-white shadow-lg flex-shrink-0">
@@ -545,12 +544,12 @@ function ExpensesPageContent() {
                   </div>
                 </CardHeader>
                 <CardContent className="relative">
-                  <div className="text-currency text-xl sm:text-2xl lg:text-3xl font-bold text-red-600 dark:text-red-400 mb-1 sm:mb-2">
+                  <div className="text-currency text-xl sm:text-2xl lg:text-3xl font-bold text-red-600 dark:text-rose-400 mb-1 sm:mb-2">
                     {formatCurrency(summaryData.totalSpent)}
                   </div>
                   <div className="flex items-center gap-2 text-xs sm:text-sm">
                     <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-red-500 rounded-full animate-pulse" />
-                    <span className="text-meta text-red-600/70 dark:text-red-400/70">
+                    <span className="text-meta text-red-600/70 dark:text-rose-400/70">
                       Current month spending
                     </span>
                   </div>
@@ -562,10 +561,10 @@ function ExpensesPageContent() {
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-500/5 dark:from-blue-500/10 dark:to-indigo-500/10" />
                 <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-2 sm:pb-3">
                   <div className="space-y-1 min-w-0 flex-1">
-                    <CardTitle className="text-xs sm:text-sm font-semibold text-blue-700 dark:text-blue-300 truncate">
-                      {getLocalizedText('expenses.totalTransactions', preferences.language)}
+                    <CardTitle className="text-xs sm:text-sm font-semibold text-blue-700 dark:text-slate-300 truncate">
+                      Total Transactions
                     </CardTitle>
-                    <p className="text-xs text-blue-600/70 dark:text-blue-400/70 hidden sm:block">
+                    <p className="text-xs text-blue-600/70 dark:text-slate-400/70 hidden sm:block">
                       All time transactions
                     </p>
                   </div>
@@ -574,12 +573,12 @@ function ExpensesPageContent() {
                   </div>
                 </CardHeader>
                 <CardContent className="relative">
-                  <div className="text-data text-xl sm:text-2xl lg:text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1 sm:mb-2">
+                  <div className="text-data text-xl sm:text-2xl lg:text-3xl font-bold text-blue-600 dark:text-slate-400 mb-1 sm:mb-2">
                     {expenses.length}
                   </div>
                   <div className="flex items-center gap-2 text-xs sm:text-sm">
                     <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-blue-500 rounded-full animate-pulse" />
-                    <span className="text-meta text-blue-600/70 dark:text-blue-400/70">
+                    <span className="text-meta text-blue-600/70 dark:text-slate-400/70">
                       {filteredAndSortedExpenses.length} visible
                     </span>
                   </div>
@@ -874,7 +873,7 @@ function ExpensesPageContent() {
                                 <span className={`font-semibold text-xs sm:text-sm ${
                                   expense.transaction_type === 'income' 
                                     ? 'text-green-600 dark:text-green-400' 
-                                    : 'text-red-600 dark:text-red-400'
+                                    : 'text-red-600 dark:text-rose-400'
                                 }`}>
                                   {expense.transaction_type === 'income' ? '+' : '-'}
                                   {formatCurrency(expense.amount)}
@@ -963,7 +962,7 @@ function ExpensesPageContent() {
                               <p className={`font-bold text-base sm:text-lg ${
                                 expense.transaction_type === 'income' 
                                   ? 'text-green-600 dark:text-green-400' 
-                                  : 'text-red-600 dark:text-red-400'
+                                  : 'text-red-600 dark:text-rose-400'
                               }`}>
                                 {expense.transaction_type === 'income' ? '+' : '-'}
                                 {formatCurrency(expense.amount)}

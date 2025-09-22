@@ -1,20 +1,17 @@
 "use client"
 
-import { Bell, Search, Home, Receipt, BarChart3, Settings, Moon, Sun, LogOut, User, RefreshCw, Menu } from "lucide-react"
+import { Bell, Home, Receipt, BarChart3, Settings, Moon, Sun, LogOut, User, Menu } from "lucide-react"
 import { useTheme } from "next-themes"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { useNotifications } from "@/contexts/NotificationContext"
 import { useSupabase } from "@/components/supabase-provider"
-import { useUserPreferences } from "@/contexts/UserPreferencesContext"
-import { getLocalizedText } from "@/lib/user-preferences"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/lib/supabaseClient"
 import { NotificationDropdown } from "./notification-dropdown"
 
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -37,13 +34,11 @@ export function DashboardHeader({ onMobileMenuToggle }: HeaderProps) {
   const { unreadCount } = useNotifications()
   const { user } = useSupabase()
   const { toast } = useToast()
-  const { preferences } = useUserPreferences()
   const [mounted, setMounted] = useState(false)
   const [isNotificationOpen, setIsNotificationOpen] = useState(false)
   const [profilePicture, setProfilePicture] = useState<string | null>(null)
   const [currentTime, setCurrentTime] = useState(new Date())
   const [timeFormat, setTimeFormat] = useState<string>('12h')
-  const [searchQuery, setSearchQuery] = useState('')
   const router = useRouter()
 
   useEffect(() => {
@@ -150,27 +145,7 @@ export function DashboardHeader({ onMobileMenuToggle }: HeaderProps) {
     }
   }
 
-  const handleSwitchAccount = () => {
-    // Demo mode - no actual account switching
-    console.log("Demo mode - account switching not implemented")
-  }
 
-  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value)
-  }
-
-  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && searchQuery.trim()) {
-      handleSearch()
-    }
-  }
-
-  const handleSearch = () => {
-    if (searchQuery.trim()) {
-      router.push(`/expenses?search=${encodeURIComponent(searchQuery.trim())}`)
-      setSearchQuery('')
-    }
-  }
 
 
 
@@ -246,35 +221,12 @@ export function DashboardHeader({ onMobileMenuToggle }: HeaderProps) {
       {/* Title - Responsive sizing */}
       <div className="flex-1 flex items-center gap-2 sm:gap-3 lg:gap-4 min-w-0">
         <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 dark:text-white truncate">
-          {getLocalizedText('nav.dashboard', preferences.language)}
+          Dashboard
         </h1>
       </div>
       
       {/* Right side controls */}
       <div className="flex items-center gap-1 sm:gap-2 lg:gap-4">
-        {/* Search - Responsive visibility */}
-        <div className="relative w-32 sm:w-48 lg:w-64 xl:w-72 hidden sm:block">
-          <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 -translate-y-1/2 text-gray-400 z-10" />
-            <Input
-              placeholder="Search..."
-              value={searchQuery}
-              onChange={handleSearchInputChange}
-              onKeyDown={handleSearchKeyDown}
-              className="pl-8 sm:pl-10 pr-3 sm:pr-4 py-1.5 sm:py-2 lg:py-2.5 bg-card/60 backdrop-blur-sm border-border/40 rounded-lg sm:rounded-xl shadow-sm hover:shadow-md focus:shadow-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 placeholder:text-muted-foreground text-xs sm:text-sm"
-            />
-          </div>
-        </div>
-        
-        {/* Mobile Search Button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => router.push('/expenses')}
-          className="sm:hidden h-8 w-8 rounded-lg hover:bg-muted/50 transition-colors"
-        >
-          <Search className="h-4 w-4" />
-        </Button>
         
         {/* Separator - Hidden on mobile */}
         <Separator orientation="vertical" className="h-4 sm:h-6 hidden sm:block bg-border/40" />
@@ -359,27 +311,27 @@ export function DashboardHeader({ onMobileMenuToggle }: HeaderProps) {
             {/* Navigation Section */}
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
-                <Link href="/dashboard" className="flex items-center">
+                <Link href="/dashboard" className="flex items-center cursor-pointer">
                   <Home className="mr-2 h-4 w-4" />
-                  <span>{getLocalizedText('nav.dashboard', preferences.language)}</span>
+                  <span>Dashboard</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/expenses" className="flex items-center">
+                <Link href="/transactions" className="flex items-center cursor-pointer">
                   <Receipt className="mr-2 h-4 w-4" />
-                  <span>{getLocalizedText('nav.expenses', preferences.language)}</span>
+                  <span>Transactions</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/analytics" className="flex items-center">
+                <Link href="/analytics" className="flex items-center cursor-pointer">
                   <BarChart3 className="mr-2 h-4 w-4" />
-                  <span>{getLocalizedText('nav.analytics', preferences.language)}</span>
+                  <span>Analytics</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/settings" className="flex items-center">
+                <Link href="/settings" className="flex items-center cursor-pointer">
                   <Settings className="mr-2 h-4 w-4" />
-                  <span>{getLocalizedText('nav.settings', preferences.language)}</span>
+                  <span>Settings</span>
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
@@ -388,17 +340,13 @@ export function DashboardHeader({ onMobileMenuToggle }: HeaderProps) {
             {/* Actions Section */}
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
-                <Link href="/settings" className="flex items-center">
+                <Link href="/settings" className="flex items-center cursor-pointer">
                   <User className="mr-2 h-4 w-4" />
                   <span>Account Settings</span>
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleSwitchAccount} className="flex items-center">
-                <RefreshCw className="mr-2 h-4 w-4" />
-                <span>Switch Account</span>
-              </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout} className="flex items-center text-red-600 focus:text-red-600">
+              <DropdownMenuItem onClick={handleLogout} className="flex items-center text-rose-600 focus:text-rose-600 cursor-pointer">
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Logout</span>
               </DropdownMenuItem>

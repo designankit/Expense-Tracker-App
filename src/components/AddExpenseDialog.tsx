@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { useSupabase } from "@/components/supabase-provider"
-import { useUserPreferences } from "@/contexts/UserPreferencesContext"
-import { getLocalizedText } from "@/lib/user-preferences"
+import { useNotifications } from "@/contexts/NotificationContext"
 import { CreateExpense } from "@/types/expense"
 import {
   Dialog,
@@ -65,7 +64,7 @@ export default function AddExpenseDialog({
 }: AddExpenseDialogProps) {
   const { toast } = useToast()
   const { user, supabase } = useSupabase()
-  const { preferences } = useUserPreferences()
+  const { addNotification } = useNotifications()
   
   const [formData, setFormData] = useState({
     title: initialData?.title || "",
@@ -83,6 +82,57 @@ export default function AddExpenseDialog({
   }>({})
 
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const checkBudgetWarnings = async () => {
+    if (!user || !supabase) return
+
+    try {
+      // Get current month's total expenses
+      const currentDate = new Date()
+      const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
+      const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0)
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: expenses, error } = await (supabase as any)
+        .from('expenses')
+        .select('amount')
+        .eq('user_id', user.id)
+        .eq('transaction_type', 'expense')
+        .gte('transaction_date', startOfMonth.toISOString().split('T')[0])
+        .lte('transaction_date', endOfMonth.toISOString().split('T')[0])
+
+      if (error) {
+        console.error('Error fetching expenses for budget check:', error)
+        return
+      }
+
+      const totalExpenses = expenses?.reduce((sum: number, expense: { amount: number }) => sum + expense.amount, 0) || 0
+      
+      // Simple budget thresholds (you can customize these)
+      const budgetLimits = {
+        warning: 30000,  // ₹30,000 warning threshold
+        critical: 40000  // ₹40,000 critical threshold
+      }
+
+      if (totalExpenses >= budgetLimits.critical) {
+        await addNotification({
+          title: "Budget Exceeded!",
+          message: `You've spent ₹${totalExpenses.toLocaleString()} this month, exceeding your budget limit.`,
+          type: 'error',
+          actionUrl: '/analytics'
+        })
+      } else if (totalExpenses >= budgetLimits.warning) {
+        await addNotification({
+          title: "Budget Warning",
+          message: `You've spent ₹${totalExpenses.toLocaleString()} this month. Consider reviewing your expenses.`,
+          type: 'warning',
+          actionUrl: '/analytics'
+        })
+      }
+    } catch (error) {
+      console.error('Error checking budget warnings:', error)
+    }
+  }
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -185,6 +235,9 @@ export default function AddExpenseDialog({
           title: "Success",
           description: "Expense added successfully.",
         })
+
+        // Check for budget warnings (only for new expenses)
+        await checkBudgetWarnings()
       }
 
       if (onSubmit) {
@@ -248,7 +301,7 @@ export default function AddExpenseDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{getLocalizedText('action.add', preferences.language)} {getLocalizedText('form.type', preferences.language)}</DialogTitle>
+          <DialogTitle>Add Transaction</DialogTitle>
           <DialogDescription>
             Add a new income or expense to track your finances.
           </DialogDescription>
@@ -256,7 +309,7 @@ export default function AddExpenseDialog({
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="title">{getLocalizedText('form.title', preferences.language)}</Label>
+              <Label htmlFor="title">Title</Label>
               <Input
                 id="title"
                 value={formData.title}
@@ -290,7 +343,7 @@ export default function AddExpenseDialog({
             </div>
             
             <div className="grid gap-2">
-              <Label htmlFor="amount">{getLocalizedText('form.amount', preferences.language)}</Label>
+              <Label htmlFor="amount">Amount</Label>
               <Input
                 id="amount"
                 type="number"
@@ -306,7 +359,7 @@ export default function AddExpenseDialog({
             </div>
             
             <div className="grid gap-2">
-              <Label htmlFor="category">{getLocalizedText('form.category', preferences.language)}</Label>
+              <Label htmlFor="category">Category</Label>
               <Select
                 value={formData.category}
                 onValueChange={(value) => handleInputChange("category", value)}
@@ -343,10 +396,10 @@ export default function AddExpenseDialog({
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={handleClose}>
-              {getLocalizedText('action.cancel', preferences.language)}
+              Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? getLocalizedText('message.loading', preferences.language) : getLocalizedText('action.save', preferences.language) + " " + getLocalizedText('form.type', preferences.language)}
+              {isSubmitting ? "Loading..." : "Save Transaction"}
             </Button>
           </DialogFooter>
         </form>

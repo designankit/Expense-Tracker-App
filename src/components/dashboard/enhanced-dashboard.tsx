@@ -2,10 +2,9 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { useSupabase } from "@/components/supabase-provider"
-import { useUserPreferences } from "@/contexts/UserPreferencesContext"
 import { Expense } from "@/types/expense"
 import { Savings } from "@/types/savings"
-import { formatCurrency, getLocalizedText } from "@/lib/user-preferences"
+import { formatCurrency } from "@/lib/user-preferences"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
@@ -42,9 +41,9 @@ import {
   BarChart3,
 } from "lucide-react"
 
-// Currency formatting function - now using user preferences
-const formatCurrencyWithPreferences = (amount: number, currency: string, language: string): string => {
-  return formatCurrency(amount, currency, language)
+// Currency formatting function
+const formatCurrencyWithPreferences = (amount: number): string => {
+  return formatCurrency(amount)
 }
 
 const formatPercentage = (value: number): string => {
@@ -58,7 +57,6 @@ interface EnhancedDashboardProps {
 
 export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
   const { user, supabase } = useSupabase()
-  const { preferences } = useUserPreferences()
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [savings, setSavings] = useState<Savings[]>([])
   const [loading, setLoading] = useState(true)
@@ -187,11 +185,13 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
         return acc
       }, {} as Record<string, number>)
 
-    return Object.entries(categoryTotals).map(([category, amount]) => ({
-      name: category,
-      value: amount || 0,
-      percentage: 0 // Will be calculated after we have total
-    }))
+    return Object.entries(categoryTotals)
+      .filter(([category, amount]) => category && amount > 0) // Filter out invalid entries
+      .map(([category, amount]) => ({
+        name: category.trim() || 'Other', // Ensure name is valid
+        value: amount || 0,
+        percentage: 0 // Will be calculated after we have total
+      }))
   }
 
   // Calculate recent transactions (last 10)
@@ -202,9 +202,9 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
       .slice(0, 10)
       .map(expense => ({
         ...expense,
-        formattedAmount: formatCurrencyWithPreferences(expense.amount || 0, preferences.currency, preferences.language),
+        formattedAmount: formatCurrencyWithPreferences(expense.amount || 0),
         formattedDate: expense.transaction_date 
-          ? new Date(expense.transaction_date).toLocaleDateString(preferences.language === 'hi' ? 'hi-IN' : 'en-US', {
+          ? new Date(expense.transaction_date).toLocaleDateString('en-US', {
               month: 'short',
               day: 'numeric'
             })
@@ -343,7 +343,7 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
               <Card className="hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer group bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200/50 dark:border-green-800/50">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium text-green-700 dark:text-green-300">
-                    {getLocalizedText('dashboard.income', preferences.language)}
+                    Income
                   </CardTitle>
                   <div className="p-3 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 text-white group-hover:scale-110 transition-transform duration-300 shadow-lg">
                     <TrendingUp className="h-5 w-5" />
@@ -351,11 +351,11 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-2">
-                    {formatCurrencyWithPreferences(totalIncome, preferences.currency, preferences.language)}
+                    {formatCurrencyWithPreferences(totalIncome)}
                   </div>
                   <div className="flex items-center text-xs text-green-600/70 dark:text-green-400/70 mt-1">
                     <ArrowUpRight className="h-3 w-3 mr-1" />
-                    {getLocalizedText('dashboard.incomeSources', preferences.language)}
+                    Income Sources
                   </div>
                   <div className="mt-3 w-full bg-green-200/30 dark:bg-green-800/30 rounded-full h-2">
                     <div className="bg-gradient-to-r from-green-500 to-emerald-500 h-2 rounded-full w-3/4 transition-all duration-1000"></div>
@@ -374,7 +374,7 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
               <Card className="hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer group bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 border-red-200/50 dark:border-red-800/50">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium text-red-700 dark:text-red-300">
-                    {getLocalizedText('dashboard.expenses', preferences.language)}
+                    Expenses
                   </CardTitle>
                   <div className="p-3 rounded-xl bg-gradient-to-br from-red-500 to-rose-600 text-white group-hover:scale-110 transition-transform duration-300 shadow-lg">
                     <TrendingDown className="h-5 w-5" />
@@ -382,11 +382,11 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold text-red-600 dark:text-red-400 mb-2">
-                    {formatCurrencyWithPreferences(totalExpenses, preferences.currency, preferences.language)}
+                    {formatCurrencyWithPreferences(totalExpenses)}
                   </div>
                   <div className="flex items-center text-xs text-red-600/70 dark:text-red-400/70 mt-1">
                     <ArrowDownRight className="h-3 w-3 mr-1" />
-                    {getLocalizedText('dashboard.totalSpending', preferences.language)}
+                    Total Spending
                   </div>
                   <div className="mt-3 w-full bg-red-200/30 dark:bg-red-800/30 rounded-full h-2">
                     <div className="bg-gradient-to-r from-red-500 to-rose-500 h-2 rounded-full w-2/3 transition-all duration-1000"></div>
@@ -413,7 +413,7 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                       ? 'text-emerald-700 dark:text-emerald-300'
                       : 'text-orange-700 dark:text-orange-300'
                   }`}>
-                    {getLocalizedText('dashboard.savings', preferences.language)}
+                    Savings
                   </CardTitle>
                   <div className={`p-3 rounded-xl text-white group-hover:scale-110 transition-transform duration-300 shadow-lg ${
                     monthlySavings >= 0 
@@ -429,7 +429,7 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                       ? 'text-emerald-600 dark:text-emerald-400'
                       : 'text-orange-600 dark:text-orange-400'
                   }`}>
-                    {formatCurrencyWithPreferences(monthlySavings, preferences.currency, preferences.language)}
+                    {formatCurrencyWithPreferences(monthlySavings)}
                   </div>
                   <div className={`flex items-center text-xs mt-1 ${
                     monthlySavings >= 0 
@@ -439,12 +439,12 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                     {monthlySavings >= 0 ? (
                       <>
                         <ArrowUpRight className="h-3 w-3 mr-1" />
-                        {getLocalizedText('dashboard.positiveSavings', preferences.language)}
+                        Positive Savings
                       </>
                     ) : (
                       <>
                         <ArrowDownRight className="h-3 w-3 mr-1" />
-                        {getLocalizedText('dashboard.overBudget', preferences.language)}
+                        Over Budget
                       </>
                     )}
                   </div>
@@ -485,7 +485,7 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                       ? 'text-amber-700 dark:text-amber-300'
                       : 'text-red-700 dark:text-red-300'
                   }`}>
-                    {getLocalizedText('dashboard.savingsRate', preferences.language)}
+                    Savings Rate
                   </CardTitle>
                   <div className={`p-3 rounded-xl text-white group-hover:scale-110 transition-transform duration-300 shadow-lg ${
                     savingsRate >= 20 
@@ -562,17 +562,17 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                 }`}>
                   <Wallet className="h-5 w-5" />
                 </div>
-                {getLocalizedText('dashboard.budgetProgress', preferences.language)}
+                Budget Progress
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">{getLocalizedText('dashboard.spentThisMonth', preferences.language)}</span>
+                  <span className="text-muted-foreground">Spent This Month</span>
                   <span className={`font-medium ${
                     budgetData.isOverBudget ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'
                   }`}>
-                    {formatCurrencyWithPreferences(budgetData.totalExpenses, preferences.currency, preferences.language)}
+                    {formatCurrencyWithPreferences(budgetData.totalExpenses)}
                   </span>
                 </div>
                 <div className="relative">
@@ -591,16 +591,16 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                   </div>
                 </div>
                 <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>{getLocalizedText('dashboard.budget', preferences.language)}: {formatCurrencyWithPreferences(budgetData.monthlyBudget, preferences.currency, preferences.language)}</span>
+                  <span>Budget: {formatCurrencyWithPreferences(budgetData.monthlyBudget)}</span>
                   <span className={budgetData.isOverBudget ? 'text-red-500' : 'text-emerald-500'}>
-                    {budgetData.isOverBudget ? getLocalizedText('dashboard.overBudget', preferences.language) : getLocalizedText('dashboard.onTrack', preferences.language)}
+                    {budgetData.isOverBudget ? 'Over Budget' : 'On Track'}
                   </span>
                 </div>
               </div>
               {budgetData.isOverBudget && (
                 <div className="flex items-center gap-2 p-3 bg-red-100 dark:bg-red-900/30 rounded-lg text-sm text-red-700 dark:text-red-300">
                   <AlertCircle className="h-4 w-4" />
-                  <span>Over budget by {formatCurrencyWithPreferences(budgetData.totalExpenses - budgetData.monthlyBudget, preferences.currency, preferences.language)}</span>
+                  <span>Over budget by {formatCurrencyWithPreferences(budgetData.totalExpenses - budgetData.monthlyBudget)}</span>
                 </div>
               )}
             </CardContent>
@@ -613,7 +613,7 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                 <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/40">
                   <PiggyBank className="h-5 w-5" />
                 </div>
-                {getLocalizedText('dashboard.savingsGoal', preferences.language)}
+                Savings Goals
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -623,7 +623,7 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Saved amount</span>
                       <span className="font-medium text-blue-600 dark:text-blue-400">
-                        {formatCurrencyWithPreferences(savingsGoalData.totalSaved, preferences.currency, preferences.language)}
+                        {formatCurrencyWithPreferences(savingsGoalData.totalSaved)}
                       </span>
                     </div>
                     <div className="relative">
@@ -638,7 +638,7 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                       </div>
                     </div>
                     <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>Target: {formatCurrencyWithPreferences(savingsGoalData.totalTarget, preferences.currency, preferences.language)}</span>
+                      <span>Target: {formatCurrencyWithPreferences(savingsGoalData.totalTarget)}</span>
                       <span className="text-blue-500">On Track</span>
                     </div>
                   </div>
@@ -667,20 +667,21 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
           </Card>
 
           {/* Expense Category Breakdown */}
-          <Card className="lg:col-span-1 hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border-purple-200/50 dark:border-purple-800/50">
+          <Card className="lg:col-span-1 hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-indigo-50 to-slate-50 dark:from-indigo-900/20 dark:to-slate-900/20 border-indigo-200/50 dark:border-indigo-800/50">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-purple-700 dark:text-purple-300">
-                <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/40">
+              <CardTitle className="flex items-center gap-2 text-indigo-700 dark:text-indigo-300">
+                <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/40">
                   <BarChart3 className="h-5 w-5" />
                 </div>
-                {getLocalizedText('dashboard.categoryBreakdown', preferences.language)}
+                Category Breakdown
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {categoryDataWithPercentages.length > 0 ? (
-                <div className="h-80 relative">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
+              {categoryDataWithPercentages && categoryDataWithPercentages.length > 0 ? (
+                <div className="space-y-4">
+                  <div className="h-48 relative">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
                       <defs>
                         {GRADIENT_COLORS.map((gradient, index) => (
                           <linearGradient key={`gradient-${index}`} id={`gradient-${index}`} x1="0" y1="0" x2="1" y2="1">
@@ -693,25 +694,15 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                         data={categoryDataWithPercentages}
                         cx="50%"
                         cy="50%"
-                        outerRadius={100}
-                        innerRadius={40}
+                        outerRadius={70}
+                        innerRadius={30}
                         fill="#8884d8"
                         dataKey="value"
                         paddingAngle={2}
                         strokeWidth={0}
                         animationBegin={0}
                         animationDuration={1500}
-                        label={({ name, percentage }) => (
-                          <text 
-                            x={0} 
-                            y={0} 
-                            textAnchor="middle" 
-                            dominantBaseline="middle"
-                            className="fill-current text-xs font-medium"
-                          >
-                            {(percentage as number) > 5 ? `${name}\n${(percentage as number).toFixed(1)}%` : ''}
-                          </text>
-                        )}
+                        label={false}
                         labelLine={false}
                       >
                         {categoryDataWithPercentages.map((entry, index) => (
@@ -739,7 +730,7 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                                   <span className="font-medium text-sm">{data.name || 'Unknown'}</span>
                                 </div>
                                 <div className="text-xs text-muted-foreground">
-                                  <div>Amount: {formatCurrencyWithPreferences(data.value || 0, preferences.currency, preferences.language)}</div>
+                                  <div>Amount: {formatCurrencyWithPreferences(data.value || 0)}</div>
                                   <div>Percentage: {(data.percentage || 0).toFixed(1)}%</div>
                                 </div>
                               </div>
@@ -750,35 +741,35 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                       />
                     </PieChart>
                   </ResponsiveContainer>
+                  </div>
                   
                   {/* Legend */}
-                  <div className="absolute bottom-0 left-0 right-0">
-                    <div className="grid grid-cols-2 gap-2 max-h-20 overflow-y-auto">
-                      {categoryDataWithPercentages.map((entry, index) => (
-                        <div key={entry.name} className="flex items-center gap-2 text-xs">
-                          <div 
-                            className="w-2 h-2 rounded-full flex-shrink-0"
-                            style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                          />
-                          <span className="truncate text-muted-foreground">{entry.name}</span>
-                          <span className="text-xs font-medium ml-auto">{entry.percentage.toFixed(1)}%</span>
-                        </div>
-                      ))}
-                    </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {categoryDataWithPercentages.map((entry, index) => (
+                      <div key={entry.name} className="flex items-center gap-2 text-xs">
+                        <div 
+                          className="w-2 h-2 rounded-full flex-shrink-0"
+                          style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                        />
+                        <span className="truncate text-muted-foreground">{entry.name}</span>
+                        <span className="text-xs font-medium ml-auto">{entry.percentage.toFixed(1)}%</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
                   <BarChart3 className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">{getLocalizedText('dashboard.noExpenseData', preferences.language)}</p>
+                  <p className="text-sm">No expense data available</p>
                 </div>
               )}
             </CardContent>
           </Card>
         </div>
+        </div>
 
         {/* Bottom Row - Trends + Activity */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6">
           {/* Recent Transactions */}
           <Card className="hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-gray-50 to-slate-50 dark:from-gray-900/20 dark:to-slate-900/20 border-gray-200/50 dark:border-gray-800/50">
             <CardHeader>
@@ -786,7 +777,7 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                 <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-900/40">
                   <Activity className="h-5 w-5" />
                 </div>
-                {getLocalizedText('dashboard.recentTransactions', preferences.language)}
+                Recent Transactions
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -839,8 +830,8 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                     <div className="p-4 rounded-full bg-gray-100 dark:bg-gray-900/40 w-16 h-16 mx-auto mb-3 flex items-center justify-center">
                       <Activity className="h-8 w-8 text-gray-500" />
                     </div>
-                    <p className="text-sm font-medium">{getLocalizedText('dashboard.noTransactions', preferences.language)}</p>
-                    <p className="text-xs mt-1">{getLocalizedText('dashboard.recentTransactionsWillAppear', preferences.language)}</p>
+                    <p className="text-sm font-medium">No transactions yet</p>
+                    <p className="text-xs mt-1">Your recent transactions will appear here</p>
                   </div>
                 )}
               </div>
@@ -854,7 +845,7 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                 <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/40">
                   <Calendar className="h-5 w-5" />
                 </div>
-                {getLocalizedText('dashboard.incomeVsExpenses', preferences.language)}
+                Income vs Expenses
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -883,7 +874,7 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                       tickLine={{ stroke: 'rgba(148, 163, 184, 0.3)' }}
                     />
                     <YAxis 
-                      tickFormatter={(value) => formatCurrencyWithPreferences(value, preferences.currency, preferences.language)} 
+                      tickFormatter={(value) => formatCurrencyWithPreferences(value)} 
                       tick={{ fontSize: 12, fill: 'currentColor' }}
                       axisLine={{ stroke: 'rgba(148, 163, 184, 0.3)' }}
                       tickLine={{ stroke: 'rgba(148, 163, 184, 0.3)' }}
@@ -907,7 +898,7 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                                     {entry?.dataKey === 'income' ? 'Income' : 'Expenses'}:
                                   </span>
                                   <span className="text-sm font-medium">
-                                    {formatCurrencyWithPreferences(entry?.value as number || 0, preferences.currency, preferences.language)}
+                                    {formatCurrencyWithPreferences(entry?.value as number || 0)}
                                   </span>
                                 </div>
                               ))}
@@ -947,7 +938,6 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
             </CardContent>
           </Card>
         </div>
-      </div>
     </TooltipProvider>
   )
 }

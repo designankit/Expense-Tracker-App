@@ -27,54 +27,27 @@ import {
   Settings as SettingsIcon,
   CheckCircle,
   Loader2,
-  Camera,
-  DollarSign
+  Camera
 } from "lucide-react"
 
 interface SettingsData {
   // Profile & Personalization
   fullName: string
   email: string
-  language: string
   timeFormat: '12h' | '24h'
-  currency: string
   defaultDashboardView: 'overview' | 'goals' | 'savings'
 }
-
-const CURRENCIES = [
-  { value: 'USD', label: 'US Dollar ($)', symbol: '$' },
-  { value: 'EUR', label: 'Euro (€)', symbol: '€' },
-  { value: 'GBP', label: 'British Pound (£)', symbol: '£' },
-  { value: 'JPY', label: 'Japanese Yen (¥)', symbol: '¥' },
-  { value: 'INR', label: 'Indian Rupee (₹)', symbol: '₹' },
-  { value: 'CAD', label: 'Canadian Dollar (C$)', symbol: 'C$' },
-  { value: 'AUD', label: 'Australian Dollar (A$)', symbol: 'A$' },
-  { value: 'SGD', label: 'Singapore Dollar (S$)', symbol: 'S$' },
-]
-
-const LANGUAGES = [
-  { value: 'en', label: 'English' },
-  { value: 'hi', label: 'हिन्दी (Hindi)' },
-  { value: 'es', label: 'Español (Spanish)' },
-  { value: 'fr', label: 'Français (French)' },
-  { value: 'de', label: 'Deutsch (German)' },
-  { value: 'zh', label: '中文 (Chinese)' },
-  { value: 'ja', label: '日本語 (Japanese)' },
-  { value: 'ko', label: '한국어 (Korean)' },
-]
 
 
 export default function SettingsPage() {
   const { user, supabase } = useSupabase()
-  const { preferences, isLoading: preferencesLoading, refreshPreferences } = useUserPreferences()
+  const { isLoading: preferencesLoading, refreshPreferences } = useUserPreferences()
   const { toast } = useToast()
   
   const [settings, setSettings] = useState<SettingsData>({
     fullName: user?.user_metadata?.full_name || '',
     email: user?.email || '',
-    language: preferences.language,
     timeFormat: '12h',
-    currency: preferences.currency,
     defaultDashboardView: 'overview'
   })
 
@@ -111,14 +84,8 @@ export default function SettingsPage() {
     fetchProfileData()
   }, [user, supabase])
 
-  // Update settings when preferences change
-  useEffect(() => {
-    setSettings(prev => ({
-      ...prev,
-      language: preferences.language,
-      currency: preferences.currency
-    }))
-  }, [preferences.language, preferences.currency])
+  // Update settings when preferences change (if needed)
+  // Note: Currency and language preferences have been removed
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -184,11 +151,8 @@ export default function SettingsPage() {
   const handleSaveSettings = async () => {
     setIsLoading(true)
     try {
-      // Prepare update data
-      const updateData: Record<string, unknown> = {
-        language: settings.language,
-        currency: settings.currency
-      }
+      // Prepare update data (currency and language removed)
+      const updateData: Record<string, unknown> = {}
 
       // Include avatar URL if a new one was uploaded
       if (newAvatarUrl) {
@@ -276,25 +240,25 @@ export default function SettingsPage() {
     <AuthGuard requireOnboarding={true}>
       <AppLayout>
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-gray-900 dark:to-slate-800">
-          <div className="p-6 sm:p-8 lg:p-12">
+          <div className="p-4 sm:p-6 lg:p-8 xl:p-12">
             {/* Header */}
             <div className="mb-10">
-              <div className="flex items-center gap-4 mb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
                 <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg">
                   <SettingsIcon className="h-6 w-6 text-white" />
                 </div>
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                <div className="flex-1">
+                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
                     Settings
                   </h1>
-                  <p className="text-base text-gray-600 dark:text-gray-400 mt-1">
+                  <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1">
                     Customize your experience and manage your account
                   </p>
                 </div>
               </div>
               
               {/* Quick Stats */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
                 <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 hover:shadow-lg transition-all duration-300">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
@@ -304,20 +268,6 @@ export default function SettingsPage() {
                       <p className="text-sm font-medium text-gray-900 dark:text-white">Account Status</p>
                       <p className="text-xs text-green-600 dark:text-green-400">
                         {user?.email_confirmed_at ? 'Verified & Active' : 'Pending Verification'}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 hover:shadow-lg transition-all duration-300">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                      <Globe className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">Language</p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">
-                        {LANGUAGES.find(lang => lang.value === settings.language)?.label || settings.language.toUpperCase()}
                       </p>
                     </div>
                   </div>
@@ -336,24 +286,10 @@ export default function SettingsPage() {
                     </div>
                   </div>
                 </div>
-                
-                <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 hover:shadow-lg transition-all duration-300">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
-                      <DollarSign className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">Currency</p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">
-                        {CURRENCIES.find(curr => curr.value === settings.currency)?.symbol || settings.currency}
-                      </p>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
 
-            <div className="max-w-4xl space-y-6">
+            <div className="max-w-6xl space-y-6">
               <Accordion type="multiple" defaultValue={["profile"]} className="space-y-4">
                 {/* Profile & Personalization */}
                 <AccordionItem value="profile" className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 hover:shadow-xl transition-all duration-300">
@@ -439,39 +375,7 @@ export default function SettingsPage() {
                           </div>
                           Preferences
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <div className="space-y-3">
-                            <Label htmlFor="language" className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Language</Label>
-                            <Select value={settings.language} onValueChange={(value) => setSettings(prev => ({ ...prev, language: value }))}>
-                              <SelectTrigger className="h-12 w-full bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 rounded-xl hover:border-blue-300 dark:hover:border-blue-500 transition-colors">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {LANGUAGES.map((lang) => (
-                                  <SelectItem key={lang.value} value={lang.value}>
-                                    {lang.label}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-
-                          <div className="space-y-3">
-                            <Label htmlFor="currency" className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Currency</Label>
-                            <Select value={settings.currency} onValueChange={(value) => setSettings(prev => ({ ...prev, currency: value }))}>
-                              <SelectTrigger className="h-12 w-full bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 rounded-xl hover:border-blue-300 dark:hover:border-blue-500 transition-colors">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {CURRENCIES.map((currency) => (
-                                  <SelectItem key={currency.value} value={currency.value}>
-                                    {currency.label}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                           <div className="space-y-3">
                             <Label htmlFor="timeFormat" className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Time Format</Label>
                             <Select value={settings.timeFormat} onValueChange={(value: '12h' | '24h') => setSettings(prev => ({ ...prev, timeFormat: value }))}>
@@ -525,7 +429,7 @@ export default function SettingsPage() {
                           <Shield className="h-4 w-4 text-green-600 dark:text-green-400" />
                           Account Information
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
                             <Label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Account Status</Label>
                             <div className="flex items-center gap-2 mt-1">
@@ -611,7 +515,7 @@ export default function SettingsPage() {
                           Version Information
                         </h3>
                         <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                             <div>
                               <Label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">App Version</Label>
                               <p className="text-lg font-semibold text-gray-900 dark:text-white mt-1">v0.1.0</p>
@@ -648,11 +552,11 @@ export default function SettingsPage() {
                           <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
                           Features
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           {[
                             'Expense Tracking',
                             'Analytics & Reports',
-                            'Multi-Currency Support',
+                            'Savings Goals',
                             'Dark/Light Theme',
                             'Real-time Notifications',
                             'Data Export',

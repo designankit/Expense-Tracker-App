@@ -18,6 +18,35 @@
     animation: zoom-in 0.2s ease-out;
   }
 
+  /* Custom animations for financial analysis card */
+  .animate-spin-slow {
+    animation: spin-slow 3s linear infinite;
+  }
+
+  .animation-delay-500 {
+    animation-delay: 0.5s;
+  }
+
+  .animation-delay-1000 {
+    animation-delay: 1s;
+  }
+
+  .animation-delay-1500 {
+    animation-delay: 1.5s;
+  }
+
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+
+  .animation-delay-2500 {
+    animation-delay: 2.5s;
+  }
+
+  .animation-delay-3000 {
+    animation-delay: 3s;
+  }
+
   .animate-fade-in-up {
     animation: fade-in-up 0.8s ease-out forwards;
     opacity: 0;
@@ -494,5 +523,15 @@
 
   .animate-accordion-up {
     animation: accordion-up 0.2s ease-out;
+  }
+
+  /* Keyframes for custom animations */
+  @keyframes spin-slow {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
   }
 }

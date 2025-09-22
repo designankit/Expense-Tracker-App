@@ -12,8 +12,8 @@ import {
   XCircle,
   Zap
 } from "lucide-react"
-import { formatPercentage } from "@/lib/format"
 import { Expense } from "@/types/expense"
+
 // Currency formatting function
 const formatCurrency = (amount: number, currency: string = "INR"): string => {
   const symbols = {
@@ -23,6 +23,11 @@ const formatCurrency = (amount: number, currency: string = "INR"): string => {
     GBP: "£"
   }
   return `${symbols[currency as keyof typeof symbols] || "₹"}${amount.toLocaleString()}`
+}
+
+// Percentage formatting function
+const formatPercentage = (value: number): string => {
+  return `${value.toFixed(1)}%`
 }
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -109,9 +114,9 @@ export function Cards({ expenses }: CardsProps) {
 
   const getTotalExpensesColor = () => {
     if (totalExpenses === 0) return "bg-gray-100 text-gray-700 dark:bg-gray-900/40 dark:text-gray-300"
-    if (totalExpenses < 1000) return "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300"
+    if (totalExpenses < 1000) return "bg-green-100 text-green-700 dark:bg-emerald-900/40 dark:text-emerald-300"
     if (totalExpenses < 10000) return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300"
-    return "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300"
+    return "bg-red-100 text-red-700 dark:bg-rose-900/40 dark:text-rose-300"
   }
 
   const getThisMonthIcon = () => {
@@ -122,10 +127,10 @@ export function Cards({ expenses }: CardsProps) {
   }
 
   const getThisMonthColor = () => {
-    if (thisMonthExpenses === 0) return "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300"
-    if (thisMonthExpenses < 500) return "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
+    if (thisMonthExpenses === 0) return "bg-green-100 text-green-700 dark:bg-emerald-900/40 dark:text-emerald-300"
+    if (thisMonthExpenses < 500) return "bg-blue-100 text-blue-700 dark:bg-slate-900/40 dark:text-slate-300"
     if (thisMonthExpenses < 2000) return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300"
-    return "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300"
+    return "bg-red-100 text-red-700 dark:bg-rose-900/40 dark:text-rose-300"
   }
 
 
@@ -137,10 +142,10 @@ export function Cards({ expenses }: CardsProps) {
   }
 
   const getSavingsRateColor = () => {
-    if (savingsRate < 0) return "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300"
+    if (savingsRate < 0) return "bg-red-100 text-red-700 dark:bg-rose-900/40 dark:text-rose-300"
     if (savingsRate < 10) return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300"
-    if (savingsRate < 30) return "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
-    return "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300"
+    if (savingsRate < 30) return "bg-blue-100 text-blue-700 dark:bg-slate-900/40 dark:text-slate-300"
+    return "bg-green-100 text-green-700 dark:bg-emerald-900/40 dark:text-emerald-300"
   }
 
   return (
@@ -158,7 +163,7 @@ export function Cards({ expenses }: CardsProps) {
                 </div>
               </CardHeader>
               <CardContent className="space-y-2">
-                <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-red-600 dark:text-red-400">{formatAmount(totalExpenses)}</div>
+                <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-red-600 dark:text-rose-400">{formatAmount(totalExpenses)}</div>
                 <p className="text-xs text-muted-foreground">
                   All time expenses
                 </p>
@@ -185,7 +190,7 @@ export function Cards({ expenses }: CardsProps) {
                 </div>
               </CardHeader>
               <CardContent className="space-y-2">
-                <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-red-600 dark:text-red-400">{formatAmount(thisMonthExpenses)}</div>
+                <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-red-600 dark:text-rose-400">{formatAmount(thisMonthExpenses)}</div>
                 <p className="text-xs text-muted-foreground">
                   Current month expenses
                 </p>
@@ -205,7 +210,7 @@ export function Cards({ expenses }: CardsProps) {
             <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-lg hover:shadow-md transition-all duration-300 cursor-pointer group hover:scale-105">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
                 <CardTitle className="text-sm font-medium text-muted-foreground">Total Income</CardTitle>
-                <div className="p-2 rounded-xl bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300 group-hover:scale-110 transition-transform duration-300">
+                <div className="p-2 rounded-xl bg-green-100 text-green-700 dark:bg-emerald-900/40 dark:text-emerald-300 group-hover:scale-110 transition-transform duration-300">
                   <DollarSign className="h-4 w-4" />
                 </div>
               </CardHeader>

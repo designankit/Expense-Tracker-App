@@ -2,13 +2,12 @@
 
 import { useState, useEffect, useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { AppLayout } from "@/components/layout/app-layout"
 import { AuthGuard } from "@/components/auth-guard"
-import { formatCurrency } from "@/lib/format"
+import { formatCurrency } from "@/lib/user-preferences"
 import { supabase } from "@/lib/supabaseClient"
 import { useSupabase } from "@/components/supabase-provider"
 import {
@@ -349,30 +348,6 @@ export default function AnalyticsPage() {
                     : 'Please log in to view your analytics.'
                   }
                 </p>
-                {user?.id && (
-                  <Button 
-                    onClick={async () => {
-                      try {
-                        const response = await fetch('/api/add-sample-analytics-data', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ userId: user.id })
-                        })
-                        if (response.ok) {
-                          window.location.reload()
-                        } else {
-                          const error = await response.json()
-                          alert(`Error: ${error.error}`)
-                        }
-                      } catch (error) {
-                        console.error('Error adding sample data:', error)
-                        alert('Error adding sample data')
-                      }
-                    }}
-                  >
-                    Add Sample Data
-                  </Button>
-                )}
               </div>
             </div>
           </div>
@@ -384,45 +359,13 @@ export default function AnalyticsPage() {
   return (
     <AuthGuard requireOnboarding={true}>
       <AppLayout>
-        <div className="p-6 space-y-6">
+        <div className="p-4 sm:p-6 lg:p-8 space-y-6">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
-              <p className="text-muted-foreground">
-                Your financial insights and trends
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={async () => {
-                  if (!user?.id) {
-                    alert('Please log in to add sample data')
-                    return
-                  }
-                  try {
-                    const response = await fetch('/api/add-sample-analytics-data', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ userId: user.id })
-                    })
-                    if (response.ok) {
-                      window.location.reload()
-                    } else {
-                      const error = await response.json()
-                      alert(`Error: ${error.error}`)
-                    }
-                  } catch (error) {
-                    console.error('Error adding sample data:', error)
-                    alert('Error adding sample data')
-                  }
-                }}
-              >
-                Add Sample Data
-              </Button>
-            </div>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Analytics</h1>
+            <p className="text-muted-foreground">
+              Your financial insights and trends
+            </p>
           </div>
 
           {/* Filters */}
@@ -499,11 +442,11 @@ export default function AnalyticsPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Total Income</p>
-                    <p className="text-2xl font-bold text-green-600">
+                    <p className="text-2xl font-bold text-emerald-600">
                       {formatCurrency(financialMetrics.income)}
                     </p>
                   </div>
-                  <TrendingUp className="h-8 w-8 text-green-600" />
+                  <TrendingUp className="h-8 w-8 text-emerald-600" />
                 </div>
               </CardContent>
             </Card>
@@ -513,11 +456,11 @@ export default function AnalyticsPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Total Expenses</p>
-                    <p className="text-2xl font-bold text-red-600">
+                    <p className="text-2xl font-bold text-rose-600">
                       {formatCurrency(financialMetrics.expenses)}
                     </p>
                   </div>
-                  <TrendingDown className="h-8 w-8 text-red-600" />
+                  <TrendingDown className="h-8 w-8 text-rose-600" />
                 </div>
               </CardContent>
             </Card>
@@ -527,11 +470,11 @@ export default function AnalyticsPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Net Flow</p>
-                    <p className={`text-2xl font-bold ${financialMetrics.netFlow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    <p className={`text-2xl font-bold ${financialMetrics.netFlow >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
                       {formatCurrency(financialMetrics.netFlow)}
                     </p>
                   </div>
-                  <DollarSign className="h-8 w-8 text-blue-600" />
+                  <DollarSign className="h-8 w-8 text-slate-600" />
                 </div>
               </CardContent>
             </Card>
@@ -541,11 +484,11 @@ export default function AnalyticsPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Savings Rate</p>
-                    <p className="text-2xl font-bold text-blue-600">
+                    <p className="text-2xl font-bold text-slate-600">
                       {financialMetrics.savingsRate.toFixed(1)}%
                     </p>
                   </div>
-                  <PiggyBank className="h-8 w-8 text-blue-600" />
+                  <PiggyBank className="h-8 w-8 text-slate-600" />
                 </div>
               </CardContent>
             </Card>
@@ -600,7 +543,7 @@ export default function AnalyticsPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="h-80">
+                <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
@@ -608,8 +551,8 @@ export default function AnalyticsPage() {
                         cx="50%"
                         cy="50%"
                         labelLine={false}
-                        label={(props: Record<string, unknown>) => `${props.category} ${(props.percent as number * 100).toFixed(0)}%`}
-                        outerRadius={80}
+                        label={false}
+                        outerRadius={70}
                         fill="#8884d8"
                         dataKey="amount"
                       >
@@ -667,19 +610,19 @@ export default function AnalyticsPage() {
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-green-600">
+                    <p className="text-2xl font-bold text-emerald-600">
                       {formatCurrency(savingsInsights.totalSaved)}
                     </p>
                     <p className="text-sm text-muted-foreground">Total Saved</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-blue-600">
+                    <p className="text-2xl font-bold text-slate-600">
                       {formatCurrency(savingsInsights.totalTarget)}
                     </p>
                     <p className="text-sm text-muted-foreground">Total Target</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-purple-600">
+                    <p className="text-2xl font-bold text-indigo-600">
                       {savingsInsights.progressPercentage.toFixed(1)}%
                     </p>
                     <p className="text-sm text-muted-foreground">Progress</p>
@@ -717,7 +660,7 @@ export default function AnalyticsPage() {
                     {recurringTransactions.map((transaction, index) => (
                       <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                         <div className="flex items-center gap-3">
-                          <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                          <div className="w-2 h-2 bg-slate-500 rounded-full" />
                           <div>
                             <p className="font-medium">{transaction.title}</p>
                             <p className="text-sm text-muted-foreground">

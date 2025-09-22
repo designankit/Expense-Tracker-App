@@ -4,12 +4,12 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { 
   LayoutDashboard, 
-  Receipt, 
   BarChart3, 
   Settings, 
   Menu,
   X,
-  PiggyBank
+  PiggyBank,
+  CreditCard
 } from "lucide-react"
 import {
   Tooltip,
@@ -18,8 +18,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { useSupabase } from "@/components/supabase-provider"
-import { useUserPreferences } from "@/contexts/UserPreferencesContext"
-import { getLocalizedText } from "@/lib/user-preferences"
 import { usePathname } from "next/navigation"
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -27,29 +25,29 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   onToggle?: () => void
 }
 
-const getNavigationItems = (language: string) => [
+const navigationItems = [
   {
-    title: getLocalizedText('nav.dashboard', language),
+    title: "Dashboard",
     icon: LayoutDashboard,
     url: "/dashboard",
   },
   {
-    title: getLocalizedText('nav.expenses', language),
-    icon: Receipt,
-    url: "/expenses",
+    title: "Transactions",
+    icon: CreditCard,
+    url: "/transactions",
   },
   {
-    title: getLocalizedText('nav.savings', language),
+    title: "Saving Goals",
     icon: PiggyBank,
     url: "/savings",
   },
   {
-    title: getLocalizedText('nav.analytics', language),
+    title: "Analytics",
     icon: BarChart3,
     url: "/analytics",
   },
   {
-    title: getLocalizedText('nav.settings', language),
+    title: "Settings",
     icon: Settings,
     url: "/settings",
   },
@@ -62,10 +60,7 @@ export function Sidebar({
   ...props 
 }: SidebarProps) {
   const { user } = useSupabase()
-  const { preferences } = useUserPreferences()
   const pathname = usePathname()
-  
-  const navigationItems = getNavigationItems(preferences.language)
 
   return (
     <TooltipProvider>
@@ -80,11 +75,15 @@ export function Sidebar({
         {/* Header */}
         <div className="flex items-center justify-between p-3 sm:p-4 border-b border-border/50">
           {!isCollapsed && (
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-                <span className="text-white text-sm font-bold">E</span>
-              </div>
-              <span className="font-semibold text-foreground">Expensio</span>
+            <div className="flex items-center justify-center w-full">
+              <span className="tracking-wide font-sans flex items-baseline gap-2">
+                <span className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent uppercase">
+                  EXPENSIO
+                </span>
+                <span className="text-lg font-light text-black dark:text-white uppercase">
+                  TRACKER
+                </span>
+              </span>
             </div>
           )}
           
@@ -116,7 +115,7 @@ export function Sidebar({
                       "w-full justify-start gap-3 h-10 transition-all duration-200",
                       isCollapsed ? "px-2" : "px-3",
                       isActive 
-                        ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-r-2 border-blue-500" 
+                        ? "bg-blue-100 dark:bg-slate-900/30 text-slate-700 dark:text-slate-300 border-r-2 border-slate-500" 
                         : "hover:bg-gray-100 dark:hover:bg-gray-800"
                     )}
                     onClick={() => {
@@ -127,12 +126,12 @@ export function Sidebar({
                   >
                     <item.icon className={cn(
                       "h-4 w-4 flex-shrink-0",
-                      isActive ? "text-blue-600 dark:text-blue-400" : ""
+                      isActive ? "text-blue-600 dark:text-slate-400" : ""
                     )} />
                     {!isCollapsed && (
                       <span className={cn(
                         "truncate font-medium",
-                        isActive ? "text-blue-700 dark:text-blue-300" : ""
+                        isActive ? "text-blue-700 dark:text-slate-300" : ""
                       )}>{item.title}</span>
                     )}
                   </Button>

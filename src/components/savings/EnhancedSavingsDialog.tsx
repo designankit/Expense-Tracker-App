@@ -23,6 +23,7 @@ import {
 import { Car, Plane, Home, Shield, PiggyBank, Target, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useSupabase } from "@/components/supabase-provider"
+import { useNotifications } from "@/contexts/NotificationContext"
 import { Savings, CreateSavings, UpdateSavings } from "@/types/savings"
 
 // Goal icons mapping
@@ -62,6 +63,44 @@ export default function EnhancedSavingsDialog({
   
   const { toast } = useToast()
   const { user, supabase } = useSupabase()
+  const { addNotification } = useNotifications()
+
+  const checkSavingsMilestones = async (savedAmount: number, targetAmount: number, goalName: string) => {
+    if (!targetAmount || targetAmount <= 0) return
+
+    const percentage = (savedAmount / targetAmount) * 100
+
+    // Milestone thresholds
+    if (percentage >= 100) {
+      await addNotification({
+        title: "🎉 Goal Achieved!",
+        message: `Congratulations! You've reached 100% of your "${goalName}" goal!`,
+        type: 'success',
+        actionUrl: '/savings'
+      })
+    } else if (percentage >= 75) {
+      await addNotification({
+        title: "Almost There!",
+        message: `You've saved 75% of your "${goalName}" goal. Keep it up!`,
+        type: 'success',
+        actionUrl: '/savings'
+      })
+    } else if (percentage >= 50) {
+      await addNotification({
+        title: "Halfway There!",
+        message: `Great progress! You've saved 50% of your "${goalName}" goal.`,
+        type: 'info',
+        actionUrl: '/savings'
+      })
+    } else if (percentage >= 25 && savedAmount > 0) {
+      await addNotification({
+        title: "Good Start!",
+        message: `You've saved 25% of your "${goalName}" goal. Keep going!`,
+        type: 'info',
+        actionUrl: '/savings'
+      })
+    }
+  }
 
   // Reset form when dialog opens/closes or initialData changes
   useEffect(() => {
@@ -178,6 +217,17 @@ export default function EnhancedSavingsDialog({
           }])
 
         if (error) throw error
+
+        // Add notification for goal creation
+        await addNotification({
+          title: "Savings Goal Created",
+          message: `Created new goal: "${formData.goal_name}" with target of ₹${formData.target_amount}`,
+          type: 'success',
+          actionUrl: '/savings'
+        })
+
+        // Check for milestone notifications
+        await checkSavingsMilestones(parseFloat(formData.saved_amount), parseFloat(formData.target_amount), formData.goal_name)
 
         toast({
           title: "Success",

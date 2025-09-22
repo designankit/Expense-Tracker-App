@@ -33,6 +33,16 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(false)
   const { user } = useSupabase()
 
+  const mapFromApi = (row: { id: string; title: string; message: string; type: string; read: boolean; created_at?: string; createdAt?: string; action_url?: string; actionUrl?: string }): Notification => ({
+    id: row.id,
+    title: row.title,
+    message: row.message,
+    type: row.type as "error" | "success" | "info" | "warning",
+    read: Boolean(row.read),
+    createdAt: row.created_at ?? row.createdAt ?? new Date().toISOString(),
+    actionUrl: row.action_url ?? row.actionUrl ?? undefined,
+  })
+
   // Load notifications from Supabase on mount and when user changes
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -46,7 +56,8 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         const response = await fetch(`/api/notifications?userId=${encodeURIComponent(user.id)}`)
         if (response.ok) {
           const data = await response.json()
-          setNotifications(data.notifications || [])
+          const mapped = (data.notifications || []).map(mapFromApi)
+          setNotifications(mapped)
         }
       } catch (error) {
         console.error('Failed to fetch notifications:', error)
@@ -80,7 +91,8 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
       if (response.ok) {
         const data = await response.json()
-        setNotifications(prev => [data.notification, ...prev])
+        const mapped = mapFromApi(data.notification)
+        setNotifications(prev => [mapped, ...prev])
       }
     } catch (error) {
       console.error('Failed to add notification:', error)
@@ -182,7 +194,8 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       const response = await fetch(`/api/notifications?userId=${encodeURIComponent(user.id)}`)
       if (response.ok) {
         const data = await response.json()
-        setNotifications(data.notifications || [])
+        const mapped = (data.notifications || []).map(mapFromApi)
+        setNotifications(mapped)
       }
     } catch (error) {
       console.error('Failed to refresh notifications:', error)
@@ -207,7 +220,8 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
       if (response.ok) {
         const data = await response.json()
-        setNotifications(prev => [...data.notifications, ...prev])
+        const mapped = (data.notifications || []).map(mapFromApi)
+        setNotifications(prev => [...mapped, ...prev])
       }
     } catch (error) {
       console.error('Failed to add demo notifications:', error)
