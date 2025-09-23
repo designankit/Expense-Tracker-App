@@ -153,7 +153,7 @@ export function Cards({ expenses }: CardsProps) {
       <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-lg hover:shadow-md transition-all duration-300 cursor-pointer group hover:scale-105">
+            <Card className="bg-white dark:bg-gray-900/20 border border-gray-200 dark:border-gray-800 rounded-lg hover:shadow transition-all duration-200 cursor-pointer group">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                   Total Expenses
@@ -180,7 +180,7 @@ export function Cards({ expenses }: CardsProps) {
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-lg hover:shadow-md transition-all duration-300 cursor-pointer group hover:scale-105">
+            <Card className="bg-white dark:bg-gray-900/20 border border-gray-200 dark:border-gray-800 rounded-lg hover:shadow transition-all duration-200 cursor-pointer group">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                   This Month
@@ -207,7 +207,7 @@ export function Cards({ expenses }: CardsProps) {
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-lg hover:shadow-md transition-all duration-300 cursor-pointer group hover:scale-105">
+            <Card className="bg-white dark:bg-gray-900/20 border border-gray-200 dark:border-gray-800 rounded-lg hover:shadow transition-all duration-200 cursor-pointer group">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
                 <CardTitle className="text-sm font-medium text-muted-foreground">Total Income</CardTitle>
                 <div className="p-2 rounded-xl bg-green-100 text-green-700 dark:bg-emerald-900/40 dark:text-emerald-300 group-hover:scale-110 transition-transform duration-300">
@@ -232,7 +232,7 @@ export function Cards({ expenses }: CardsProps) {
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-lg hover:shadow-md transition-all duration-300 cursor-pointer group hover:scale-105">
+            <Card className="bg-white dark:bg-gray-900/20 border border-gray-200 dark:border-gray-800 rounded-lg hover:shadow transition-all duration-200 cursor-pointer group">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
                 <CardTitle className="text-sm font-medium text-muted-foreground">Savings Rate</CardTitle>
                 <div className={`p-2 rounded-xl ${getSavingsRateColor()} group-hover:scale-110 transition-transform duration-300`}>

@@ -207,20 +207,20 @@ export function DashboardHeader({ onMobileMenuToggle }: HeaderProps) {
   }
 
   return (
-    <header className="flex h-14 sm:h-16 lg:h-18 items-center gap-2 sm:gap-3 lg:gap-4 border-b border-border/30 bg-background/95 backdrop-blur-xl px-3 sm:px-4 lg:px-6 sticky top-0 z-40 shadow-sm">
+    <header className="flex h-14 sm:h-16 lg:h-18 items-center gap-2 sm:gap-3 lg:gap-4 border-b border-gray-200/70 dark:border-gray-800 bg-white/95 dark:bg-gray-900/90 backdrop-blur supports-[backdrop-filter]:bg-white/80 px-3 sm:px-4 lg:px-6 sticky top-0 z-40 shadow-sm">
       {/* Mobile Menu Button */}
       <Button
         variant="ghost"
         size="icon"
         onClick={onMobileMenuToggle}
-        className="lg:hidden h-8 w-8 sm:h-9 sm:w-9 rounded-lg hover:bg-muted/50 transition-colors"
+        className="lg:hidden h-8 w-8 sm:h-9 sm:w-9 rounded-lg hover:bg-emerald-50 text-gray-700 hover:text-emerald-700 dark:text-gray-300 dark:hover:bg-gray-800 transition-colors"
       >
         <Menu className="h-4 w-4" />
       </Button>
       
       {/* Title - Responsive sizing */}
       <div className="flex-1 flex items-center gap-2 sm:gap-3 lg:gap-4 min-w-0">
-        <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 dark:text-white truncate">
+        <h1 className="text-lg sm:text-xl lg:text-2xl font-semibold text-emerald-900 dark:text-white truncate">
           Dashboard
         </h1>
       </div>
@@ -229,7 +229,7 @@ export function DashboardHeader({ onMobileMenuToggle }: HeaderProps) {
       <div className="flex items-center gap-1 sm:gap-2 lg:gap-4">
         
         {/* Separator - Hidden on mobile */}
-        <Separator orientation="vertical" className="h-4 sm:h-6 hidden sm:block bg-border/40" />
+        <Separator orientation="vertical" className="h-4 sm:h-6 hidden sm:block bg-gray-200 dark:bg-gray-800" />
         
         {/* Notifications */}
         <div className="relative">
@@ -237,7 +237,7 @@ export function DashboardHeader({ onMobileMenuToggle }: HeaderProps) {
             variant="ghost" 
             size="icon"
             onClick={() => setIsNotificationOpen(!isNotificationOpen)}
-            className="relative h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10 rounded-lg sm:rounded-xl hover:bg-muted/50 transition-colors"
+            className="relative h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10 rounded-lg sm:rounded-xl hover:bg-emerald-50 text-gray-700 hover:text-emerald-700 dark:text-gray-300 dark:hover:bg-gray-800 transition-colors"
           >
             <Bell className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             {unreadCount > 0 && (
@@ -256,11 +256,11 @@ export function DashboardHeader({ onMobileMenuToggle }: HeaderProps) {
         </div>
         
         {/* Theme Toggle */}
-        <Button 
+          <Button 
           variant="ghost" 
           size="icon" 
           onClick={toggleTheme} 
-          className="h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10 rounded-lg sm:rounded-xl hover:bg-muted/50 transition-colors"
+          className="h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10 rounded-lg sm:rounded-xl hover:bg-emerald-50 text-gray-700 hover:text-emerald-700 dark:text-gray-300 dark:hover:bg-gray-800 transition-colors"
         >
           {mounted ? (
             theme === "dark" ? (
@@ -276,7 +276,7 @@ export function DashboardHeader({ onMobileMenuToggle }: HeaderProps) {
         {/* User Avatar Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10 rounded-full hover:bg-muted/50 transition-colors">
+            <Button variant="ghost" className="relative h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10 rounded-full hover:bg-emerald-50 dark:hover:bg-gray-800 transition-colors">
               <Avatar className="h-7 w-7 sm:h-8 sm:w-8 lg:h-9 lg:w-9">
                 <AvatarImage src={profilePicture || undefined} />
                 <AvatarFallback className="text-xs sm:text-sm font-medium bg-gradient-to-br from-primary to-purple-600 text-white">

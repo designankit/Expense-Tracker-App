@@ -10,6 +10,7 @@ import { Expense, ExpenseInsert, ExpenseUpdate } from "@/types/database"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { SummaryCardSkeleton, TransactionListSkeleton } from "@/components/ui/loading-skeletons"
 import {
   Select,
   SelectContent,
@@ -66,7 +67,7 @@ function TransactionsPageContent() {
 
   // State management
   const [transactions, setTransactions] = useState<Expense[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [highlightedTransactionId, setHighlightedTransactionId] = useState<string | null>(null)
   const [isAddTransactionOpen, setIsAddTransactionOpen] = useState(false)
@@ -432,14 +433,15 @@ function TransactionsPageContent() {
   if (isLoading) {
     return (
       <AppLayout>
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-          <div className="p-6">
-            <div className="flex items-center justify-center h-96">
-              <div className="text-center">
-                <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-blue-600" />
-                <p className="text-gray-600 dark:text-gray-400">Loading transactions...</p>
-              </div>
+        <div className="min-h-screen bg-white dark:bg-gray-900">
+          <div className="p-3 sm:p-4 lg:p-6 xl:p-8 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              <SummaryCardSkeleton />
+              <SummaryCardSkeleton />
+              <SummaryCardSkeleton />
+              <SummaryCardSkeleton />
             </div>
+            <TransactionListSkeleton />
           </div>
         </div>
       </AppLayout>
@@ -470,7 +472,7 @@ function TransactionsPageContent() {
   return (
     <AuthGuard>
       <AppLayout>
-        <div className="min-h-screen bg-gradient-to-br from-blue-50/50 via-indigo-50/30 to-purple-50/50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+        <div className="min-h-screen bg-white dark:bg-gray-900">
           <div className="p-3 sm:p-4 lg:p-6 xl:p-8 space-y-4 sm:space-y-6">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4">
@@ -484,7 +486,7 @@ function TransactionsPageContent() {
               </div>
               <Button 
                 onClick={() => setIsAddTransactionOpen(true)}
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 sm:px-6 py-2 sm:py-2.5 text-sm sm:text-base font-medium rounded-lg sm:rounded-xl shadow-sm hover:shadow-md transition-all duration-200 w-full sm:w-auto"
+                className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-4 sm:px-6 py-2 sm:py-2.5 text-sm sm:text-base font-medium rounded-lg sm:rounded-xl shadow-sm hover:shadow-md transition-all duration-200 w-full sm:w-auto"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 <span className="hidden sm:inline">Add Transaction</span>
@@ -495,21 +497,36 @@ function TransactionsPageContent() {
             {/* Enhanced Tabs */}
             <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'expenses' | 'incomes')} className="w-full">
               <div className="flex flex-col items-center space-y-4 mb-6">
-                <div className="w-full max-w-md">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="expenses" className="flex items-center gap-2 group">
-                      <TrendingDown className="h-4 w-4 transition-colors group-data-[state=active]:text-red-600" />
+                <div className="w-full max-w-xl">
+                  <TabsList className="relative flex w-full items-center justify-between gap-2 rounded-full border border-gray-200 bg-white p-2 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                    {/* Sliding active indicator */}
+                    <div
+                      className={`absolute top-2 bottom-2 left-2 w-[calc(50%-0.5rem)] rounded-full border transition-all duration-300 ease-out
+                        ${activeTab === 'expenses'
+                          ? 'translate-x-0 bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800'
+                          : 'translate-x-[calc(100%+0.5rem)] bg-emerald-50 border-emerald-200 dark:bg-emerald-900/20 dark:border-emerald-800'}`}
+                    />
+                    <TabsTrigger
+                      value="expenses"
+                      className={`group z-10 flex w-1/2 items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium text-gray-600 transition-colors
+                        data-[state=active]:text-red-900 dark:text-gray-300 dark:data-[state=active]:text-white`}
+                    >
+                      <TrendingDown className="h-4 w-4 text-red-500 transition-colors group-data-[state=active]:text-red-600" />
                       <span>Expenses</span>
-                      <div className="ml-1 px-2 py-0.5 text-xs rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 group-data-[state=active]:bg-red-100 group-data-[state=active]:text-red-700 dark:group-data-[state=active]:bg-red-900/30 dark:group-data-[state=active]:text-red-400">
+                      <span className="ml-1 inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-700 group-data-[state=active]:bg-red-200 dark:bg-red-900/30 dark:text-red-400">
                         {transactions.filter(t => t.transaction_type === 'expense').length}
-                      </div>
+                      </span>
                     </TabsTrigger>
-                    <TabsTrigger value="incomes" className="flex items-center gap-2 group">
-                      <TrendingUp className="h-4 w-4 transition-colors group-data-[state=active]:text-green-600" />
+                    <TabsTrigger
+                      value="incomes"
+                      className={`group z-10 flex w-1/2 items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium text-gray-600 transition-colors
+                        data-[state=active]:text-emerald-900 dark:text-gray-300 dark:data-[state=active]:text-white`}
+                    >
+                      <TrendingUp className="h-4 w-4 text-green-500 transition-colors group-data-[state=active]:text-green-600" />
                       <span>Incomes</span>
-                      <div className="ml-1 px-2 py-0.5 text-xs rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 group-data-[state=active]:bg-green-100 group-data-[state=active]:text-green-700 dark:group-data-[state=active]:bg-green-900/30 dark:group-data-[state=active]:text-green-400">
+                      <span className="ml-1 inline-flex items-center rounded-full bg-gray-200 px-2.5 py-0.5 text-xs font-semibold text-gray-700 group-data-[state=active]:bg-green-100 group-data-[state=active]:text-green-700 dark:bg-gray-700 dark:text-gray-300 dark:group-data-[state=active]:bg-green-900/30 dark:group-data-[state=active]:text-green-400">
                         {transactions.filter(t => t.transaction_type === 'income').length}
-                      </div>
+                      </span>
                     </TabsTrigger>
                   </TabsList>
                 </div>

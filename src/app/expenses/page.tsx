@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { SummaryCardSkeleton, TransactionListSkeleton } from "@/components/ui/loading-skeletons"
 import {
   Select,
   SelectContent,
@@ -91,7 +92,7 @@ function ExpensesPageContent() {
 
   // State management
   const [expenses, setExpenses] = useState<Expense[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [highlightedExpenseId, setHighlightedExpenseId] = useState<string | null>(null)
   const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false)
@@ -465,14 +466,14 @@ function ExpensesPageContent() {
   if (isLoading) {
     return (
       <AppLayout>
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-          <div className="p-6">
-            <div className="flex items-center justify-center h-96">
-              <div className="text-center">
-                <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-blue-600" />
-                <p className="text-gray-600 dark:text-gray-400">Loading expenses...</p>
-              </div>
+        <div className="min-h-screen bg-white dark:bg-gray-900">
+          <div className="p-3 sm:p-4 lg:p-6 xl:p-8 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              <SummaryCardSkeleton />
+              <SummaryCardSkeleton />
+              <SummaryCardSkeleton />
             </div>
+            <TransactionListSkeleton />
           </div>
         </div>
       </AppLayout>
@@ -503,7 +504,7 @@ function ExpensesPageContent() {
   return (
     <AuthGuard>
       <AppLayout>
-        <div className="min-h-screen bg-gradient-to-br from-blue-50/50 via-indigo-50/30 to-purple-50/50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+        <div className="min-h-screen bg-white dark:bg-gray-900">
           <div className="p-3 sm:p-4 lg:p-6 xl:p-8 space-y-4 sm:space-y-6">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4">
@@ -517,7 +518,7 @@ function ExpensesPageContent() {
               </div>
               <Button 
                 onClick={() => setIsAddExpenseOpen(true)}
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 sm:px-6 py-2 sm:py-2.5 text-sm sm:text-base font-medium rounded-lg sm:rounded-xl shadow-sm hover:shadow-md transition-all duration-200 w-full sm:w-auto"
+                className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-4 sm:px-6 py-2 sm:py-2.5 text-sm sm:text-base font-medium rounded-lg sm:rounded-xl shadow-sm hover:shadow-md transition-all duration-200 w-full sm:w-auto"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 <span className="hidden sm:inline">Add Expense</span>

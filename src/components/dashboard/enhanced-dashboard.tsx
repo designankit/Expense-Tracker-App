@@ -340,25 +340,25 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
           {/* This Month's Income */}
           <Tooltip>
             <TooltipTrigger asChild>
-              <Card className="hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer group bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200/50 dark:border-green-800/50">
+              <Card className="transition-all duration-200 cursor-pointer group bg-white dark:bg-gray-900/20 border-gray-200 dark:border-gray-800">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-green-700 dark:text-green-300">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
                     Income
                   </CardTitle>
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 text-white group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                  <div className="p-3 rounded-xl bg-emerald-50 text-emerald-600 group-hover:bg-emerald-100 transition-colors">
                     <TrendingUp className="h-5 w-5" />
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-2">
+                  <div className="text-3xl font-semibold text-emerald-700 dark:text-emerald-400 mb-2">
                     {formatCurrencyWithPreferences(totalIncome)}
                   </div>
-                  <div className="flex items-center text-xs text-green-600/70 dark:text-green-400/70 mt-1">
+                  <div className="flex items-center text-xs text-emerald-700/70 dark:text-emerald-400/70 mt-1">
                     <ArrowUpRight className="h-3 w-3 mr-1" />
                     Income Sources
                   </div>
-                  <div className="mt-3 w-full bg-green-200/30 dark:bg-green-800/30 rounded-full h-2">
-                    <div className="bg-gradient-to-r from-green-500 to-emerald-500 h-2 rounded-full w-3/4 transition-all duration-1000"></div>
+                  <div className="mt-3 w-full bg-emerald-200/40 dark:bg-emerald-900/40 rounded-full h-2">
+                    <div className="bg-emerald-500 dark:bg-emerald-400 h-2 rounded-full w-3/4 transition-all duration-700"></div>
                   </div>
                 </CardContent>
               </Card>
@@ -371,25 +371,25 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
           {/* This Month's Expenses */}
           <Tooltip>
             <TooltipTrigger asChild>
-              <Card className="hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer group bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 border-red-200/50 dark:border-red-800/50">
+              <Card className="transition-all duration-200 cursor-pointer group bg-white dark:bg-gray-900/20 border-gray-200 dark:border-gray-800">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-red-700 dark:text-red-300">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
                     Expenses
                   </CardTitle>
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-red-500 to-rose-600 text-white group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                  <div className="p-3 rounded-xl bg-rose-50 text-rose-600 group-hover:bg-rose-100 transition-colors">
                     <TrendingDown className="h-5 w-5" />
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-red-600 dark:text-red-400 mb-2">
+                  <div className="text-3xl font-semibold text-rose-600 dark:text-rose-400 mb-2">
                     {formatCurrencyWithPreferences(totalExpenses)}
                   </div>
-                  <div className="flex items-center text-xs text-red-600/70 dark:text-red-400/70 mt-1">
+                  <div className="flex items-center text-xs text-rose-700/70 dark:text-rose-400/70 mt-1">
                     <ArrowDownRight className="h-3 w-3 mr-1" />
                     Total Spending
                   </div>
-                  <div className="mt-3 w-full bg-red-200/30 dark:bg-red-800/30 rounded-full h-2">
-                    <div className="bg-gradient-to-r from-red-500 to-rose-500 h-2 rounded-full w-2/3 transition-all duration-1000"></div>
+                  <div className="mt-3 w-full bg-rose-200/40 dark:bg-rose-900/40 rounded-full h-2">
+                    <div className="bg-rose-500 dark:bg-rose-400 h-2 rounded-full w-2/3 transition-all duration-700"></div>
                   </div>
                 </CardContent>
               </Card>
@@ -402,39 +402,31 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
           {/* This Month's Savings */}
           <Tooltip>
             <TooltipTrigger asChild>
-              <Card className={`hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer group ${
-                monthlySavings >= 0 
-                  ? 'bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border-emerald-200/50 dark:border-emerald-800/50'
-                  : 'bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 border-orange-200/50 dark:border-orange-800/50'
-              }`}>
+              <Card className={`transition-all duration-200 cursor-pointer group bg-white dark:bg-gray-900/20 border-gray-200 dark:border-gray-800`}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className={`text-sm font-medium ${
-                    monthlySavings >= 0 
-                      ? 'text-emerald-700 dark:text-emerald-300'
-                      : 'text-orange-700 dark:text-orange-300'
-                  }`}>
+                  <CardTitle className={`text-sm font-medium text-muted-foreground`}>
                     Savings
                   </CardTitle>
-                  <div className={`p-3 rounded-xl text-white group-hover:scale-110 transition-transform duration-300 shadow-lg ${
+                  <div className={`p-3 rounded-xl ${
                     monthlySavings >= 0 
-                      ? 'bg-gradient-to-br from-emerald-500 to-teal-600'
-                      : 'bg-gradient-to-br from-orange-500 to-red-600'
+                      ? 'bg-emerald-50 text-emerald-600'
+                      : 'bg-orange-50 text-orange-600'
                   }`}>
                     <PiggyBank className="h-5 w-5" />
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className={`text-3xl font-bold mb-2 ${
+                  <div className={`text-3xl font-semibold mb-2 ${
                     monthlySavings >= 0 
-                      ? 'text-emerald-600 dark:text-emerald-400'
+                      ? 'text-emerald-700 dark:text-emerald-400'
                       : 'text-orange-600 dark:text-orange-400'
                   }`}>
                     {formatCurrencyWithPreferences(monthlySavings)}
                   </div>
                   <div className={`flex items-center text-xs mt-1 ${
                     monthlySavings >= 0 
-                      ? 'text-emerald-600/70 dark:text-emerald-400/70'
-                      : 'text-orange-600/70 dark:text-orange-400/70'
+                      ? 'text-emerald-700/70 dark:text-emerald-400/70'
+                      : 'text-orange-700/70 dark:text-orange-400/70'
                   }`}>
                     {monthlySavings >= 0 ? (
                       <>
@@ -450,13 +442,13 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                   </div>
                   <div className={`mt-3 w-full rounded-full h-2 ${
                     monthlySavings >= 0 
-                      ? 'bg-emerald-200/30 dark:bg-emerald-800/30'
-                      : 'bg-orange-200/30 dark:bg-orange-800/30'
+                      ? 'bg-emerald-200/40 dark:bg-emerald-900/40'
+                      : 'bg-orange-200/40 dark:bg-orange-900/40'
                   }`}>
-                    <div className={`h-2 rounded-full transition-all duration-1000 ${
+                    <div className={`h-2 rounded-full transition-all duration-700 ${
                       monthlySavings >= 0 
-                        ? 'bg-gradient-to-r from-emerald-500 to-teal-500 w-4/5'
-                        : 'bg-gradient-to-r from-orange-500 to-red-500 w-3/5'
+                        ? 'bg-emerald-500 dark:bg-emerald-400 w-4/5'
+                        : 'bg-orange-500 dark:bg-orange-400 w-3/5'
                     }`}></div>
                   </div>
                 </CardContent>
@@ -470,66 +462,54 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
           {/* Savings Rate */}
           <Tooltip>
             <TooltipTrigger asChild>
-              <Card className={`hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer group ${
-                savingsRate >= 20 
-                  ? 'bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200/50 dark:border-blue-800/50'
-                  : savingsRate >= 10
-                  ? 'bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 border-amber-200/50 dark:border-amber-800/50'
-                  : 'bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 border-red-200/50 dark:border-red-800/50'
-              }`}>
+              <Card className={`transition-all duration-200 cursor-pointer group bg-white dark:bg-gray-900/20 border-gray-200 dark:border-gray-800`}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className={`text-sm font-medium ${
-                    savingsRate >= 20 
-                      ? 'text-blue-700 dark:text-blue-300'
-                      : savingsRate >= 10
-                      ? 'text-amber-700 dark:text-amber-300'
-                      : 'text-red-700 dark:text-red-300'
-                  }`}>
+                  <CardTitle className={`text-sm font-medium text-muted-foreground`}>
                     Savings Rate
                   </CardTitle>
-                  <div className={`p-3 rounded-xl text-white group-hover:scale-110 transition-transform duration-300 shadow-lg ${
+                  <div className={`p-3 rounded-xl ${
                     savingsRate >= 20 
-                      ? 'bg-gradient-to-br from-blue-500 to-indigo-600'
+                      ? 'bg-emerald-50 text-emerald-600'
                       : savingsRate >= 10
-                      ? 'bg-gradient-to-br from-amber-500 to-yellow-600'
-                      : 'bg-gradient-to-br from-red-500 to-rose-600'
+                      ? 'bg-amber-50 text-amber-600'
+                      : 'bg-rose-50 text-rose-600'
                   }`}>
                     <Target className="h-5 w-5" />
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className={`text-3xl font-bold mb-2 ${
+                  <div className={`text-3xl font-semibold mb-2 ${
                     savingsRate >= 20 
-                      ? 'text-blue-600 dark:text-blue-400'
+                      ? 'text-emerald-700 dark:text-emerald-400'
                       : savingsRate >= 10
                       ? 'text-amber-600 dark:text-amber-400'
-                      : 'text-red-600 dark:text-red-400'
+                      : 'text-rose-600 dark:text-rose-400'
                   }`}>
                     {formatPercentage(savingsRate)}
                   </div>
                   <div className={`flex items-center text-xs mt-1 ${
                     savingsRate >= 20 
-                      ? 'text-blue-600/70 dark:text-blue-400/70'
+                      ? 'text-emerald-700/70 dark:text-emerald-400/70'
                       : savingsRate >= 10
-                      ? 'text-amber-600/70 dark:text-amber-400/70'
-                      : 'text-red-600/70 dark:text-red-400/70'
+                      ? 'text-amber-700/70 dark:text-amber-400/70'
+                      : 'text-rose-700/70 dark:text-rose-400/70'
                   }`}>
                     <BarChart3 className="h-3 w-3 mr-1" />
                     Savings ÷ Income × 100
                   </div>
                   <div className={`mt-3 w-full rounded-full h-2 ${
                     savingsRate >= 20 
-                      ? 'bg-blue-200/30 dark:bg-blue-800/30'
+                      ? 'bg-emerald-200/40 dark:bg-emerald-900/40'
                       : savingsRate >= 10
-                      ? 'bg-amber-200/30 dark:bg-amber-800/30'
-                      : 'bg-red-200/30 dark:bg-red-800/30'
+                      ? 'bg-amber-200/40 dark:bg-amber-900/40'
+                      : 'bg-rose-200/40 dark:bg-rose-900/40'
                   }`}>
-                    <div className={`h-2 rounded-full transition-all duration-1000 ${
+                    <div className={`h-2 rounded-full transition-all duration-700 ${
                       savingsRate >= 20 
-                        ? 'bg-gradient-to-r from-blue-500 to-indigo-500'
+                        ? 'bg-emerald-500 dark:bg-emerald-400'
                         : savingsRate >= 10
-                        ? 'bg-gradient-to-r from-amber-500 to-yellow-500'
-                        : 'bg-gradient-to-r from-red-500 to-rose-500'
+                        ? 'bg-amber-500 dark:bg-amber-400'
+                        : 'bg-rose-500 dark:bg-rose-400'
                     }`} style={{ width: `${Math.min(savingsRate, 100)}%` }}></div>
                   </div>
                 </CardContent>
@@ -546,15 +526,11 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
           {/* Monthly Budget Progress */}
           <Card className={`lg:col-span-1 hover:shadow-lg transition-all duration-300 ${
             budgetData.isOverBudget 
-              ? 'bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 border-red-200/50 dark:border-red-800/50'
-              : 'bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 border-emerald-200/50 dark:border-emerald-800/50'
+              ? 'bg-white border-red-200/50 dark:bg-gray-900/20 dark:border-red-800/50'
+              : 'bg-white border-emerald-200/50 dark:bg-gray-900/20 dark:border-emerald-800/50'
           }`}>
             <CardHeader>
-              <CardTitle className={`flex items-center gap-2 ${
-                budgetData.isOverBudget 
-                  ? 'text-red-700 dark:text-red-300'
-                  : 'text-emerald-700 dark:text-emerald-300'
-              }`}>
+              <CardTitle className={`flex items-center gap-2 text-emerald-900 dark:text-emerald-200`}>
                 <div className={`p-2 rounded-lg ${
                   budgetData.isOverBudget 
                     ? 'bg-red-100 dark:bg-red-900/40'
@@ -607,10 +583,10 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
           </Card>
 
           {/* Savings Goal Progress */}
-          <Card className="lg:col-span-1 hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200/50 dark:border-blue-800/50">
+          <Card className="lg:col-span-1 hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-900/20 border-emerald-200/50 dark:border-emerald-800/50">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
-                <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/40">
+              <CardTitle className="flex items-center gap-2 text-emerald-900 dark:text-emerald-200">
+                <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
                   <PiggyBank className="h-5 w-5" />
                 </div>
                 Savings Goals
@@ -622,32 +598,32 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                   <div className="space-y-3">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Saved amount</span>
-                      <span className="font-medium text-blue-600 dark:text-blue-400">
+                      <span className="font-medium text-emerald-600 dark:text-emerald-400">
                         {formatCurrencyWithPreferences(savingsGoalData.totalSaved)}
                       </span>
                     </div>
                     <div className="relative">
                       <Progress 
                         value={savingsGoalData.progress} 
-                        className="h-3 [&>div]:bg-gradient-to-r [&>div]:from-blue-500 [&>div]:to-indigo-600" 
+                        className="h-3 [&>div]:bg-gradient-to-r [&>div]:from-emerald-500 [&>div]:to-green-600" 
                       />
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-xs font-medium text-blue-600">
+                        <span className="text-xs font-medium text-emerald-600">
                           {formatPercentage(savingsGoalData.progress)}
                         </span>
                       </div>
                     </div>
                     <div className="flex justify-between text-xs text-muted-foreground">
                       <span>Target: {formatCurrencyWithPreferences(savingsGoalData.totalTarget)}</span>
-                      <span className="text-blue-500">On Track</span>
+                      <span className="text-emerald-600">On Track</span>
                     </div>
                   </div>
                   <div className="space-y-2">
                     <div className="text-xs text-muted-foreground font-medium">Active Goals:</div>
                     {savings.slice(0, 3).map((goal) => (
-                      <div key={goal.id} className="flex justify-between items-center p-2 bg-blue-100/50 dark:bg-blue-900/30 rounded-lg">
+                      <div key={goal.id} className="flex justify-between items-center p-2 bg-emerald-100/50 dark:bg-emerald-900/30 rounded-lg">
                         <span className="truncate text-sm font-medium">{goal.goal_name}</span>
-                        <Badge variant="outline" className="text-xs border-blue-300 text-blue-700 dark:text-blue-300">
+                        <Badge variant="outline" className="text-xs border-emerald-300 text-emerald-700 dark:text-emerald-300">
                           {formatPercentage((goal.saved_amount / goal.target_amount) * 100)}
                         </Badge>
                       </div>
@@ -667,9 +643,9 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
           </Card>
 
           {/* Expense Category Breakdown */}
-          <Card className="lg:col-span-1 hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-indigo-50 to-slate-50 dark:from-indigo-900/20 dark:to-slate-900/20 border-indigo-200/50 dark:border-indigo-800/50">
+          <Card className="lg:col-span-1 hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-900/20 border-indigo-200/50 dark:border-indigo-800/50">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-indigo-700 dark:text-indigo-300">
+              <CardTitle className="flex items-center gap-2 text-emerald-900 dark:text-emerald-200">
                 <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/40">
                   <BarChart3 className="h-5 w-5" />
                 </div>
@@ -771,9 +747,9 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
         {/* Bottom Row - Trends + Activity */}
         <div className="grid grid-cols-1 gap-6">
           {/* Recent Transactions */}
-          <Card className="hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-gray-50 to-slate-50 dark:from-gray-900/20 dark:to-slate-900/20 border-gray-200/50 dark:border-gray-800/50">
+          <Card className="hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-900/20 border-gray-200/50 dark:border-gray-800/50">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+              <CardTitle className="flex items-center gap-2 text-emerald-900 dark:text-emerald-200">
                 <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-900/40">
                   <Activity className="h-5 w-5" />
                 </div>
@@ -839,9 +815,9 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
           </Card>
 
           {/* Income vs Expenses Chart */}
-          <Card className="hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 border-indigo-200/50 dark:border-indigo-800/50">
+          <Card className="hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-900/20 border-indigo-200/50 dark:border-indigo-800/50">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-indigo-700 dark:text-indigo-300">
+              <CardTitle className="flex items-center gap-2 text-emerald-900 dark:text-emerald-200">
                 <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/40">
                   <Calendar className="h-5 w-5" />
                 </div>

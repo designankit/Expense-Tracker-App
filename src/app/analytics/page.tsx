@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ChartSkeleton, SummaryCardSkeleton } from "@/components/ui/loading-skeletons"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
@@ -81,7 +82,7 @@ export default function AnalyticsPage() {
   const { user, loading: authLoading } = useSupabase()
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [savingsGoals, setSavingsGoals] = useState<SavingsGoal[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
   const [timeRange, setTimeRange] = useState<'week' | 'month' | 'year'>('month')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
 
@@ -318,15 +319,14 @@ export default function AnalyticsPage() {
     return (
       <AuthGuard requireOnboarding={true}>
         <AppLayout>
-          <div className="p-6">
-            <div className="flex items-center justify-center h-96">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-                <p className="text-muted-foreground">
-                  {authLoading ? 'Loading user...' : 'Loading analytics...'}
-                </p>
-              </div>
+          <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <SummaryCardSkeleton />
+              <SummaryCardSkeleton />
+              <SummaryCardSkeleton />
+              <SummaryCardSkeleton />
             </div>
+            <ChartSkeleton />
           </div>
         </AppLayout>
       </AuthGuard>
@@ -369,7 +369,7 @@ export default function AnalyticsPage() {
           </div>
 
           {/* Filters */}
-          <Card>
+          <Card className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
             <CardContent className="p-4">
               <div className="flex flex-wrap gap-4">
                 <div className="flex items-center gap-2">
@@ -407,7 +407,7 @@ export default function AnalyticsPage() {
           </Card>
 
           {/* Financial Health Score */}
-          <Card>
+          <Card className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Activity className="h-5 w-5" />
@@ -437,7 +437,7 @@ export default function AnalyticsPage() {
 
           {/* Quick Stats */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card>
+            <Card className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -451,7 +451,7 @@ export default function AnalyticsPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -465,7 +465,7 @@ export default function AnalyticsPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -479,7 +479,7 @@ export default function AnalyticsPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -495,7 +495,7 @@ export default function AnalyticsPage() {
           </div>
 
           {/* Income vs Expenses Trends */}
-          <Card>
+          <Card className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <TrendingUp className="h-5 w-5" />
@@ -535,7 +535,7 @@ export default function AnalyticsPage() {
 
           {/* Category Analysis */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
+            <Card className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <PieChartIcon className="h-5 w-5" />
@@ -567,7 +567,7 @@ export default function AnalyticsPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <BarChart3 className="h-5 w-5" />
@@ -599,7 +599,7 @@ export default function AnalyticsPage() {
           </div>
 
           {/* Savings Insights */}
-          <Card>
+          <Card className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <PiggyBank className="h-5 w-5" />
@@ -647,7 +647,7 @@ export default function AnalyticsPage() {
 
           {/* Recurring Transactions */}
           {recurringTransactions.length > 0 && (
-            <Card>
+            <Card className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Repeat className="h-5 w-5" />

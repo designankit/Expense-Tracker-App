@@ -20,7 +20,7 @@ import {
 } from "lucide-react"
 
 export default function DashboardPage() {
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
   const [financialAnalysis, setFinancialAnalysis] = useState<{
     currentMonthExpenses: number
     lastMonthExpenses: number
@@ -39,9 +39,7 @@ export default function DashboardPage() {
   const { user, supabase } = useSupabase()
   // Note: Language preferences removed
 
-  useEffect(() => {
-    setIsLoading(false)
-  }, [])
+  // Removed initial mount loader to avoid flash during tab navigation
 
   // Analyze comprehensive financial trends
   useEffect(() => {
@@ -49,6 +47,7 @@ export default function DashboardPage() {
       if (!user || !supabase) return
 
       try {
+        setIsLoading(true)
         const currentDate = new Date()
         const currentMonth = currentDate.getMonth()
         const currentYear = currentDate.getFullYear()
@@ -151,6 +150,8 @@ export default function DashboardPage() {
         })
       } catch (error) {
         console.error('Error analyzing financials:', error)
+      } finally {
+        setIsLoading(false)
       }
     }
 
@@ -177,7 +178,7 @@ export default function DashboardPage() {
   return (
     <AuthGuard requireOnboarding={true}>
       <AppLayout>
-        <div className="min-h-screen w-full bg-gradient-to-br from-blue-50/50 via-indigo-50/30 to-purple-50/50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+        <div className="min-h-screen w-full bg-white dark:bg-gray-900">
           <div className="w-full p-3 sm:p-4 lg:p-6 xl:p-8">
             {isLoading ? (
               <DashboardSkeleton />
@@ -185,8 +186,8 @@ export default function DashboardPage() {
               <div className="space-y-4 sm:space-y-6 lg:space-y-8">
                 {/* Welcome Header */}
                 <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-indigo-500/10 to-blue-600/10 rounded-lg blur-3xl" />
-                  <div className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-lg p-4 sm:p-6 lg:p-8 shadow-sm">
+                  <div className="absolute inset-0 bg-emerald-500/5 rounded-lg blur-3xl" />
+                  <div className="relative bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-4 sm:p-6 lg:p-8 shadow">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6">
                       <div className="space-y-2 min-w-0 flex-1">
                         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white truncate">
@@ -198,14 +199,14 @@ export default function DashboardPage() {
                         
                         {/* Financial Analysis Card */}
                         {financialAnalysis && (
-                          <div className={`relative overflow-hidden rounded-xl border-2 p-4 sm:p-6 shadow-lg transition-all duration-500 hover:shadow-xl hover:scale-[1.02] animate-in slide-in-from-bottom-4 fade-in duration-700 ${
+                          <div className={`relative overflow-hidden rounded-xl border p-4 sm:p-6 shadow-sm transition-all duration-300 ${
                             financialAnalysis.color === 'green' 
-                              ? 'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-700'
+                              ? 'bg-emerald-50 dark:bg-emerald-900/10 border-emerald-200 dark:border-emerald-800'
                               : financialAnalysis.color === 'blue'
-                              ? 'bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200 dark:border-blue-700'
+                              ? 'bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800'
                               : financialAnalysis.color === 'orange'
-                              ? 'bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 border-orange-200 dark:border-orange-700'
-                              : 'bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 border-red-200 dark:border-red-700'
+                              ? 'bg-amber-50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800'
+                              : 'bg-rose-50 dark:bg-rose-900/10 border-rose-200 dark:border-rose-800'
                           }`}>
                             {/* Animated Background Pattern */}
                             <div className="absolute inset-0 opacity-5">
@@ -224,7 +225,7 @@ export default function DashboardPage() {
                             
                             <div className="relative">
                               <div className="flex items-start gap-4">
-                                <div className={`p-2 rounded-lg animate-in zoom-in duration-500 hover:scale-110 transition-transform ${
+                                <div className={`p-2 rounded-lg ${
                                   financialAnalysis.color === 'green' 
                                     ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400'
                                     : financialAnalysis.color === 'blue'

@@ -86,39 +86,65 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-blue-900 dark:to-indigo-900">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-lime-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-900">
+      {/* Sticky Navigation */}
+      <div className="sticky top-0 z-50 w-full backdrop-blur bg-white/70 dark:bg-gray-900/70 border-b border-emerald-200/40 dark:border-emerald-800/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-lg bg-emerald-600"></div>
+            <span className="font-semibold text-emerald-900 dark:text-emerald-200">Expensio</span>
+          </div>
+          <nav className="hidden md:flex items-center gap-6 text-sm text-gray-700 dark:text-gray-300">
+            <a href="#features" className="hover:text-emerald-700">Features</a>
+            <a href="#how" className="hover:text-emerald-700">How it works</a>
+            <a href="#screens" className="hover:text-emerald-700">Screenshots</a>
+            
+            <a href="#faq" className="hover:text-emerald-700">FAQ</a>
+          </nav>
+          <div className="hidden sm:flex items-center gap-3">
+            <Link href="/login" className="text-sm text-emerald-700 dark:text-emerald-300">Sign in</Link>
+            <Link href="/signup" className="inline-flex items-center rounded-lg bg-emerald-600 text-white text-sm px-4 py-2 hover:bg-emerald-700">Get Started</Link>
+          </div>
+        </div>
+      </div>
       {/* Subtle background pattern */}
       <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
 
-      {/* Hero Section */}
+      {/* Hero Section with illustrations */}
       <motion.div 
         ref={heroRef}
         initial="initial"
         animate={heroInView ? "animate" : "initial"}
         variants={staggerContainer}
-        className="relative z-10 w-full px-4 sm:px-6 lg:px-8 py-20 sm:py-24 lg:py-32"
+        className="relative z-10 w-full px-4 sm:px-6 lg:px-8 py-24 md:py-28 lg:py-32 overflow-hidden"
       >
-        <div className="max-w-6xl mx-auto text-center">
+        {/* Soft illustration blobs */}
+        <div className="pointer-events-none absolute inset-0 -z-10">
+          <div className="absolute -top-24 -left-24 w-[520px] h-[520px] rounded-full bg-emerald-300/20 blur-3xl" />
+          <div className="absolute top-1/3 -right-24 w-[420px] h-[420px] rounded-full bg-teal-300/20 blur-3xl" />
+          <div className="absolute bottom-0 left-1/3 w-[360px] h-[360px] rounded-full bg-lime-300/20 blur-3xl" />
+        </div>
+        <div className="max-w-5xl mx-auto text-center">
           <motion.div
             variants={scaleIn}
-            className="inline-flex items-center gap-3 px-6 py-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-full text-sm font-medium mb-8 shadow-lg"
+            className="inline-flex items-center gap-3 px-6 py-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-emerald-200/60 dark:border-emerald-800/40 rounded-full text-sm font-medium mb-8 shadow-lg"
           >
-            <Lock className="h-4 w-4 text-green-600" />
+            <Lock className="h-4 w-4 text-emerald-600" />
             <span className="text-gray-700 dark:text-gray-300">End-to-end Encrypted</span>
             <span className="text-gray-300 dark:text-gray-600">•</span>
-            <CheckCircle className="h-4 w-4 text-green-600" />
+            <CheckCircle className="h-4 w-4 text-emerald-600" />
             <span className="text-gray-700 dark:text-gray-300">Secure & Private</span>
             <span className="text-gray-300 dark:text-gray-600">•</span>
-            <Globe className="h-4 w-4 text-green-600" />
+            <Globe className="h-4 w-4 text-emerald-600" />
             <span className="text-gray-700 dark:text-gray-300">GDPR Compliant</span>
           </motion.div>
           
           <motion.h1 
             variants={fadeInUp}
-            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-gray-900 dark:text-white mb-8 leading-tight"
+            className="mx-auto max-w-4xl heading-display mb-8 leading-tight"
           >
             Take control of your{" "}
-            <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600 bg-clip-text text-transparent">
               finances
             </span>
           </motion.h1>
@@ -134,13 +160,13 @@ export default function Home() {
             variants={fadeInUp}
             className="flex flex-col sm:flex-row gap-6 justify-center"
           >
-            <Button asChild size="lg" className="text-lg px-10 py-6 hover:scale-105 transition-all duration-200 shadow-xl hover:shadow-2xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+            <Button asChild size="lg" className="text-lg px-10 py-6 hover:scale-105 transition-all duration-200 shadow-xl hover:shadow-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700">
               <Link href="/signup">
                 Get Started Free
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
-            <Button asChild variant="outline" size="lg" className="text-lg px-10 py-6 hover:scale-105 transition-all duration-200 border-2">
+            <Button asChild variant="outline" size="lg" className="text-lg px-10 py-6 hover:scale-105 transition-all duration-200 border-2 border-emerald-300 text-emerald-700 dark:text-emerald-300">
               <Link href="/login">
                 Sign In
               </Link>
@@ -155,11 +181,12 @@ export default function Home() {
         initial="initial"
         animate={featuresInView ? "animate" : "initial"}
         variants={staggerContainer}
-        className="relative z-10 w-full px-4 sm:px-6 lg:px-8 py-20 sm:py-24"
+        id="features"
+        className="relative z-10 w-full px-4 sm:px-6 lg:px-8 py-24 md:py-28 lg:py-32"
       >
         <div className="max-w-7xl mx-auto">
           <motion.div variants={fadeInUp} className="text-center mb-20">
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-8">
+            <h2 className="section-title mb-8">
               Everything you need to manage your finances
             </h2>
             <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 max-w-4xl mx-auto leading-relaxed">
@@ -279,17 +306,45 @@ export default function Home() {
         </div>
       </motion.div>
 
-      {/* Preview Section */}
+      {/* How it works Section */}
+      <section id="how" className="relative z-10 w-full px-4 sm:px-6 lg:px-8 py-24 md:py-28 lg:py-32">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold text-emerald-900 dark:text-emerald-200 mb-4">How it works</h2>
+            <p className="text-gray-600 dark:text-gray-300">Three steps to get insights and save more.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="rounded-2xl bg-white dark:bg-gray-900 border border-emerald-200/50 dark:border-emerald-800/50 p-6">
+              <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center mb-4 font-semibold">1</div>
+              <h3 className="font-semibold text-emerald-900 dark:text-emerald-200 mb-2">Create your account</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300">Sign up free and set currency and categories.</p>
+            </div>
+            <div className="rounded-2xl bg-white dark:bg-gray-900 border border-emerald-200/50 dark:border-emerald-800/50 p-6">
+              <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center mb-4 font-semibold">2</div>
+              <h3 className="font-semibold text-emerald-900 dark:text-emerald-200 mb-2">Add transactions</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300">Import or add manually. We auto‑categorize.</p>
+            </div>
+            <div className="rounded-2xl bg-white dark:bg-gray-900 border border-emerald-200/50 dark:border-emerald-800/50 p-6">
+              <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center mb-4 font-semibold">3</div>
+              <h3 className="font-semibold text-emerald-900 dark:text-emerald-200 mb-2">Track & save</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300">Dashboards, goals, and insights help you save.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Preview / Screens Section */}
       <motion.div 
         ref={previewRef}
         initial="initial"
         animate={previewInView ? "animate" : "initial"}
         variants={staggerContainer}
-        className="relative z-10 w-full px-4 sm:px-6 lg:px-8 py-20 sm:py-24 bg-gray-50/50 dark:bg-gray-800/30"
+        id="screens"
+        className="relative z-10 w-full px-4 sm:px-6 lg:px-8 py-24 md:py-28 lg:py-32 bg-gray-50/50 dark:bg-gray-800/30 overflow-hidden"
       >
         <div className="max-w-7xl mx-auto">
           <motion.div variants={fadeInUp} className="text-center mb-20">
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-8">
+            <h2 className="section-title mb-8">
               See it in action
             </h2>
             <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 max-w-4xl mx-auto leading-relaxed">
@@ -303,7 +358,9 @@ export default function Home() {
               <div className="relative mx-auto max-w-sm">
                 <div className="bg-gray-800 rounded-t-2xl p-2 shadow-2xl">
                   <div className="bg-white rounded-lg overflow-hidden">
-                    <div className="bg-gray-100 px-4 py-3 flex items-center gap-2">
+                    <div className="bg-gray-100 px-4 py-3 flex items-center gap-2 relative">
+                      {/* notch */}
+                      <div className="absolute left-1/2 -translate-x-1/2 -top-4 h-6 w-28 bg-black/80 rounded-b-2xl"></div>
                       <div className="w-3 h-3 bg-red-500 rounded-full"></div>
                       <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
                       <div className="w-3 h-3 bg-green-500 rounded-full"></div>
@@ -340,7 +397,8 @@ export default function Home() {
               <div className="relative mx-auto max-w-xs">
                 <div className="bg-gray-800 rounded-2xl p-2 shadow-2xl">
                   <div className="bg-white rounded-xl overflow-hidden">
-                    <div className="bg-gray-100 px-4 py-3 flex items-center gap-2">
+                    <div className="bg-gray-100 px-4 py-3 flex items-center gap-2 relative">
+                      <div className="absolute left-1/2 -translate-x-1/2 -top-3 h-5 w-20 bg-black/80 rounded-b-2xl"></div>
                       <div className="w-2 h-2 bg-red-500 rounded-full"></div>
                       <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
@@ -379,7 +437,9 @@ export default function Home() {
               <div className="relative mx-auto max-w-48">
                 <div className="bg-gray-800 rounded-3xl p-2 shadow-2xl">
                   <div className="bg-white rounded-2xl overflow-hidden">
-                    <div className="bg-gray-100 px-3 py-2 flex items-center justify-center">
+                    <div className="bg-gray-100 px-3 py-2 flex items-center justify-center relative">
+                      {/* phone notch */}
+                      <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 h-5 w-24 bg-black/80 rounded-b-2xl" />
                       <div className="w-8 h-1 bg-gray-400 rounded-full"></div>
                     </div>
                     <div className="p-3">
@@ -418,17 +478,17 @@ export default function Home() {
         </div>
       </motion.div>
 
-      {/* Why Choose Us Section */}
+      {/* Why Choose Us Section with background */}
       <motion.div 
         ref={whyChooseRef}
         initial="initial"
         animate={whyChooseInView ? "animate" : "initial"}
         variants={staggerContainer}
-        className="relative z-10 w-full px-4 sm:px-6 lg:px-8 py-20 sm:py-24"
+        className="relative z-10 w-full px-4 sm:px-6 lg:px-8 py-24 md:py-28 lg:py-32 bg-gradient-to-b from-white/60 to-emerald-50/40 dark:from-gray-900/20 dark:to-emerald-900/10 overflow-hidden"
       >
         <div className="max-w-7xl mx-auto">
           <motion.div variants={fadeInUp} className="text-center mb-20">
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-8">
+            <h2 className="section-title mb-8">
               Why Choose Us?
             </h2>
             <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 max-w-4xl mx-auto leading-relaxed">
@@ -496,17 +556,20 @@ export default function Home() {
         </div>
       </motion.div>
 
-      {/* FAQ Section */}
+      
+
+      {/* FAQ Section with background */}
       <motion.div 
         ref={faqRef}
         initial="initial"
         animate={faqInView ? "animate" : "initial"}
         variants={staggerContainer}
-        className="relative z-10 w-full px-4 sm:px-6 lg:px-8 py-20 sm:py-24 bg-gray-50/50 dark:bg-gray-800/30"
+        id="faq"
+        className="relative z-10 w-full px-4 sm:px-6 lg:px-8 py-24 md:py-28 lg:py-32 bg-gradient-to-b from-emerald-50/40 to-white/60 dark:from-emerald-900/10 dark:to-gray-900/20 overflow-hidden"
       >
         <div className="max-w-4xl mx-auto">
           <motion.div variants={fadeInUp} className="text-center mb-20">
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-8">
+            <h2 className="section-title mb-8">
               Frequently Asked Questions
             </h2>
             <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 leading-relaxed">
@@ -565,7 +628,7 @@ export default function Home() {
         className="relative z-10 w-full px-4 sm:px-6 lg:px-8 py-20 sm:py-24"
       >
         <div className="max-w-5xl mx-auto text-center">
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-8">
+          <h2 className="section-title mb-8">
             Ready to take control of your finances?
           </h2>
           <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed">

@@ -239,13 +239,13 @@ export default function SettingsPage() {
   return (
     <AuthGuard requireOnboarding={true}>
       <AppLayout>
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-gray-900 dark:to-slate-800">
-          <div className="p-4 sm:p-6 lg:p-8 xl:p-12">
+        <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-lime-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-900">
+          <div className="px-3 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-6 lg:py-8">
             {/* Header */}
             <div className="mb-10">
               <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
-                <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg">
-                  <SettingsIcon className="h-6 w-6 text-white" />
+                <div className="h-12 w-12 sm:h-14 sm:w-14 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-lg flex items-center justify-center">
+                  <SettingsIcon className="h-7 w-7 sm:h-8 sm:w-8 text-white" />
                 </div>
                 <div className="flex-1">
                   <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
@@ -259,10 +259,10 @@ export default function SettingsPage() {
               
               {/* Quick Stats */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-                <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 hover:shadow-lg transition-all duration-300">
+                <div className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-800 hover:shadow-lg transition-all duration-300">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
-                      <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                    <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+                      <CheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                     </div>
                     <div>
                       <p className="text-sm font-medium text-gray-900 dark:text-white">Account Status</p>
@@ -273,10 +273,10 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 
-                <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 hover:shadow-lg transition-all duration-300">
+                <div className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-800 hover:shadow-lg transition-all duration-300">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-                      <SettingsIcon className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                    <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
+                      <SettingsIcon className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                     </div>
                     <div>
                       <p className="text-sm font-medium text-gray-900 dark:text-white">Time Format</p>
@@ -292,11 +292,11 @@ export default function SettingsPage() {
             <div className="max-w-6xl space-y-6">
               <Accordion type="multiple" defaultValue={["profile"]} className="space-y-4">
                 {/* Profile & Personalization */}
-                <AccordionItem value="profile" className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 hover:shadow-xl transition-all duration-300">
-                  <AccordionTrigger className="px-8 py-6 hover:no-underline group">
+                <AccordionItem value="profile" className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 hover:shadow-md transition-all duration-300">
+                  <AccordionTrigger className="px-6 sm:px-8 py-5 sm:py-6 hover:no-underline group">
                     <div className="flex items-center gap-4">
-                      <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-md group-hover:scale-110 transition-transform duration-200">
-                        <User className="h-5 w-5 text-white" />
+                    <div className="h-10 w-10 sm:h-12 sm:w-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-md group-hover:scale-110 transition-transform duration-200 flex items-center justify-center">
+                      <User className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                       </div>
                       <div className="text-left">
                         <span className="text-lg font-semibold text-gray-900 dark:text-white">Profile & Personalization</span>
@@ -304,13 +304,13 @@ export default function SettingsPage() {
                       </div>
                     </div>
                   </AccordionTrigger>
-                  <AccordionContent className="px-8 pb-8">
+                  <AccordionContent className="px-6 sm:px-8 pb-6 sm:pb-8">
                     <div className="space-y-8">
                       {/* User Information - Read Only */}
-                      <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-2xl p-8 border border-gray-200/50 dark:border-gray-600/50">
+                      <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 sm:p-8 border border-gray-200 dark:border-gray-800">
                         <h3 className="text-lg font-semibold mb-6 flex items-center gap-3">
-                          <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                            <User className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                          <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
+                            <User className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                           </div>
                           User Information
                         </h3>
@@ -370,8 +370,8 @@ export default function SettingsPage() {
                       {/* Preferences - Editable */}
                       <div>
                         <h3 className="text-lg font-semibold mb-6 flex items-center gap-3">
-                          <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
-                            <SettingsIcon className="h-4 w-4 text-green-600 dark:text-green-400" />
+                          <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+                            <SettingsIcon className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                           </div>
                           Preferences
                         </h3>
@@ -409,8 +409,8 @@ export default function SettingsPage() {
                 </AccordionItem>
 
                 {/* Account Settings */}
-                <AccordionItem value="account" className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 hover:shadow-xl transition-all duration-300">
-                  <AccordionTrigger className="px-8 py-6 hover:no-underline group">
+                <AccordionItem value="account" className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 hover:shadow-md transition-all duration-300">
+                  <AccordionTrigger className="px-6 sm:px-8 py-5 sm:py-6 hover:no-underline group">
                     <div className="flex items-center gap-4">
                       <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-md group-hover:scale-110 transition-transform duration-200">
                         <Shield className="h-5 w-5 text-white" />
@@ -424,7 +424,7 @@ export default function SettingsPage() {
                   <AccordionContent className="px-6 pb-6">
                     <div className="space-y-6">
                       {/* Account Information - Read Only */}
-                      <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
+                      <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
                         <h3 className="text-base font-medium mb-4 flex items-center gap-2">
                           <Shield className="h-4 w-4 text-green-600 dark:text-green-400" />
                           Account Information
@@ -494,8 +494,8 @@ export default function SettingsPage() {
                 </AccordionItem>
 
                 {/* App Version */}
-                <AccordionItem value="version" className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 hover:shadow-xl transition-all duration-300">
-                  <AccordionTrigger className="px-8 py-6 hover:no-underline group">
+                <AccordionItem value="version" className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 hover:shadow-md transition-all duration-300">
+                  <AccordionTrigger className="px-6 sm:px-8 py-5 sm:py-6 hover:no-underline group">
                     <div className="flex items-center gap-4">
                       <div className="p-3 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl shadow-md group-hover:scale-110 transition-transform duration-200">
                         <SettingsIcon className="h-5 w-5 text-white" />
@@ -514,7 +514,7 @@ export default function SettingsPage() {
                           <SettingsIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                           Version Information
                         </h3>
-                        <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
+                        <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                             <div>
                               <Label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">App Version</Label>
@@ -563,7 +563,7 @@ export default function SettingsPage() {
                             'Secure Authentication',
                             'Responsive Design'
                           ].map((feature) => (
-                            <div key={feature} className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                            <div key={feature} className="flex items-center space-x-3 p-3 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800">
                               <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400 flex-shrink-0" />
                               <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{feature}</span>
                             </div>

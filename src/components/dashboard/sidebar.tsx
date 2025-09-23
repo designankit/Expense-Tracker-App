@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/tooltip"
 import { useSupabase } from "@/components/supabase-provider"
 import { usePathname } from "next/navigation"
+import Link from "next/link"
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   isCollapsed?: boolean
@@ -66,18 +67,18 @@ export function Sidebar({
     <TooltipProvider>
       <div
         className={cn(
-          "flex h-full w-full flex-col bg-background border-r border-border/50 transition-all duration-300",
+          "flex h-full w-full flex-col bg-emerald-50 dark:bg-gray-900 border-r border-emerald-200/40 dark:border-gray-800/60 transition-all duration-300 backdrop-blur-sm",
           isCollapsed ? "w-16" : "w-64",
           className
         )}
         {...props}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-3 sm:p-4 border-b border-border/50">
+        <div className="flex items-center justify-between p-3 sm:p-4 border-b border-emerald-200/40 dark:border-gray-800/60">
           {!isCollapsed && (
             <div className="flex items-center justify-center w-full">
               <span className="tracking-wide font-sans flex items-baseline gap-2">
-                <span className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent uppercase">
+                <span className="text-lg font-bold bg-gradient-to-r from-emerald-600 to-green-500 bg-clip-text text-transparent uppercase">
                   EXPENSIO
                 </span>
                 <span className="text-lg font-light text-black dark:text-white uppercase">
@@ -109,31 +110,29 @@ export function Sidebar({
               <Tooltip key={item.title} delayDuration={0}>
                 <TooltipTrigger asChild>
                   <Button
+                    asChild
                     variant="ghost"
                     size="sm"
                     className={cn(
-                      "w-full justify-start gap-3 h-10 transition-all duration-200",
+                      "w-full justify-start gap-3 h-10 rounded-xl group transition-all duration-200",
                       isCollapsed ? "px-2" : "px-3",
                       isActive 
-                        ? "bg-blue-100 dark:bg-slate-900/30 text-slate-700 dark:text-slate-300 border-r-2 border-slate-500" 
-                        : "hover:bg-gray-100 dark:hover:bg-gray-800"
+                        ? "bg-emerald-600 text-white shadow-sm hover:bg-emerald-500 dark:bg-emerald-500 dark:hover:bg-emerald-400" 
+                        : "text-emerald-800 hover:bg-emerald-100/60 hover:text-emerald-900 dark:text-gray-300 dark:hover:bg-gray-800/60 dark:hover:text-white"
                     )}
-                    onClick={() => {
-                      if (typeof window !== 'undefined') {
-                        window.location.href = item.url
-                      }
-                    }}
                   >
+                    <Link href={item.url} className="flex items-center w-full">
                     <item.icon className={cn(
                       "h-4 w-4 flex-shrink-0",
-                      isActive ? "text-blue-600 dark:text-slate-400" : ""
+                      isActive ? "text-white" : "text-emerald-700 group-hover:text-emerald-800 dark:text-gray-400 dark:group-hover:text-white"
                     )} />
                     {!isCollapsed && (
                       <span className={cn(
                         "truncate font-medium",
-                        isActive ? "text-blue-700 dark:text-slate-300" : ""
+                        isActive ? "text-white" : "group-hover:text-emerald-900 dark:text-gray-300 dark:group-hover:text-white"
                       )}>{item.title}</span>
                     )}
+                    </Link>
                   </Button>
                 </TooltipTrigger>
                 {isCollapsed && (

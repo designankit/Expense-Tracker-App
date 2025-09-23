@@ -40,24 +40,24 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-      <div className="container mx-auto px-4 py-16">
-        <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-6">
-            Expensio Tracker
+    <div className="min-h-screen bg-white dark:bg-gray-900">
+      <div className="container mx-auto px-4 py-10 sm:py-12">
+        {/* Hero CTA */}
+        <div className="text-center mb-10 sm:mb-12">
+          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+            Ready to take control of your finances?
           </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
-            Take control of your finances with our intuitive expense tracking app. 
-            Monitor your spending, analyze trends, and achieve your financial goals.
+          <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 mb-6 max-w-3xl mx-auto">
+            Join thousands of users who have transformed their financial habits with our expense tracking platform.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button asChild size="lg" className="text-lg px-8 py-6">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button asChild size="lg" className="text-base sm:text-lg px-6 sm:px-8 py-4 rounded-xl shadow-[0_12px_40px_-12px_rgba(16,185,129,0.25)]">
               <Link href="/signup">
-                Get Started
+                Get Started Free
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
-            <Button asChild variant="outline" size="lg" className="text-lg px-8 py-6">
+            <Button asChild variant="outline" size="lg" className="text-base sm:text-lg px-6 sm:px-8 py-4 rounded-xl">
               <Link href="/login">
                 Sign In
               </Link>
@@ -65,7 +65,7 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 mb-16">
+        <div className="grid md:grid-cols-3 gap-4 sm:gap-6 mb-10 sm:mb-12">
           <Card>
             <CardHeader>
               <BarChart3 className="h-12 w-12 text-blue-600 mb-4" />
@@ -101,7 +101,7 @@ export default function LandingPage() {
           <p className="text-gray-600 dark:text-gray-300 mb-4">
             Ready to take control of your finances?
           </p>
-          <Button asChild size="lg" className="text-lg px-8 py-6">
+          <Button asChild size="lg" className="text-base sm:text-lg px-6 sm:px-8 py-4 rounded-xl">
             <Link href="/signup">
               Start Tracking Today
               <ArrowRight className="ml-2 h-5 w-5" />

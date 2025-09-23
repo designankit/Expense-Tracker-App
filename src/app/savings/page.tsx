@@ -23,6 +23,7 @@ import { Savings, GoalStatus } from "@/types/savings"
 import { SimpleSavingsCard } from "@/components/savings/SimpleSavingsCard"
 import { ConfettiAnimation } from "@/components/savings/ConfettiAnimation"
 import EnhancedSavingsDialog from "@/components/savings/EnhancedSavingsDialog"
+import { SummaryCardSkeleton, SavingsGoalSkeleton } from "@/components/ui/loading-skeletons"
 
 // Export functionality
 const exportToCSV = (goals: Savings[]) => {
@@ -62,7 +63,7 @@ const exportToCSV = (goals: Savings[]) => {
 
 export default function EnhancedSavingsPage() {
   const [savings, setSavings] = useState<Savings[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingSavings, setEditingSavings] = useState<Savings | null>(null)
   const [showConfetti, setShowConfetti] = useState(false)
@@ -77,6 +78,7 @@ export default function EnhancedSavingsPage() {
     }
 
     try {
+      setIsLoading(true)
       const { data, error } = await supabase
         .from('savings')
         .select('*')
@@ -316,14 +318,17 @@ export default function EnhancedSavingsPage() {
     return (
       <AuthGuard>
         <AppLayout>
-          <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-            <div className="p-6">
-              <div className="flex items-center justify-center h-96">
-                <div className="text-center">
-                  <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-slate-600" />
-                  <p className="text-gray-600 dark:text-gray-400">Loading savings goals...</p>
-                </div>
+          <div className="min-h-screen bg-white dark:bg-gray-900">
+            <div className="px-3 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-6 lg:py-8 space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                <SummaryCardSkeleton />
+                <SummaryCardSkeleton />
+                <SummaryCardSkeleton />
+                <SummaryCardSkeleton />
               </div>
+              <SavingsGoalSkeleton />
+              <SavingsGoalSkeleton />
+              <SavingsGoalSkeleton />
             </div>
           </div>
         </AppLayout>
@@ -334,29 +339,29 @@ export default function EnhancedSavingsPage() {
   return (
     <AuthGuard>
       <AppLayout>
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-          <div className="p-4 sm:p-6 lg:p-8">
-            <div className="space-y-6 sm:space-y-8">
+        <div className="min-h-screen bg-white dark:bg-gray-900">
+          <div className="px-3 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-6 lg:py-8">
+            <div className="space-y-5 sm:space-y-6 lg:space-y-8">
               {/* Header */}
               <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 via-emerald-500/10 to-green-600/10 rounded-lg blur-3xl" />
-                <div className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-lg p-6 sm:p-8 shadow-sm">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 via-green-500/10 to-teal-500/10 rounded-2xl blur-3xl" />
+                <div className="relative bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 sm:p-6 lg:p-8 shadow-sm">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6">
                     <div className="space-y-2">
-                      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-                        <PiggyBank className="h-8 w-8 sm:h-10 sm:w-10 text-emerald-600" />
+                      <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                        <PiggyBank className="h-7 w-7 sm:h-9 sm:w-9 text-emerald-600" />
                         Savings Goals
                       </h1>
-                      <p className="text-gray-600 dark:text-gray-300 text-base">
+                      <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">
                         Track your progress towards financial goals with enhanced features
                       </p>
                     </div>
-                    <div className="flex gap-3">
+                    <div className="flex gap-2 sm:gap-3">
                       {savings.length > 0 && (
                         <Button 
                           onClick={handleExport}
                           variant="outline"
-                          className="border-emerald-200 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-800 dark:text-emerald-300 dark:hover:bg-emerald-900/20"
+                          className="border-gray-200 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
                         >
                           <Download className="h-4 w-4 mr-2" />
                           Export Progress
@@ -364,8 +369,8 @@ export default function EnhancedSavingsPage() {
                       )}
                       <Button 
                         onClick={() => setIsDialogOpen(true)}
-                        className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-8 py-3 text-base font-semibold rounded-lg shadow-sm hover:shadow-md transition-all duration-300"
-                        size="lg"
+                        className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-emerald-700 text-white px-5 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base font-semibold rounded-xl shadow-sm hover:shadow-md transition-all duration-300"
+                        size="default"
                       >
                         <Plus className="h-5 w-5 mr-2" />
                         Add Goal
@@ -423,8 +428,8 @@ export default function EnhancedSavingsPage() {
               )}
 
               {/* Summary Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-lg shadow-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                <Card className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
                       Total Goals
@@ -441,7 +446,7 @@ export default function EnhancedSavingsPage() {
                   </CardContent>
                 </Card>
 
-                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-lg shadow-sm">
+                <Card className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
                       Total Target
@@ -455,7 +460,7 @@ export default function EnhancedSavingsPage() {
                   </CardContent>
                 </Card>
 
-                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-lg shadow-sm">
+                <Card className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
                       Total Saved
@@ -472,7 +477,7 @@ export default function EnhancedSavingsPage() {
                   </CardContent>
                 </Card>
 
-                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-lg shadow-sm">
+                <Card className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
                       Completed
@@ -492,7 +497,7 @@ export default function EnhancedSavingsPage() {
 
               {/* Overall Progress */}
               {savings.length > 0 && (
-                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-lg shadow-sm">
+                <Card className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm">
                   <CardHeader>
                     <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
                       Overall Progress
@@ -507,9 +512,9 @@ export default function EnhancedSavingsPage() {
                         ₹{totalSaved.toLocaleString()} / ₹{totalTarget.toLocaleString()}
                       </span>
                     </div>
-                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                    <div className="w-full bg-gray-200 dark:bg-gray-800 rounded-full h-2.5">
                       <div 
-                        className="bg-gradient-to-r from-green-500 to-emerald-500 h-3 rounded-full transition-all duration-500"
+                        className="bg-gradient-to-r from-green-500 to-emerald-500 h-2.5 rounded-full transition-all duration-500"
                         style={{ width: `${Math.min(overallProgress, 100)}%` }}
                       ></div>
                     </div>
@@ -519,7 +524,7 @@ export default function EnhancedSavingsPage() {
 
               {/* Income Comparison */}
               {getIncomeComparison && (
-                <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200/50 dark:border-blue-800/50">
+                <Card className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
                       <Calculator className="h-5 w-5" />
@@ -608,7 +613,7 @@ export default function EnhancedSavingsPage() {
                   </Card>
                 ) : (
                   <motion.div 
-                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
                     layout
                   >
                     <AnimatePresence>
