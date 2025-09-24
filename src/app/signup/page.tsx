@@ -79,19 +79,46 @@ export default function SignupPage() {
 
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <div className="relative min-h-screen overflow-hidden bg-white dark:bg-gray-900">
+      {/* Background visuals */}
+      <div aria-hidden className="pointer-events-none absolute inset-0">
+        {/* radial highlight */}
+        <div className="absolute -top-32 left-1/2 h-[600px] w-[900px] -translate-x-1/2 rounded-full bg-gradient-to-br from-emerald-400/20 via-teal-400/10 to-transparent blur-3xl dark:from-emerald-400/25 dark:via-teal-400/15 animate-blob-slow" />
+        {/* decorative blobs */}
+        <div className="absolute -right-40 top-1/3 h-80 w-80 rounded-full bg-emerald-500/10 blur-3xl dark:bg-emerald-500/20 animate-blob" />
+        <div className="absolute -left-40 bottom-10 h-96 w-96 rounded-full bg-teal-500/10 blur-3xl dark:bg-teal-500/20 animate-blob-fast" />
+        {/* subtle grid */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(16,185,129,0.10)_1px,transparent_1px)] [background-size:14px_14px] opacity-40 dark:opacity-20 animate-grid-pan" />
+      </div>
       {/* Main Content */}
-      <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
-          <div className="backdrop-blur-md bg-white/10 dark:bg-black/10 rounded-3xl p-8 border border-white/20 dark:border-white/10 shadow-2xl">
-            <div className="text-center mb-8">
+      <div className="relative min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-sm sm:max-w-md space-y-8 px-2 sm:px-0">
+          {/* gradient border wrapper for eye-catchy look */}
+          <div className="relative rounded-3xl p-[1px] bg-gradient-to-br from-emerald-400/20 via-teal-400/10 to-transparent dark:from-emerald-400/40 dark:via-teal-400/20 shadow-2xl">
+            {/* professional background layers behind the card */}
+            <div aria-hidden className="pointer-events-none absolute -inset-6 rounded-[2rem] ring-conic opacity-20 dark:opacity-60" />
+            <div aria-hidden className="pointer-events-none absolute -inset-2 rounded-[2rem] vignette-soft opacity-10 dark:opacity-100" />
+            <div aria-hidden className="pointer-events-none absolute inset-0 rounded-[2rem] bg-noise opacity-15 dark:opacity-35" />
+            <div aria-hidden className="pointer-events-none absolute -inset-10 rounded-[2.5rem] beam-diagonal opacity-30 dark:opacity-100" />
+            {/* decorative accent */}
+            <div aria-hidden className="pointer-events-none absolute -top-6 -left-6 h-24 w-24 rounded-full bg-emerald-500/10 blur-2xl sm:block hidden" />
+            <div className="backdrop-blur-md bg-white/60 dark:bg-black/10 rounded-[calc(theme(borderRadius.3xl))] p-6 sm:p-8 border border-emerald-900/10 dark:border-white/10 shadow-modern transition-transform duration-500 ease-out group focus-within:scale-[1.01] hover:scale-[1.01]">
+            <div className="text-center mb-4 sm:mb-8">
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Expensio Tracker</h1>
               <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
                 Create your account to start tracking expenses
               </p>
             </div>
+            {/* mobile-only feature badges for richer look */}
+            <div className="sm:hidden flex items-center justify-center gap-2 mb-4">
+              <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">Secure</span>
+              <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-teal-500/10 text-teal-300 border border-teal-500/20">Fast</span>
+              <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">Free</span>
+            </div>
 
-            <Card className="bg-white/20 dark:bg-black/20 border-white/30 dark:border-white/20 backdrop-blur-sm">
+            <Card className="relative overflow-hidden bg-white/70 dark:bg-black/20 border-emerald-900/10 dark:border-white/20 backdrop-blur-sm shadow-xl">
+          {/* inner gradient glow */}
+          <div aria-hidden className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-emerald-400/10 via-teal-400/5 to-transparent dark:from-emerald-400/5" />
           <CardHeader>
             <CardTitle>Create Account</CardTitle>
             <CardDescription>
@@ -150,7 +177,7 @@ export default function SignupPage() {
                   </Button>
                 </div>
               </div>
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button type="submit" className="w-full btn-modern" disabled={isLoading}>
                 {isLoading ? "Creating Account..." : "Create Account"}
               </Button>
             </form>
@@ -170,8 +197,9 @@ export default function SignupPage() {
                 </p>
               </div>
             )}
-          </CardContent>
+            </CardContent>
             </Card>
+            </div>
           </div>
         </div>
       </div>

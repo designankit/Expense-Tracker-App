@@ -514,6 +514,75 @@
     animation: piggy-bounce 3s ease-in-out infinite;
   }
 
+  /* Smooth organic blob movement for hero backgrounds */
+  @keyframes blob-drift {
+    0% {
+      transform: translate3d(0, 0, 0) scale(1);
+      filter: blur(48px);
+    }
+    33% {
+      transform: translate3d(20px, -30px, 0) scale(1.05);
+      filter: blur(52px);
+    }
+    66% {
+      transform: translate3d(-25px, 15px, 0) scale(0.98);
+      filter: blur(46px);
+    }
+    100% {
+      transform: translate3d(0, 0, 0) scale(1);
+      filter: blur(48px);
+    }
+  }
+
+  .animate-blob-slow {
+    animation: blob-drift 18s ease-in-out infinite;
+  }
+
+  .animate-blob {
+    animation: blob-drift 12s ease-in-out infinite;
+  }
+
+  .animate-blob-fast {
+    animation: blob-drift 8s ease-in-out infinite;
+  }
+
+  /* Gentle gradient grid pan */
+  @keyframes grid-pan {
+    0% { background-position: 0% 0%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 0%; }
+  }
+
+  .animate-grid-pan {
+    background-size: 140% 140%;
+    animation: grid-pan 30s linear infinite;
+  }
+
+  /* Vignette utility for card sections */
+  .vignette-soft {
+    box-shadow: inset 0 0 140px rgba(0,0,0,0.45), inset 0 0 40px rgba(0,0,0,0.25);
+  }
+
+  /* Subtle SVG noise overlay */
+  .bg-noise {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='table' tableValues='0 0 0.06 0'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 120px 120px;
+    opacity: .35;
+    pointer-events: none;
+  }
+
+  /* Conic gradient ring accent */
+  .ring-conic {
+    background: conic-gradient(from 180deg at 50% 50%, rgba(16,185,129,0.15), rgba(45,212,191,0.06), transparent 60%);
+  }
+
+  /* Diagonal light beam */
+  .beam-diagonal {
+    background: linear-gradient(115deg, rgba(255,255,255,0) 30%, rgba(16,185,129,0.10) 50%, rgba(255,255,255,0) 70%);
+    filter: blur(18px);
+  }
+
   /* Accordion animations */
   @keyframes accordion-down {
     from {

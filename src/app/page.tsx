@@ -11,8 +11,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { motion, useInView } from "framer-motion"
+import { motion, useInView, useScroll, useTransform } from "framer-motion"
 import { useRef } from "react"
+import Image from "next/image"
 import Link from "next/link"
 import { 
   ArrowRight, 
@@ -29,7 +30,9 @@ import {
   DollarSign,
   Eye,
   Heart,
-  Zap
+  Zap,
+  Plus,
+  UserPlus
 } from "lucide-react"
 
 export default function Home() {
@@ -49,6 +52,16 @@ export default function Home() {
   const previewInView = useInView(previewRef, { once: true })
   const whyChooseInView = useInView(whyChooseRef, { once: true })
   const faqInView = useInView(faqRef, { once: true })
+
+  // Parallax for background blobs
+  const { scrollYProgress } = useScroll()
+  // Horizontal parallax based on scroll progress (0 → 1)
+  const blob1Y = useTransform(scrollYProgress, [0, 1], [0, 0])
+  const blob2Y = useTransform(scrollYProgress, [0, 1], [0, 0])
+  const blob3Y = useTransform(scrollYProgress, [0, 1], [0, 0])
+  const blob1X = useTransform(scrollYProgress, [0, 1], [-120, 120])
+  const blob2X = useTransform(scrollYProgress, [0, 1], [100, -100])
+  const blob3X = useTransform(scrollYProgress, [0, 1], [-60, 60])
 
   // Check if we have real Supabase credentials
   const hasRealCredentials = process.env.NEXT_PUBLIC_SUPABASE_URL && 
@@ -87,9 +100,19 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-lime-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-900">
+      {/* Fixed background blobs and grid across the whole landing page (with parallax) */}
+      <div aria-hidden className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <motion.div style={{ y: blob1Y, x: blob1X }} className="absolute -top-40 -left-40 h-[700px] w-[700px] rounded-full bg-emerald-400/15 dark:bg-emerald-500/15 blur-3xl will-change-transform" />
+        <motion.div style={{ y: blob2Y, x: blob2X }} className="absolute top-1/3 -right-48 h-[600px] w-[600px] rounded-full bg-teal-400/12 dark:bg-teal-500/12 blur-3xl will-change-transform" />
+        <motion.div style={{ y: blob3Y, x: blob3X }} className="absolute bottom-[-120px] left-1/4 h-[520px] w-[520px] rounded-full bg-lime-400/12 dark:bg-lime-500/12 blur-3xl will-change-transform" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(16,185,129,0.10)_1px,transparent_1px)] [background-size:16px_16px] opacity-40 dark:opacity-20 animate-grid-pan" />
+      </div>
+
+      {/* content wrapper above background */}
+      <div className="relative z-10">
       {/* Sticky Navigation */}
-      <div className="sticky top-0 z-50 w-full backdrop-blur bg-white/70 dark:bg-gray-900/70 border-b border-emerald-200/40 dark:border-emerald-800/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+      <div className="w-full bg-transparent">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-5 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-emerald-600"></div>
             <span className="font-semibold text-emerald-900 dark:text-emerald-200">Expensio</span>
@@ -102,32 +125,60 @@ export default function Home() {
             <a href="#faq" className="hover:text-emerald-700">FAQ</a>
           </nav>
           <div className="hidden sm:flex items-center gap-3">
-            <Link href="/login" className="text-sm text-emerald-700 dark:text-emerald-300">Sign in</Link>
-            <Link href="/signup" className="inline-flex items-center rounded-lg bg-emerald-600 text-white text-sm px-4 py-2 hover:bg-emerald-700">Get Started</Link>
+            <Link href="/login" className="inline-flex items-center rounded-lg border border-emerald-300/70 text-emerald-700 dark:text-emerald-300 text-sm px-4 py-2 hover:bg-emerald-50/80 dark:hover:bg-emerald-900/20 transition">Sign In</Link>
+            <Link href="/signup" className="inline-flex items-center rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-sm px-4 py-2 hover:from-emerald-700 hover:to-teal-700 transition">Get Started</Link>
           </div>
         </div>
       </div>
-      {/* Subtle background pattern */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+      {/* Removed extra section pattern layer */}
 
-      {/* Hero Section with illustrations */}
+      {/* Hero Section */}
       <motion.div 
         ref={heroRef}
         initial="initial"
         animate={heroInView ? "animate" : "initial"}
         variants={staggerContainer}
-        className="relative z-10 w-full px-4 sm:px-6 lg:px-8 py-24 md:py-28 lg:py-32 overflow-hidden"
+        className="relative z-10 w-full px-4 sm:px-6 lg:px-8 py-14 md:py-16 lg:py-20 overflow-hidden"
       >
-        {/* Soft illustration blobs */}
-        <div className="pointer-events-none absolute inset-0 -z-10">
-          <div className="absolute -top-24 -left-24 w-[520px] h-[520px] rounded-full bg-emerald-300/20 blur-3xl" />
-          <div className="absolute top-1/3 -right-24 w-[420px] h-[420px] rounded-full bg-teal-300/20 blur-3xl" />
-          <div className="absolute bottom-0 left-1/3 w-[360px] h-[360px] rounded-full bg-lime-300/20 blur-3xl" />
-        </div>
+        {/* Background visuals are now global & fixed */}
         <div className="max-w-5xl mx-auto text-center">
+          
+          <motion.h1 
+            variants={fadeInUp}
+            className="mx-auto max-w-4xl heading-display mb-8 leading-tight"
+          >
+            <span className="text-gray-900 dark:text-emerald-200">Take control</span> of
+            <span className="bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600 bg-clip-text text-transparent"> your finances</span>
+          </motion.h1>
+          
+          <motion.p 
+            variants={fadeInUp}
+            className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 mb-8 max-w-4xl mx-auto leading-relaxed"
+          >
+            Monitor your spending, analyze trends, and achieve your financial goals with our intuitive expense tracking platform.
+          </motion.p>
+          
+          <motion.div 
+            variants={fadeInUp}
+            className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center"
+          >
+            <Button asChild size="lg" className="text-base sm:text-lg lg:text-xl px-8 py-4 sm:px-10 sm:py-6 hover:scale-105 transition-all duration-200 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700">
+              <Link href="/signup">
+                Get Started Free
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="text-base sm:text-lg lg:text-xl px-8 py-4 sm:px-10 sm:py-6 hover:scale-105 transition-all duration-200 border-2 border-emerald-300 text-emerald-700 dark:text-emerald-300">
+              <Link href="/login">
+                Sign In
+              </Link>
+            </Button>
+          </motion.div>
+
+          {/* Security badges row under CTAs */}
           <motion.div
             variants={scaleIn}
-            className="inline-flex items-center gap-3 px-6 py-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-emerald-200/60 dark:border-emerald-800/40 rounded-full text-sm font-medium mb-8 shadow-lg"
+            className="mt-6 inline-flex flex-wrap items-center justify-center gap-3 px-6 py-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-emerald-200/60 dark:border-emerald-800/40 rounded-full text-sm font-medium"
           >
             <Lock className="h-4 w-4 text-emerald-600" />
             <span className="text-gray-700 dark:text-gray-300">End-to-end Encrypted</span>
@@ -137,40 +188,6 @@ export default function Home() {
             <span className="text-gray-300 dark:text-gray-600">•</span>
             <Globe className="h-4 w-4 text-emerald-600" />
             <span className="text-gray-700 dark:text-gray-300">GDPR Compliant</span>
-          </motion.div>
-          
-          <motion.h1 
-            variants={fadeInUp}
-            className="mx-auto max-w-4xl heading-display mb-8 leading-tight"
-          >
-            Take control of your{" "}
-            <span className="bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600 bg-clip-text text-transparent">
-              finances
-            </span>
-          </motion.h1>
-          
-          <motion.p 
-            variants={fadeInUp}
-            className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed"
-          >
-            Monitor your spending, analyze trends, and achieve your financial goals with our intuitive expense tracking platform.
-          </motion.p>
-          
-          <motion.div 
-            variants={fadeInUp}
-            className="flex flex-col sm:flex-row gap-6 justify-center"
-          >
-            <Button asChild size="lg" className="text-lg px-10 py-6 hover:scale-105 transition-all duration-200 shadow-xl hover:shadow-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700">
-              <Link href="/signup">
-                Get Started Free
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="lg" className="text-lg px-10 py-6 hover:scale-105 transition-all duration-200 border-2 border-emerald-300 text-emerald-700 dark:text-emerald-300">
-              <Link href="/login">
-                Sign In
-              </Link>
-            </Button>
           </motion.div>
         </div>
       </motion.div>
@@ -182,11 +199,11 @@ export default function Home() {
         animate={featuresInView ? "animate" : "initial"}
         variants={staggerContainer}
         id="features"
-        className="relative z-10 w-full px-4 sm:px-6 lg:px-8 py-24 md:py-28 lg:py-32"
+        className="relative z-10 w-full px-4 sm:px-6 lg:px-8 py-14 md:py-16 lg:py-20"
       >
         <div className="max-w-7xl mx-auto">
-          <motion.div variants={fadeInUp} className="text-center mb-20">
-            <h2 className="section-title mb-8">
+          <motion.div variants={fadeInUp} className="text-center mb-12">
+            <h2 className="section-title text-3xl sm:text-4xl lg:text-5xl leading-tight mb-8">
               Everything you need to manage your finances
             </h2>
             <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 max-w-4xl mx-auto leading-relaxed">
@@ -196,7 +213,7 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <motion.div variants={fadeInUp}>
-              <Card className="h-full hover:shadow-2xl transition-all duration-300 hover:scale-105 border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+              <Card className="h-full transition-all duration-300 hover:scale-105 border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
                 <CardHeader className="text-center pb-4">
                   <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white w-fit mx-auto mb-6">
                     <BarChart3 className="h-10 w-10" />
@@ -232,7 +249,7 @@ export default function Home() {
             </motion.div>
 
             <motion.div variants={fadeInUp}>
-              <Card className="h-full hover:shadow-2xl transition-all duration-300 hover:scale-105 border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+              <Card className="h-full transition-all duration-300 hover:scale-105 border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
                 <CardHeader className="text-center pb-4">
                   <div className="p-4 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 text-white w-fit mx-auto mb-6">
                     <Shield className="h-10 w-10" />
@@ -268,7 +285,7 @@ export default function Home() {
             </motion.div>
 
             <motion.div variants={fadeInUp}>
-              <Card className="h-full hover:shadow-2xl transition-all duration-300 hover:scale-105 border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+              <Card className="h-full transition-all duration-300 hover:scale-105 border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
                 <CardHeader className="text-center pb-4">
                   <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 text-white w-fit mx-auto mb-6">
                     <Target className="h-10 w-10" />
@@ -307,25 +324,30 @@ export default function Home() {
       </motion.div>
 
       {/* How it works Section */}
-      <section id="how" className="relative z-10 w-full px-4 sm:px-6 lg:px-8 py-24 md:py-28 lg:py-32">
+      <section id="how" className="relative z-10 w-full px-4 sm:px-6 lg:px-8 py-14 md:py-16 lg:py-20">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-emerald-900 dark:text-emerald-200 mb-4">How it works</h2>
+          <div className="text-center mb-8">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-emerald-900 dark:text-emerald-200 mb-4 leading-tight">How it works</h2>
             <p className="text-gray-600 dark:text-gray-300">Three steps to get insights and save more.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="rounded-2xl bg-white dark:bg-gray-900 border border-emerald-200/50 dark:border-emerald-800/50 p-6">
-              <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center mb-4 font-semibold">1</div>
+          <div className="relative grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* connecting line */}
+            <div className="hidden md:block absolute top-14 left-1/6 right-1/6 h-0.5 bg-gradient-to-r from-emerald-200 via-emerald-300 to-emerald-200" />
+            <div className="group rounded-2xl bg-gradient-to-br from-white to-emerald-50 dark:from-gray-900 dark:to-emerald-950/20 border border-emerald-200/60 dark:border-emerald-800/60 p-6 relative transition-all">
+              <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 pointer-events-none transition-opacity" />
+              <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center mb-4 font-semibold"><UserPlus className="h-5 w-5" /></div>
               <h3 className="font-semibold text-emerald-900 dark:text-emerald-200 mb-2">Create your account</h3>
               <p className="text-sm text-gray-600 dark:text-gray-300">Sign up free and set currency and categories.</p>
             </div>
-            <div className="rounded-2xl bg-white dark:bg-gray-900 border border-emerald-200/50 dark:border-emerald-800/50 p-6">
-              <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center mb-4 font-semibold">2</div>
+            <div className="group rounded-2xl bg-gradient-to-br from-white to-emerald-50 dark:from-gray-900 dark:to-emerald-950/20 border border-emerald-200/60 dark:border-emerald-800/60 p-6 relative transition-all">
+              <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 pointer-events-none transition-opacity" />
+              <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center mb-4 font-semibold"><Plus className="h-5 w-5" /></div>
               <h3 className="font-semibold text-emerald-900 dark:text-emerald-200 mb-2">Add transactions</h3>
               <p className="text-sm text-gray-600 dark:text-gray-300">Import or add manually. We auto‑categorize.</p>
             </div>
-            <div className="rounded-2xl bg-white dark:bg-gray-900 border border-emerald-200/50 dark:border-emerald-800/50 p-6">
-              <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center mb-4 font-semibold">3</div>
+            <div className="group rounded-2xl bg-gradient-to-br from-white to-emerald-50 dark:from-gray-900 dark:to-emerald-950/20 border border-emerald-200/60 dark:border-emerald-800/60 p-6 relative transition-all">
+              <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 pointer-events-none transition-opacity" />
+              <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center mb-4 font-semibold"><PiggyBank className="h-5 w-5" /></div>
               <h3 className="font-semibold text-emerald-900 dark:text-emerald-200 mb-2">Track & save</h3>
               <p className="text-sm text-gray-600 dark:text-gray-300">Dashboards, goals, and insights help you save.</p>
             </div>
@@ -340,11 +362,11 @@ export default function Home() {
         animate={previewInView ? "animate" : "initial"}
         variants={staggerContainer}
         id="screens"
-        className="relative z-10 w-full px-4 sm:px-6 lg:px-8 py-24 md:py-28 lg:py-32 bg-gray-50/50 dark:bg-gray-800/30 overflow-hidden"
+        className="relative z-10 w-full px-4 sm:px-6 lg:px-8 py-16 md:py-20 lg:py-24 overflow-hidden"
       >
         <div className="max-w-7xl mx-auto">
-          <motion.div variants={fadeInUp} className="text-center mb-20">
-            <h2 className="section-title mb-8">
+          <motion.div variants={fadeInUp} className="text-center mb-12">
+            <h2 className="section-title text-3xl sm:text-4xl lg:text-5xl leading-tight mb-8">
               See it in action
             </h2>
             <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 max-w-4xl mx-auto leading-relaxed">
@@ -352,127 +374,45 @@ export default function Home() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+          {/* Static grid of mockups (no carousel, no shadows) */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
             <motion.div variants={fadeInUp} className="relative">
-              {/* Laptop Mockup */}
-              <div className="relative mx-auto max-w-sm">
-                <div className="bg-gray-800 rounded-t-2xl p-2 shadow-2xl">
-                  <div className="bg-white rounded-lg overflow-hidden">
-                    <div className="bg-gray-100 px-4 py-3 flex items-center gap-2 relative">
-                      {/* notch */}
-                      <div className="absolute left-1/2 -translate-x-1/2 -top-4 h-6 w-28 bg-black/80 rounded-b-2xl"></div>
-                      <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                      <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                    </div>
-                    <div className="p-6">
-                      <div className="flex items-center gap-3 mb-6">
-                        <div className="p-2 rounded-lg bg-blue-100">
-                          <BarChart3 className="h-6 w-6 text-blue-600" />
-                        </div>
-                        <h3 className="text-lg font-semibold">Dashboard</h3>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4 mb-6">
-                        <div className="p-4 bg-green-50 rounded-lg">
-                          <div className="text-2xl font-bold text-green-600">₹50K</div>
-                          <div className="text-sm text-green-600/70">Income</div>
-                        </div>
-                        <div className="p-4 bg-red-50 rounded-lg">
-                          <div className="text-2xl font-bold text-red-600">₹12K</div>
-                          <div className="text-sm text-red-600/70">Expenses</div>
-                        </div>
-                      </div>
-                      <div className="h-24 bg-gradient-to-r from-blue-100 to-purple-100 rounded-lg flex items-center justify-center">
-                        <BarChart3 className="h-8 w-8 text-gray-400" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-gray-700 h-8 rounded-b-2xl shadow-2xl"></div>
+              <div className="relative mx-auto max-w-2xl">
+                <Image
+                  src="/Laptop Mockup.png"
+                  alt="Dashboard laptop mockup"
+                  width={1600}
+                  height={1000}
+                  className="w-full h-auto rounded-2xl"
+                />
               </div>
+              <p className="mt-4 text-center text-sm text-gray-600 dark:text-gray-300">Dashboard</p>
             </motion.div>
 
             <motion.div variants={fadeInUp} className="relative">
-              {/* Tablet Mockup */}
-              <div className="relative mx-auto max-w-xs">
-                <div className="bg-gray-800 rounded-2xl p-2 shadow-2xl">
-                  <div className="bg-white rounded-xl overflow-hidden">
-                    <div className="bg-gray-100 px-4 py-3 flex items-center gap-2 relative">
-                      <div className="absolute left-1/2 -translate-x-1/2 -top-3 h-5 w-20 bg-black/80 rounded-b-2xl"></div>
-                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                      <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    </div>
-                    <div className="p-4">
-                      <div className="flex items-center gap-2 mb-4">
-                        <div className="p-2 rounded-lg bg-purple-100">
-                          <CreditCard className="h-5 w-5 text-purple-600" />
-                        </div>
-                        <h3 className="text-base font-semibold">Transactions</h3>
-                      </div>
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                          <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                            <span className="text-sm font-medium">Groceries</span>
-                          </div>
-                          <span className="text-sm font-bold text-red-600">-₹2.5K</span>
-                        </div>
-                        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                          <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                            <span className="text-sm font-medium">Salary</span>
-                          </div>
-                          <span className="text-sm font-bold text-green-600">+₹50K</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+              <div className="relative mx-auto max-w-md">
+                <Image
+                  src="/Tablet Mockup.png"
+                  alt="Transactions tablet mockup"
+                  width={1200}
+                  height={900}
+                  className="w-full h-auto rounded-2xl"
+                />
               </div>
+              <p className="mt-4 text-center text-sm text-gray-600 dark:text-gray-300">Transactions</p>
             </motion.div>
 
             <motion.div variants={fadeInUp} className="relative">
-              {/* Phone Mockup */}
-              <div className="relative mx-auto max-w-48">
-                <div className="bg-gray-800 rounded-3xl p-2 shadow-2xl">
-                  <div className="bg-white rounded-2xl overflow-hidden">
-                    <div className="bg-gray-100 px-3 py-2 flex items-center justify-center relative">
-                      {/* phone notch */}
-                      <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 h-5 w-24 bg-black/80 rounded-b-2xl" />
-                      <div className="w-8 h-1 bg-gray-400 rounded-full"></div>
-                    </div>
-                    <div className="p-3">
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className="p-1.5 rounded-lg bg-orange-100">
-                          <PiggyBank className="h-4 w-4 text-orange-600" />
-                        </div>
-                        <h3 className="text-sm font-semibold">Savings</h3>
-                      </div>
-                      <div className="space-y-3">
-                        <div className="p-3 bg-blue-50 rounded-lg">
-                          <div className="flex justify-between items-center mb-1">
-                            <span className="text-xs font-medium">Emergency</span>
-                            <span className="text-xs font-bold text-blue-600">65%</span>
-                          </div>
-                          <div className="w-full bg-blue-200 rounded-full h-1">
-                            <div className="bg-blue-500 h-1 rounded-full w-3/5"></div>
-                          </div>
-                        </div>
-                        <div className="p-3 bg-green-50 rounded-lg">
-                          <div className="flex justify-between items-center mb-1">
-                            <span className="text-xs font-medium">Vacation</span>
-                            <span className="text-xs font-bold text-green-600">30%</span>
-                          </div>
-                          <div className="w-full bg-green-200 rounded-full h-1">
-                            <div className="bg-green-500 h-1 rounded-full w-1/3"></div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+              <div className="relative mx-auto max-w-[260px]">
+                <Image
+                  src="/Mobile Mockup.png"
+                  alt="Savings mobile mockup"
+                  width={600}
+                  height={1200}
+                  className="w-full h-auto rounded-3xl"
+                />
               </div>
+              <p className="mt-4 text-center text-sm text-gray-600 dark:text-gray-300">Savings Goals</p>
             </motion.div>
           </div>
         </div>
@@ -484,13 +424,11 @@ export default function Home() {
         initial="initial"
         animate={whyChooseInView ? "animate" : "initial"}
         variants={staggerContainer}
-        className="relative z-10 w-full px-4 sm:px-6 lg:px-8 py-24 md:py-28 lg:py-32 bg-gradient-to-b from-white/60 to-emerald-50/40 dark:from-gray-900/20 dark:to-emerald-900/10 overflow-hidden"
+        className="relative z-10 w-full px-4 sm:px-6 lg:px-8 py-14 md:py-16 lg:py-20 overflow-hidden"
       >
         <div className="max-w-7xl mx-auto">
-          <motion.div variants={fadeInUp} className="text-center mb-20">
-            <h2 className="section-title mb-8">
-              Why Choose Us?
-            </h2>
+          <motion.div variants={fadeInUp} className="text-center mb-12">
+            <h2 className="section-title text-3xl sm:text-4xl lg:text-5xl leading-tight mb-8">Why Users Love Expensio</h2>
             <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 max-w-4xl mx-auto leading-relaxed">
               Built specifically for personal finance management with your needs in mind.
             </p>
@@ -498,7 +436,7 @@ export default function Home() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             <motion.div variants={fadeInUp}>
-              <Card className="h-full hover:shadow-2xl transition-all duration-300 hover:scale-105 border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-center">
+              <Card className="h-full transition-all duration-300 hover:scale-105 border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-center">
                 <CardContent className="p-8">
                   <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white w-fit mx-auto mb-6">
                     <Monitor className="h-8 w-8" />
@@ -512,7 +450,7 @@ export default function Home() {
             </motion.div>
 
             <motion.div variants={fadeInUp}>
-              <Card className="h-full hover:shadow-2xl transition-all duration-300 hover:scale-105 border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-center">
+              <Card className="h-full transition-all duration-300 hover:scale-105 border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-center">
                 <CardContent className="p-8">
                   <div className="p-4 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 text-white w-fit mx-auto mb-6">
                     <Smartphone className="h-8 w-8" />
@@ -526,7 +464,7 @@ export default function Home() {
             </motion.div>
 
             <motion.div variants={fadeInUp}>
-              <Card className="h-full hover:shadow-2xl transition-all duration-300 hover:scale-105 border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-center">
+              <Card className="h-full transition-all duration-300 hover:scale-105 border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-center">
                 <CardContent className="p-8">
                   <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 text-white w-fit mx-auto mb-6">
                     <DollarSign className="h-8 w-8" />
@@ -540,7 +478,7 @@ export default function Home() {
             </motion.div>
 
             <motion.div variants={fadeInUp}>
-              <Card className="h-full hover:shadow-2xl transition-all duration-300 hover:scale-105 border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-center">
+              <Card className="h-full transition-all duration-300 hover:scale-105 border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-center">
                 <CardContent className="p-8">
                   <div className="p-4 rounded-2xl bg-gradient-to-br from-orange-500 to-red-600 text-white w-fit mx-auto mb-6">
                     <Heart className="h-8 w-8" />
@@ -553,6 +491,8 @@ export default function Home() {
               </Card>
             </motion.div>
           </div>
+
+          {/* Testimonials removed */}
         </div>
       </motion.div>
 
@@ -565,11 +505,11 @@ export default function Home() {
         animate={faqInView ? "animate" : "initial"}
         variants={staggerContainer}
         id="faq"
-        className="relative z-10 w-full px-4 sm:px-6 lg:px-8 py-24 md:py-28 lg:py-32 bg-gradient-to-b from-emerald-50/40 to-white/60 dark:from-emerald-900/10 dark:to-gray-900/20 overflow-hidden"
+        className="relative z-10 w-full px-4 sm:px-6 lg:px-8 py-16 md:py-20 lg:py-24 overflow-hidden"
       >
         <div className="max-w-4xl mx-auto">
-          <motion.div variants={fadeInUp} className="text-center mb-20">
-            <h2 className="section-title mb-8">
+          <motion.div variants={fadeInUp} className="text-center mb-12">
+            <h2 className="section-title text-3xl sm:text-4xl lg:text-5xl leading-tight mb-8">
               Frequently Asked Questions
             </h2>
             <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 leading-relaxed">
@@ -579,7 +519,7 @@ export default function Home() {
 
           <motion.div variants={fadeInUp}>
             <Accordion type="single" collapsible className="space-y-6">
-              <AccordionItem value="item-1" className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl px-8 py-4 shadow-lg">
+              <AccordionItem value="item-1" className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl px-8 py-4">
                 <AccordionTrigger className="text-left hover:no-underline text-lg font-semibold">
                   Is my financial data secure?
                 </AccordionTrigger>
@@ -588,7 +528,7 @@ export default function Home() {
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem value="item-2" className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl px-8 py-4 shadow-lg">
+              <AccordionItem value="item-2" className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl px-8 py-4">
                 <AccordionTrigger className="text-left hover:no-underline text-lg font-semibold">
                   Can I use this app for free?
                 </AccordionTrigger>
@@ -597,7 +537,7 @@ export default function Home() {
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem value="item-3" className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl px-8 py-4 shadow-lg">
+              <AccordionItem value="item-3" className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl px-8 py-4">
                 <AccordionTrigger className="text-left hover:no-underline text-lg font-semibold">
                   Can I sync data across multiple devices?
                 </AccordionTrigger>
@@ -606,7 +546,7 @@ export default function Home() {
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem value="item-4" className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl px-8 py-4 shadow-lg">
+              <AccordionItem value="item-4" className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl px-8 py-4">
                 <AccordionTrigger className="text-left hover:no-underline text-lg font-semibold">
                   How do I get started?
                 </AccordionTrigger>
@@ -625,23 +565,23 @@ export default function Home() {
         whileInView="animate"
         viewport={{ once: true }}
         variants={fadeInUp}
-        className="relative z-10 w-full px-4 sm:px-6 lg:px-8 py-20 sm:py-24"
+        className="relative z-10 w-full px-4 sm:px-6 lg:px-8 py-16 sm:py-20"
       >
         <div className="max-w-5xl mx-auto text-center">
-          <h2 className="section-title mb-8">
+          <h2 className="section-title text-3xl sm:text-4xl lg:text-5xl leading-tight mb-8">
             Ready to take control of your finances?
           </h2>
-          <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-base sm:text-lg lg:text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
             Join thousands of users who have transformed their financial habits with our expense tracking platform.
           </p>
-          <div className="flex flex-col sm:flex-row gap-6 justify-center mb-12">
-            <Button asChild size="lg" className="text-xl px-12 py-8 hover:scale-105 transition-all duration-200 shadow-2xl hover:shadow-3xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+            <Button asChild size="lg" className="text-base sm:text-lg lg:text-xl px-8 py-4 sm:px-12 sm:py-6 hover:scale-105 transition-all duration-200 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700">
               <Link href="/signup">
                 Get Started Free
                 <ArrowRight className="ml-3 h-6 w-6" />
               </Link>
             </Button>
-            <Button asChild variant="outline" size="lg" className="text-xl px-12 py-8 hover:scale-105 transition-all duration-200 border-2">
+            <Button asChild variant="outline" size="lg" className="text-base sm:text-lg lg:text-xl px-8 py-4 sm:px-12 sm:py-6 hover:scale-105 transition-all duration-200 border-2">
               <Link href="/login">
                 Sign In
               </Link>
@@ -649,7 +589,7 @@ export default function Home() {
           </div>
           
           {!hasRealCredentials && (
-            <div className="p-6 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-2xl max-w-3xl mx-auto shadow-lg">
+            <div className="p-6 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-2xl max-w-3xl mx-auto">
               <p className="text-yellow-800 dark:text-yellow-200 leading-relaxed">
                 <strong>Demo Mode:</strong> To enable full authentication, please configure your Supabase project.
                 See <code className="bg-yellow-100 dark:bg-yellow-800 px-2 py-1 rounded text-sm font-mono">SUPABASE_SETUP.md</code> for instructions.
@@ -660,23 +600,27 @@ export default function Home() {
       </motion.div>
 
       {/* Footer */}
-      <footer className="relative z-10 w-full px-4 sm:px-6 lg:px-8 py-12 bg-gray-50/50 dark:bg-gray-800/30 border-t border-gray-200/50 dark:border-gray-700/50">
+      <footer className="relative z-10 w-full px-4 sm:px-6 lg:px-8 py-14 border-t border-gray-200/20 dark:border-gray-700/40">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="text-gray-600 dark:text-gray-400">
-              © 2024 Expense Tracker. All rights reserved.
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-9 rounded-lg bg-emerald-600"></div>
+              <div className="text-gray-700 dark:text-gray-200 font-semibold">Expensio — Track. Save. Grow.</div>
             </div>
-            <div className="flex gap-8">
-              <Link href="/privacy" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
-                Privacy Policy
-              </Link>
-              <Link href="/terms" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
-                Terms of Service
-              </Link>
+            <div className="flex justify-center gap-6 text-sm">
+              <Link href="/privacy" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">Privacy</Link>
+              <Link href="/terms" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">Terms</Link>
+              <Link href="#" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">Support</Link>
+              <Link href="#" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">Blog</Link>
+            </div>
+            <div className="flex justify-center md:justify-end">
+              <Link href="/signup" className="inline-flex items-center rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-sm px-4 py-2 hover:from-emerald-700 hover:to-teal-700 transition">Get Started Free</Link>
             </div>
           </div>
+          <div className="mt-6 text-center text-gray-600 dark:text-gray-400">© 2024 Expensio. All rights reserved.</div>
         </div>
       </footer>
+      </div>
     </div>
   )
 }
