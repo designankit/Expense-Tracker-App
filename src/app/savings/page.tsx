@@ -14,7 +14,6 @@ import {
   Download,
   AlertCircle,
   CheckCircle,
-  Loader2,
   Calculator
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"

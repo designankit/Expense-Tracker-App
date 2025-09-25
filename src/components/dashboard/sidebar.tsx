@@ -11,6 +11,7 @@ import {
   PiggyBank,
   CreditCard
 } from "lucide-react"
+import Image from "next/image"
 import {
   Tooltip,
   TooltipContent,
@@ -77,14 +78,14 @@ export function Sidebar({
         <div className="flex items-center justify-between p-3 sm:p-4 border-b border-emerald-200/40 dark:border-gray-800/60">
           {!isCollapsed && (
             <div className="flex items-center justify-center w-full">
-              <span className="tracking-wide font-sans flex items-baseline gap-2">
-                <span className="text-lg font-bold bg-gradient-to-r from-emerald-600 to-green-500 bg-clip-text text-transparent uppercase">
-                  EXPENSIO
-                </span>
-                <span className="text-lg font-light text-black dark:text-white uppercase">
-                  TRACKER
-                </span>
-              </span>
+              <Image
+                src="/Applogo.png"
+                alt="Expensio Tracker Logo"
+                width={140}
+                height={40}
+                className="h-8 w-auto object-contain"
+                priority
+              />
             </div>
           )}
           

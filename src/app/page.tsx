@@ -1,6 +1,5 @@
 "use client"
 
-import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useSupabase } from "@/components/supabase-provider"
 import { Button } from "@/components/ui/button"
@@ -12,7 +11,8 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { motion, useInView, useScroll, useTransform } from "framer-motion"
-import { useRef } from "react"
+import { useRef, useState, useEffect } from "react"
+import { useTheme } from "next-themes"
 import Image from "next/image"
 import Link from "next/link"
 import { 
@@ -23,7 +23,6 @@ import {
   Target, 
   CheckCircle, 
   Smartphone,
-  CreditCard,
   PiggyBank,
   Globe,
   Monitor,
@@ -32,12 +31,16 @@ import {
   Heart,
   Zap,
   Plus,
-  UserPlus
+  UserPlus,
+  Moon,
+  Sun
 } from "lucide-react"
 
 export default function Home() {
   const { user, loading } = useSupabase()
   const router = useRouter()
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
   
   // Refs for intersection observer
   const heroRef = useRef(null)
@@ -70,12 +73,21 @@ export default function Home() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY && 
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY !== 'placeholder-key'
 
+  // Handle theme mounting
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   // Redirect authenticated users to dashboard
   useEffect(() => {
     if (!loading && user) {
       router.push('/dashboard')
     }
   }, [user, loading, router])
+
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark")
+  }
 
   // Animation variants
   const fadeInUp = {
@@ -113,9 +125,15 @@ export default function Home() {
       {/* Sticky Navigation */}
       <div className="w-full bg-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-5 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-emerald-600"></div>
-            <span className="font-semibold text-emerald-900 dark:text-emerald-200">Expensio</span>
+          <div className="flex items-center gap-2 justify-center w-full sm:justify-start sm:w-auto">
+            <Image
+              src="/Applogo.png"
+              alt="Expensio Tracker Logo"
+              width={120}
+              height={32}
+              className="h-8 w-auto object-contain"
+              priority
+            />
           </div>
           <nav className="hidden md:flex items-center gap-6 text-sm text-gray-700 dark:text-gray-300">
             <a href="#features" className="hover:text-emerald-700">Features</a>
@@ -125,6 +143,24 @@ export default function Home() {
             <a href="#faq" className="hover:text-emerald-700">FAQ</a>
           </nav>
           <div className="hidden sm:flex items-center gap-3">
+            {/* Theme Toggle */}
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={toggleTheme} 
+              className="h-9 w-9 rounded-lg hover:bg-emerald-50/80 dark:hover:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 hover:text-emerald-800 dark:hover:text-emerald-200 transition-colors"
+            >
+              {mounted ? (
+                theme === "dark" ? (
+                  <Sun className="h-4 w-4" />
+                ) : (
+                  <Moon className="h-4 w-4" />
+                )
+              ) : (
+                <div className="h-4 w-4" />
+              )}
+            </Button>
+            
             <Link href="/login" className="inline-flex items-center rounded-lg border border-emerald-300/70 text-emerald-700 dark:text-emerald-300 text-sm px-4 py-2 hover:bg-emerald-50/80 dark:hover:bg-emerald-900/20 transition">Sign In</Link>
             <Link href="/signup" className="inline-flex items-center rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-sm px-4 py-2 hover:from-emerald-700 hover:to-teal-700 transition">Get Started</Link>
           </div>
@@ -604,8 +640,14 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
             <div className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-lg bg-emerald-600"></div>
-              <div className="text-gray-700 dark:text-gray-200 font-semibold">Expensio — Track. Save. Grow.</div>
+              <Image
+                src="/Applogo.png"
+                alt="Expensio Tracker Logo"
+                width={36}
+                height={36}
+                className="h-9 w-auto object-contain"
+              />
+              <div className="text-gray-700 dark:text-gray-200 font-semibold">— Track. Save. Grow.</div>
             </div>
             <div className="flex justify-center gap-6 text-sm">
               <Link href="/privacy" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">Privacy</Link>
@@ -617,7 +659,7 @@ export default function Home() {
               <Link href="/signup" className="inline-flex items-center rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-sm px-4 py-2 hover:from-emerald-700 hover:to-teal-700 transition">Get Started Free</Link>
             </div>
           </div>
-          <div className="mt-6 text-center text-gray-600 dark:text-gray-400">© 2024 Expensio. All rights reserved.</div>
+          <div className="mt-6 text-center text-gray-600 dark:text-gray-400">© 2025 Expensio. All rights reserved.</div>
         </div>
       </footer>
       </div>

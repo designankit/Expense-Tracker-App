@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { supabase } from "@/lib/supabaseClient"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -104,8 +105,17 @@ export default function SignupPage() {
             <div aria-hidden className="pointer-events-none absolute -top-6 -left-6 h-24 w-24 rounded-full bg-emerald-500/10 blur-2xl sm:block hidden" />
             <div className="backdrop-blur-md bg-white/60 dark:bg-black/10 rounded-[calc(theme(borderRadius.3xl))] p-6 sm:p-8 border border-emerald-900/10 dark:border-white/10 shadow-modern transition-transform duration-500 ease-out group focus-within:scale-[1.01] hover:scale-[1.01]">
             <div className="text-center mb-4 sm:mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Expensio Tracker</h1>
-              <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+              <div className="flex justify-center mb-4">
+                <Image
+                  src="/Applogo.png"
+                  alt="Expensio Tracker Logo"
+                  width={160}
+                  height={45}
+                  className="h-12 w-auto object-contain"
+                  priority
+                />
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-300">
                 Create your account to start tracking expenses
               </p>
             </div>
