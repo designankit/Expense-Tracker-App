@@ -1,6 +1,6 @@
 "use client"
 
-import { Bell, Home, Receipt, BarChart3, Settings, Moon, Sun, LogOut, User, Menu } from "lucide-react"
+import { Bell, Home, Receipt, BarChart3, Settings, Moon, Sun, LogOut, User, Menu, Repeat } from "lucide-react"
 import { useTheme } from "next-themes"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -320,6 +320,12 @@ export function DashboardHeader({ onMobileMenuToggle }: HeaderProps) {
                 <Link href="/transactions" className="flex items-center cursor-pointer">
                   <Receipt className="mr-2 h-4 w-4" />
                   <span>Transactions</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/recurring" className="flex items-center cursor-pointer">
+                  <Repeat className="mr-2 h-4 w-4" />
+                  <span>Scheduled</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>

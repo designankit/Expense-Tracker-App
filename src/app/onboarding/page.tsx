@@ -43,7 +43,7 @@ const STEPS = [
   {
     id: 'personalization',
     title: 'Personalization',
-    description: 'Set your preferences',
+    description: 'Complete your setup',
     icon: Globe,
     component: PersonalizationStep
   },
@@ -66,9 +66,6 @@ const STEPS = [
 interface OnboardingData {
   full_name?: string
   avatar_url?: string
-  currency?: string
-  language?: string
-  timezone?: string
   budget_style?: string
   default_savings_percentage?: number
   selected_categories?: string[]
@@ -150,9 +147,6 @@ export default function OnboardingPage() {
           setOnboardingData({
             full_name: profileData.full_name as string,
             avatar_url: profileData.avatar_url as string,
-            currency: (profileData.currency as string) || 'INR',
-            language: (profileData.language as string) || 'en',
-            timezone: (profileData.timezone as string) || 'Asia/Kolkata',
             budget_style: (profileData.budget_style as string) || 'balanced',
             default_savings_percentage: (profileData.default_savings_percentage as number) || 20,
             selected_categories: (profileData.selected_categories as string[]) || ['Food', 'Transport', 'Shopping', 'Entertainment', 'Utilities', 'Healthcare']
@@ -285,8 +279,10 @@ export default function OnboardingPage() {
     return (
       <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-blue-600" />
-          <p className="text-gray-600 dark:text-gray-400">Loading onboarding...</p>
+          <div className="w-16 h-16 mx-auto mb-4 bg-emerald-100 dark:bg-emerald-900/40 rounded-full flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
+          </div>
+          <p className="text-gray-600 dark:text-gray-400 font-medium">Loading onboarding...</p>
         </div>
       </div>
     )
@@ -300,10 +296,10 @@ export default function OnboardingPage() {
       <div className="container mx-auto px-4 py-8">
         {/* Progress Header */}
         <div className="max-w-4xl mx-auto mb-8">
-          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-lg p-6 shadow-sm">
+          <div className="bg-white/80 dark:bg-gray-900/20 backdrop-blur-sm border border-emerald-200/50 dark:border-emerald-800/50 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                <h1 className="text-2xl font-bold text-emerald-900 dark:text-emerald-200">
                   {currentStepConfig.title}
                 </h1>
                 <p className="text-gray-600 dark:text-gray-400">
@@ -314,7 +310,7 @@ export default function OnboardingPage() {
                 <div className="text-sm text-gray-500 dark:text-gray-400">
                   Step {currentStep + 1} of {STEPS.length}
                 </div>
-                <div className="text-lg font-semibold text-blue-600 dark:text-blue-400">
+                <div className="text-lg font-semibold text-emerald-600 dark:text-emerald-400">
                   {Math.round(((currentStep + 1) / STEPS.length) * 100)}%
                 </div>
               </div>
@@ -322,32 +318,32 @@ export default function OnboardingPage() {
             
             <Progress 
               value={(currentStep / (STEPS.length - 1)) * 100} 
-              className="h-2"
+              className="h-3 bg-emerald-100 dark:bg-emerald-900/20"
             />
             
             {/* Step Indicators */}
-            <div className="flex justify-between mt-4">
+            <div className="flex justify-between mt-6">
               {STEPS.map((step, index) => (
                 <div
                   key={step.id}
                   className={`flex flex-col items-center ${
-                    index <= currentStep ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400'
+                    index <= currentStep ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400'
                   }`}
                 >
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-1 transition-all duration-300 ${
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all duration-300 ${
                     index < currentStep 
-                      ? 'bg-green-500 text-white' 
+                      ? 'bg-emerald-500 text-white shadow-lg' 
                       : index === currentStep 
-                        ? 'bg-blue-500 text-white' 
+                        ? 'bg-emerald-600 text-white shadow-lg' 
                         : 'bg-gray-200 dark:bg-gray-700 text-gray-500'
                   }`}>
                     {index < currentStep ? (
-                      <CheckCircle className="h-4 w-4" />
+                      <CheckCircle className="h-5 w-5" />
                     ) : (
-                      <step.icon className="h-4 w-4" />
+                      <step.icon className="h-5 w-5" />
                     )}
                   </div>
-                  <span className="text-xs text-center max-w-16">{step.title}</span>
+                  <span className="text-xs text-center max-w-16 font-medium">{step.title}</span>
                 </div>
               ))}
             </div>
@@ -356,7 +352,7 @@ export default function OnboardingPage() {
 
         {/* Step Content */}
         <div className="max-w-2xl mx-auto">
-          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-lg shadow-sm">
+          <Card className="bg-white/80 dark:bg-gray-900/20 backdrop-blur-sm border border-emerald-200/50 dark:border-emerald-800/50 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
             <CardContent className="p-8">
               <StepComponent
                 data={onboardingData}
@@ -377,14 +373,14 @@ export default function OnboardingPage() {
               variant="outline"
               onClick={handlePrevious}
               disabled={isSaving}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 border-emerald-300 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-700 dark:text-emerald-300 dark:hover:bg-emerald-900/20"
             >
               <ChevronLeft className="h-4 w-4" />
               Previous
             </Button>
             
             <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-              {isSaving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              {isSaving && <Loader2 className="h-4 w-4 animate-spin mr-2 text-emerald-600" />}
               Progress saved automatically
             </div>
           </div>

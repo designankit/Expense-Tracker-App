@@ -110,10 +110,10 @@ export default function FinancePreferencesStep({ data, onNext, isLoading }: Fina
     <div className="space-y-8">
       {/* Header */}
       <div className="text-center">
-        <div className="w-16 h-16 mx-auto bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center mb-4">
+        <div className="w-16 h-16 mx-auto bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
           <DollarSign className="h-8 w-8 text-white" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+        <h2 className="text-2xl font-bold text-emerald-900 dark:text-emerald-200 mb-2">
           Finance Preferences
         </h2>
         <p className="text-gray-600 dark:text-gray-400">
@@ -122,9 +122,9 @@ export default function FinancePreferencesStep({ data, onNext, isLoading }: Fina
       </div>
 
       {/* Budget Style Selection */}
-      <Card className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border-purple-200/50 dark:border-purple-800/50">
+      <Card className="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-800/20 border-emerald-200/50 dark:border-emerald-800/50 shadow-lg">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-purple-800 dark:text-purple-200">
+          <CardTitle className="flex items-center gap-2 text-emerald-800 dark:text-emerald-200">
             <Target className="h-5 w-5" />
             Budget Style
           </CardTitle>
@@ -136,7 +136,7 @@ export default function FinancePreferencesStep({ data, onNext, isLoading }: Fina
                 key={style.id}
                 className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
                   formData.budget_style === style.id
-                    ? 'ring-2 ring-purple-500 shadow-md'
+                    ? 'ring-2 ring-emerald-500 shadow-md'
                     : 'hover:shadow-sm'
                 }`}
                 onClick={() => handleBudgetStyleChange(style.id)}
@@ -285,7 +285,7 @@ export default function FinancePreferencesStep({ data, onNext, isLoading }: Fina
         <Button
           onClick={handleNext}
           disabled={isLoading || formData.selected_categories.length === 0}
-          className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+          className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800"
         >
           Continue
         </Button>

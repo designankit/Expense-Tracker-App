@@ -40,6 +40,7 @@ import {
   AlertCircle,
   BarChart3,
 } from "lucide-react"
+import { UpcomingRecurring } from "./upcoming-recurring"
 
 // Currency formatting function
 const formatCurrencyWithPreferences = (amount: number): string => {
@@ -107,8 +108,17 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
       refreshData()
     }
 
+    const handleTransactionAdded = () => {
+      console.log('Dashboard detected transactionAdded')
+      refreshData()
+    }
+
     window.addEventListener('refreshDashboard', handleRefresh)
-    return () => window.removeEventListener('refreshDashboard', handleRefresh)
+    window.addEventListener('transactionAdded', handleTransactionAdded)
+    return () => {
+      window.removeEventListener('refreshDashboard', handleRefresh)
+      window.removeEventListener('transactionAdded', handleTransactionAdded)
+    }
   }, [refreshData])
 
   // Calculate KPIs for current month
@@ -157,6 +167,22 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
     const isOverBudget = totalExpenses > monthlyBudget
 
     return { progress, isOverBudget, totalExpenses, monthlyBudget }
+  }
+
+  // Calculate progress bar percentages for top row cards
+  const getProgressPercentages = () => {
+    const { totalIncome, totalExpenses, monthlySavings } = getCurrentMonthData()
+    
+    // Income progress (scaled to ₹100,000 max for better visualization)
+    const incomeProgress = Math.min((totalIncome / 100000) * 100, 100)
+    
+    // Expenses progress (scaled to ₹100,000 max for better visualization)
+    const expensesProgress = Math.min((totalExpenses / 100000) * 100, 100)
+    
+    // Savings progress (scaled to ₹50,000 max for better visualization)
+    const savingsProgress = Math.min(Math.abs(monthlySavings) / 50000 * 100, 100)
+    
+    return { incomeProgress, expensesProgress, savingsProgress }
   }
 
   // Calculate savings goal progress
@@ -292,6 +318,7 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
   const categoryData = getCategoryBreakdown()
   const recentTransactions = getRecentTransactions()
   const monthlyTrends = getMonthlyTrends()
+  const { incomeProgress, expensesProgress, savingsProgress } = getProgressPercentages()
 
   // Calculate percentages for category breakdown
   const totalExpenseAmount = categoryData.reduce((sum, cat) => sum + cat.value, 0)
@@ -357,8 +384,16 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                     <ArrowUpRight className="h-3 w-3 mr-1" />
                     Income Sources
                   </div>
-                  <div className="mt-3 w-full bg-emerald-200/40 dark:bg-emerald-900/40 rounded-full h-2">
-                    <div className="bg-emerald-500 dark:bg-emerald-400 h-2 rounded-full w-3/4 transition-all duration-700"></div>
+                  <div className="mt-3 w-full bg-emerald-200/40 dark:bg-emerald-900/40 rounded-full h-2 relative">
+                    <div 
+                      className="bg-emerald-500 dark:bg-emerald-400 h-2 rounded-full transition-all duration-700"
+                      style={{ width: `${incomeProgress}%` }}
+                    ></div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-xs font-medium text-emerald-600 dark:text-emerald-300">
+                        {incomeProgress.toFixed(0)}%
+                      </span>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -388,8 +423,16 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                     <ArrowDownRight className="h-3 w-3 mr-1" />
                     Total Spending
                   </div>
-                  <div className="mt-3 w-full bg-rose-200/40 dark:bg-rose-900/40 rounded-full h-2">
-                    <div className="bg-rose-500 dark:bg-rose-400 h-2 rounded-full w-2/3 transition-all duration-700"></div>
+                  <div className="mt-3 w-full bg-rose-200/40 dark:bg-rose-900/40 rounded-full h-2 relative">
+                    <div 
+                      className="bg-rose-500 dark:bg-rose-400 h-2 rounded-full transition-all duration-700"
+                      style={{ width: `${expensesProgress}%` }}
+                    ></div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-xs font-medium text-rose-600 dark:text-rose-300">
+                        {expensesProgress.toFixed(0)}%
+                      </span>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -440,16 +483,30 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                       </>
                     )}
                   </div>
-                  <div className={`mt-3 w-full rounded-full h-2 ${
+                  <div className={`mt-3 w-full rounded-full h-2 relative ${
                     monthlySavings >= 0 
                       ? 'bg-emerald-200/40 dark:bg-emerald-900/40'
                       : 'bg-orange-200/40 dark:bg-orange-900/40'
                   }`}>
-                    <div className={`h-2 rounded-full transition-all duration-700 ${
-                      monthlySavings >= 0 
-                        ? 'bg-emerald-500 dark:bg-emerald-400 w-4/5'
-                        : 'bg-orange-500 dark:bg-orange-400 w-3/5'
-                    }`}></div>
+                    <div 
+                      className={`h-2 rounded-full transition-all duration-700 ${
+                        monthlySavings >= 0 
+                          ? 'bg-emerald-500 dark:bg-emerald-400'
+                          : 'bg-orange-500 dark:bg-orange-400'
+                      }`}
+                      style={{ 
+                        width: `${savingsProgress}%` 
+                      }}
+                    ></div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className={`text-xs font-medium ${
+                        monthlySavings >= 0 
+                          ? 'text-emerald-600 dark:text-emerald-300'
+                          : 'text-orange-600 dark:text-orange-300'
+                      }`}>
+                        {savingsProgress.toFixed(0)}%
+                      </span>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -522,9 +579,12 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
         </div>
 
         {/* Middle Row - Insights */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Upcoming Recurring Transactions */}
+          <UpcomingRecurring />
+
           {/* Monthly Budget Progress */}
-          <Card className={`lg:col-span-1 hover:shadow-lg transition-all duration-300 ${
+          <Card className={`hover:shadow-lg transition-all duration-300 ${
             budgetData.isOverBudget 
               ? 'bg-white border-red-200/50 dark:bg-gray-900/20 dark:border-red-800/50'
               : 'bg-white border-emerald-200/50 dark:bg-gray-900/20 dark:border-emerald-800/50'
@@ -583,7 +643,7 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
           </Card>
 
           {/* Savings Goal Progress */}
-          <Card className="lg:col-span-1 hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-900/20 border-emerald-200/50 dark:border-emerald-800/50">
+          <Card className="hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-900/20 border-emerald-200/50 dark:border-emerald-800/50">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-emerald-900 dark:text-emerald-200">
                 <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
@@ -643,10 +703,10 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
           </Card>
 
           {/* Expense Category Breakdown */}
-          <Card className="lg:col-span-1 hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-900/20 border-indigo-200/50 dark:border-indigo-800/50">
+          <Card className="hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-900/20 border-emerald-200/50 dark:border-emerald-800/50">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-emerald-900 dark:text-emerald-200">
-                <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/40">
+                <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
                   <BarChart3 className="h-5 w-5" />
                 </div>
                 Category Breakdown

@@ -9,7 +9,8 @@ import {
   Menu,
   X,
   PiggyBank,
-  CreditCard
+  CreditCard,
+  Repeat
 } from "lucide-react"
 import Image from "next/image"
 import {
@@ -37,6 +38,11 @@ const navigationItems = [
     title: "Transactions",
     icon: CreditCard,
     url: "/transactions",
+  },
+  {
+    title: "Scheduled",
+    icon: Repeat,
+    url: "/recurring",
   },
   {
     title: "Saving Goals",

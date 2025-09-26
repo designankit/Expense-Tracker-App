@@ -129,10 +129,10 @@ export default function BasicInfoStep({ data, onNext, onSkip, isLoading }: Basic
     <div className="space-y-8">
       {/* Header */}
       <div className="text-center">
-        <div className="w-16 h-16 mx-auto bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mb-4">
+        <div className="w-16 h-16 mx-auto bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
           <User className="h-8 w-8 text-white" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+        <h2 className="text-2xl font-bold text-emerald-900 dark:text-emerald-200 mb-2">
           Tell us about yourself
         </h2>
         <p className="text-gray-600 dark:text-gray-400">
@@ -141,19 +141,19 @@ export default function BasicInfoStep({ data, onNext, onSkip, isLoading }: Basic
       </div>
 
       {/* Profile Picture Upload */}
-      <Card className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border-purple-200/50 dark:border-purple-800/50">
+      <Card className="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-800/20 border-emerald-200/50 dark:border-emerald-800/50 shadow-lg">
         <CardContent className="p-6">
           <div className="flex flex-col items-center space-y-4">
             <div className="relative">
               <Avatar className="w-24 h-24 border-4 border-white dark:border-gray-800 shadow-lg">
                 <AvatarImage src={avatarUrl} alt="Profile" />
-                <AvatarFallback className="text-lg font-semibold bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
+                <AvatarFallback className="text-lg font-semibold bg-gradient-to-br from-emerald-500 to-emerald-600 text-white">
                   {formData.full_name ? getInitials(formData.full_name) : 'U'}
                 </AvatarFallback>
               </Avatar>
               <label
                 htmlFor="avatar-upload"
-                className="absolute -bottom-2 -right-2 w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-transform duration-200 shadow-lg"
+                className="absolute -bottom-2 -right-2 w-8 h-8 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-transform duration-200 shadow-lg"
               >
                 {isUploading ? (
                   <Loader2 className="h-4 w-4 text-white animate-spin" />
@@ -170,7 +170,7 @@ export default function BasicInfoStep({ data, onNext, onSkip, isLoading }: Basic
               />
             </div>
             <div className="text-center">
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
+              <h3 className="font-semibold text-emerald-900 dark:text-emerald-200 mb-1">
                 Profile Picture
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -222,7 +222,7 @@ export default function BasicInfoStep({ data, onNext, onSkip, isLoading }: Basic
         <Button
           onClick={onSkip}
           variant="outline"
-          className="flex-1"
+          className="flex-1 border-emerald-300 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-700 dark:text-emerald-300 dark:hover:bg-emerald-900/20"
           disabled={isLoading || isUploading}
         >
           Skip for now
@@ -230,7 +230,7 @@ export default function BasicInfoStep({ data, onNext, onSkip, isLoading }: Basic
         <Button
           onClick={handleNext}
           disabled={isLoading || isUploading || !formData.full_name.trim()}
-          className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+          className="flex-1 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800"
         >
           Continue
         </Button>

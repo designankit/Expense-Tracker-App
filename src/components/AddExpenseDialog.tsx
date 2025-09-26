@@ -1,10 +1,11 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { useSupabase } from "@/components/supabase-provider"
 import { useNotifications } from "@/contexts/NotificationContext"
 import { CreateExpense } from "@/types/expense"
+import { FREQUENCY_OPTIONS, calculateNextDueDate } from "@/types/recurring-transaction"
 import {
   Dialog,
   DialogContent,
@@ -23,6 +24,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
+
 
 interface AddExpenseDialogProps {
   open: boolean
@@ -32,28 +35,12 @@ interface AddExpenseDialogProps {
   onExpenseAdded?: () => Promise<void>
 }
 
-const expenseCategories = [
-  "Food",
-  "Transportation",
-  "Entertainment",
-  "Bills",
-  "Healthcare",
-  "Shopping",
-  "Education",
-  "Travel",
-  "Other",
-]
-
-const incomeCategories = [
-  "Salary",
-  "Freelance",
-  "Investment",
-  "Business",
-  "Gift",
-  "Bonus",
-  "Rental",
-  "Other",
-]
+interface CustomCategory {
+  id: string
+  name: string
+  color: string
+  transaction_type: 'expense' | 'income'
+}
 
 export default function AddExpenseDialog({ 
   open, 
@@ -72,6 +59,9 @@ export default function AddExpenseDialog({
     category: initialData?.category || "",
     transaction_date: initialData?.transaction_date || new Date().toISOString().split("T")[0],
     transaction_type: initialData?.transaction_type || "expense",
+    is_recurring: false,
+    frequency: "monthly" as const,
+    end_date: "",
   })
   
   const [errors, setErrors] = useState<{
@@ -79,9 +69,11 @@ export default function AddExpenseDialog({
     amount?: string
     transaction_date?: string
     category?: string
+    frequency?: string
   }>({})
 
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [categories, setCategories] = useState<CustomCategory[]>([])
 
   const checkBudgetWarnings = async () => {
     if (!user || !supabase) return
@@ -134,7 +126,7 @@ export default function AddExpenseDialog({
     }
   }
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }))
     // Clear error when user starts typing
     if (errors[field as keyof typeof errors]) {
@@ -142,28 +134,33 @@ export default function AddExpenseDialog({
     }
   }
 
-  const validateForm = () => {
+  const validateForm = (dataToValidate = formData) => {
     const newErrors: typeof errors = {}
     
     // Validate title
-    if (!formData.title.trim()) {
+    if (!dataToValidate.title.trim()) {
       newErrors.title = "Title is required"
     }
     
     // Validate amount
-    const amount = parseFloat(formData.amount)
-    if (!formData.amount || isNaN(amount) || amount <= 0) {
+    const amount = parseFloat(dataToValidate.amount)
+    if (!dataToValidate.amount || isNaN(amount) || amount <= 0) {
       newErrors.amount = "Amount must be greater than 0"
     }
     
     // Validate date
-    if (!formData.transaction_date) {
+    if (!dataToValidate.transaction_date) {
       newErrors.transaction_date = "Date is required"
     }
     
     // Validate category
-    if (!formData.category.trim()) {
+    if (!dataToValidate.category.trim()) {
       newErrors.category = "Category is required"
+    }
+    
+    // Validate recurring transaction fields
+    if (dataToValidate.is_recurring && !dataToValidate.frequency) {
+      newErrors.frequency = "Frequency is required for scheduled transactions"
     }
     
     setErrors(newErrors)
@@ -173,7 +170,18 @@ export default function AddExpenseDialog({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!validateForm()) {
+    // Prepare form data for validation
+    const dataToValidate = { ...formData }
+    
+    // Ensure a category is selected
+    if (!formData.category.trim()) {
+      setErrors({ category: "Category is required" })
+      return
+    }
+
+    const validationPassed = validateForm(dataToValidate)
+    
+    if (!validationPassed) {
       return
     }
 
@@ -189,10 +197,12 @@ export default function AddExpenseDialog({
     setIsSubmitting(true)
     
     try {
+      const finalCategory = formData.category
+
       const expenseData: CreateExpense = {
         title: formData.title,
         amount: parseFloat(formData.amount),
-        category: formData.category,
+        category: finalCategory,
         transaction_date: formData.transaction_date,
         transaction_type: formData.transaction_type as 'income' | 'expense',
       }
@@ -220,6 +230,9 @@ export default function AddExpenseDialog({
           title: "Success",
           description: "Expense updated successfully.",
         })
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('transactionAdded'))
+        }
       } else {
         // Create new expense
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -231,13 +244,69 @@ export default function AddExpenseDialog({
           throw error
         }
 
+        // If this is a recurring transaction, create the recurring rule
+        if (formData.is_recurring) {
+          const startDate = new Date(formData.transaction_date)
+          const nextDueDate = calculateNextDueDate(
+            formData.frequency,
+            startDate,
+            startDate
+          )
+
+          const recurringData = {
+            user_id: user.id,
+            title: formData.title,
+            amount: parseFloat(formData.amount),
+            category: finalCategory,
+            transaction_type: formData.transaction_type as 'income' | 'expense',
+            frequency: formData.frequency,
+            start_date: formData.transaction_date,
+            end_date: formData.end_date || null,
+            next_due_date: nextDueDate.toISOString().split('T')[0],
+            is_active: true,
+          }
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const { error: recurringError } = await (supabase as any)
+            .from('recurring_transactions')
+            .insert([recurringData])
+
+          if (recurringError) {
+            console.error('Error creating recurring transaction:', recurringError)
+            // Don't throw here, just log the error as the main transaction was created
+          }
+        }
+
         toast({
           title: "Success",
-          description: "Expense added successfully.",
+          description: formData.is_recurring 
+            ? "Scheduled transaction created successfully." 
+            : "Transaction added successfully.",
         })
 
         // Check for budget warnings (only for new expenses)
         await checkBudgetWarnings()
+
+        // Trigger notification checks
+        try {
+          await fetch('/api/notifications/check', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              userId: user.id
+            })
+          })
+        } catch (error) {
+          console.error('Error triggering notification checks:', error)
+        }
+
+        // Refresh categories list to include the new category
+        fetchCategories()
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('transactionAdded'))
+        }
       }
 
       if (onSubmit) {
@@ -255,8 +324,12 @@ export default function AddExpenseDialog({
         category: "",
         transaction_date: new Date().toISOString().split("T")[0],
         transaction_type: "expense",
+        is_recurring: false,
+        frequency: "monthly",
+        end_date: "",
       })
       setErrors({})
+      
       
       // Close dialog
       onOpenChange(false)
@@ -279,8 +352,12 @@ export default function AddExpenseDialog({
       category: "",
       transaction_date: new Date().toISOString().split("T")[0],
       transaction_type: "expense",
+      is_recurring: false,
+      frequency: "monthly",
+      end_date: "",
     })
     setErrors({})
+    
     onOpenChange(false)
   }
 
@@ -293,9 +370,47 @@ export default function AddExpenseDialog({
         category: initialData.category || "",
         transaction_date: initialData.transaction_date || new Date().toISOString().split("T")[0],
         transaction_type: initialData.transaction_type || "expense",
+        is_recurring: false,
+        frequency: "monthly",
+        end_date: "",
       })
     }
   }, [initialData])
+
+  // Fetch categories function
+  const fetchCategories = useCallback(async () => {
+    if (!user || !supabase || !open) return
+
+    try {
+      // Get unique categories from existing expenses for this transaction type
+      const { data, error } = await (supabase as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+        .from('expenses')
+        .select('category')
+        .eq('user_id', user.id)
+        .eq('transaction_type', formData.transaction_type)
+        .not('category', 'is', null)
+
+      if (error) throw error
+      
+      // Get unique categories and create simple category objects
+      const uniqueCategories = [...new Set(data?.map((item: any) => item.category).filter(Boolean) || [])] as string[] // eslint-disable-line @typescript-eslint/no-explicit-any
+      const categoryObjects = uniqueCategories.map((category: string, index: number) => ({
+        id: `existing-${index}`,
+        name: category,
+        color: '#10b981', // Default green color for existing categories
+        transaction_type: formData.transaction_type
+      }))
+      
+      setCategories(categoryObjects)
+    } catch (error) {
+      console.error('Error fetching categories:', error)
+    }
+  }, [user, supabase, open, formData.transaction_type])
+
+  // Fetch categories when dialog opens
+  useEffect(() => {
+    fetchCategories()
+  }, [fetchCategories])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -368,13 +483,23 @@ export default function AddExpenseDialog({
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
-                  {(formData.transaction_type === 'income' ? incomeCategories : expenseCategories).map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category}
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.name}>
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-3 h-3 rounded-full"
+                          style={{ backgroundColor: category.color }}
+                        />
+                        {category.name}
+                      </div>
                     </SelectItem>
                   ))}
+                  
                 </SelectContent>
               </Select>
+              
+              
+              
               {errors.category && (
                 <p className="text-sm text-red-500">{errors.category}</p>
               )}
@@ -391,6 +516,55 @@ export default function AddExpenseDialog({
               />
               {errors.transaction_date && (
                 <p className="text-sm text-red-500">{errors.transaction_date}</p>
+              )}
+            </div>
+
+            {/* Recurring Transaction Fields */}
+            <div className="grid gap-4 py-4 border-t">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="is_recurring"
+                  checked={formData.is_recurring}
+                  onCheckedChange={(checked) => handleInputChange("is_recurring", checked)}
+                />
+                <Label htmlFor="is_recurring">Schedule this transaction to repeat automatically</Label>
+              </div>
+
+              {formData.is_recurring && (
+                <>
+                  <div className="grid gap-2">
+                    <Label htmlFor="frequency">Frequency</Label>
+                    <Select
+                      value={formData.frequency}
+                      onValueChange={(value) => handleInputChange("frequency", value)}
+                    >
+                      <SelectTrigger className={errors.frequency ? "border-red-500" : ""}>
+                        <SelectValue placeholder="Select frequency" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {FREQUENCY_OPTIONS.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {errors.frequency && (
+                      <p className="text-sm text-red-500">{errors.frequency}</p>
+                    )}
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="end_date">End Date (Optional)</Label>
+                    <Input
+                      id="end_date"
+                      type="date"
+                      value={formData.end_date}
+                      onChange={(e) => handleInputChange("end_date", e.target.value)}
+                      placeholder="Leave empty for indefinite"
+                    />
+                  </div>
+                </>
               )}
             </div>
           </div>

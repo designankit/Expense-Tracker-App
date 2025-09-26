@@ -140,6 +140,19 @@ function TransactionsPageContent() {
     }
 
     fetchTransactions()
+
+    // Listen for global transactionAdded events to refresh immediately
+    const handler = () => {
+      fetchTransactions()
+    }
+    if (typeof window !== 'undefined') {
+      window.addEventListener('transactionAdded', handler)
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('transactionAdded', handler)
+      }
+    }
   }, [user, supabase, toast])
 
   // Get unique categories

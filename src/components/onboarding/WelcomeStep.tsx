@@ -48,11 +48,11 @@ export default function WelcomeStep({ onNext, isLoading }: WelcomeStepProps) {
     <div className="text-center space-y-8">
       {/* Welcome Header */}
       <div className="space-y-4">
-        <div className="w-20 h-20 mx-auto bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+        <div className="w-20 h-20 mx-auto bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg">
           <PiggyBank className="h-10 w-10 text-white" />
         </div>
         <div>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+          <h2 className="text-3xl font-bold text-emerald-900 dark:text-emerald-200 mb-2">
             Welcome to Expensio Tracker! 🎉
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-400">
@@ -66,15 +66,15 @@ export default function WelcomeStep({ onNext, isLoading }: WelcomeStepProps) {
         {features.map((feature, index) => (
           <Card 
             key={index}
-            className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200/50 dark:border-blue-800/50 hover:shadow-md transition-all duration-300"
+            className="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-800/20 border-emerald-200/50 dark:border-emerald-800/50 hover:shadow-lg transition-all duration-300 hover:scale-105"
           >
             <CardContent className="p-4">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
                   <feature.icon className="h-5 w-5 text-white" />
                 </div>
                 <div className="text-left">
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
+                  <h3 className="font-semibold text-emerald-900 dark:text-emerald-200 mb-1">
                     {feature.title}
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -88,14 +88,14 @@ export default function WelcomeStep({ onNext, isLoading }: WelcomeStepProps) {
       </div>
 
       {/* Quick Setup Info */}
-      <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg p-6 border border-green-200/50 dark:border-green-800/50">
+      <div className="bg-gradient-to-r from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-800/20 rounded-xl p-6 border border-emerald-200/50 dark:border-emerald-800/50 shadow-lg">
         <div className="flex items-center justify-center gap-2 mb-2">
-          <CheckCircle className="h-5 w-5 text-green-600" />
-          <span className="font-semibold text-green-800 dark:text-green-200">
+          <CheckCircle className="h-5 w-5 text-emerald-600" />
+          <span className="font-semibold text-emerald-800 dark:text-emerald-200">
             Quick 5-Step Setup
           </span>
         </div>
-        <p className="text-sm text-green-700 dark:text-green-300">
+        <p className="text-sm text-emerald-700 dark:text-emerald-300">
           We&apos;ll help you personalize your experience in just a few minutes. 
           Your progress is saved automatically, so you can always come back later.
         </p>
@@ -107,7 +107,7 @@ export default function WelcomeStep({ onNext, isLoading }: WelcomeStepProps) {
           onClick={() => onNext()}
           disabled={isLoading}
           size="lg"
-          className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-3 text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
+          className="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-8 py-3 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
         >
           Get Started
           <ArrowRight className="ml-2 h-5 w-5" />

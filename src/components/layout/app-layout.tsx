@@ -3,12 +3,14 @@
 import { useState } from "react"
 import { Sidebar } from "@/components/dashboard/sidebar"
 import { DashboardHeader } from "@/components/dashboard/header"
+import { GlobalFloatingActionButton } from "./FloatingActionButton"
 
 interface AppLayoutProps {
   children: React.ReactNode
+  onTransactionAdded?: () => void
 }
 
-export function AppLayout({ children }: AppLayoutProps) {
+export function AppLayout({ children, onTransactionAdded }: AppLayoutProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
@@ -60,6 +62,9 @@ export function AppLayout({ children }: AppLayoutProps) {
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
+      
+      {/* Global Floating Action Button */}
+      <GlobalFloatingActionButton onTransactionAdded={onTransactionAdded} />
     </div>
   )
 }

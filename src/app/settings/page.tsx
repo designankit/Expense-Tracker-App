@@ -27,15 +27,15 @@ import {
   Settings as SettingsIcon,
   CheckCircle,
   Loader2,
-  Camera
+  Camera,
 } from "lucide-react"
+// CategoryManager removed along with custom categories feature
 
 interface SettingsData {
   // Profile & Personalization
   fullName: string
   email: string
   timeFormat: '12h' | '24h'
-  defaultDashboardView: 'overview' | 'goals' | 'savings'
 }
 
 
@@ -47,8 +47,7 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState<SettingsData>({
     fullName: user?.user_metadata?.full_name || '',
     email: user?.email || '',
-    timeFormat: '12h',
-    defaultDashboardView: 'overview'
+    timeFormat: '12h'
   })
 
   const [isLoading, setIsLoading] = useState(false)
@@ -258,7 +257,7 @@ export default function SettingsPage() {
               </div>
               
               {/* Quick Stats */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
                 <div className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-800 hover:shadow-lg transition-all duration-300">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
@@ -375,7 +374,7 @@ export default function SettingsPage() {
                           </div>
                           Preferences
                         </h3>
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div className="max-w-md">
                           <div className="space-y-3">
                             <Label htmlFor="timeFormat" className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Time Format</Label>
                             <Select value={settings.timeFormat} onValueChange={(value: '12h' | '24h') => setSettings(prev => ({ ...prev, timeFormat: value }))}>
@@ -385,20 +384,6 @@ export default function SettingsPage() {
                               <SelectContent>
                                 <SelectItem value="12h">12 Hour (AM/PM)</SelectItem>
                                 <SelectItem value="24h">24 Hour</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-
-                          <div className="space-y-3">
-                            <Label htmlFor="dashboardView" className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Default Dashboard View</Label>
-                            <Select value={settings.defaultDashboardView} onValueChange={(value: 'overview' | 'goals' | 'savings') => setSettings(prev => ({ ...prev, defaultDashboardView: value }))}>
-                              <SelectTrigger className="h-12 w-full bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 rounded-xl hover:border-blue-300 dark:hover:border-blue-500 transition-colors">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="overview">Overview</SelectItem>
-                                <SelectItem value="goals">Goals</SelectItem>
-                                <SelectItem value="savings">Savings</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
@@ -493,6 +478,8 @@ export default function SettingsPage() {
                   </AccordionContent>
                 </AccordionItem>
 
+                
+
                 {/* App Version */}
                 <AccordionItem value="version" className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 hover:shadow-md transition-all duration-300">
                   <AccordionTrigger className="px-6 sm:px-8 py-5 sm:py-6 hover:no-underline group">
@@ -554,11 +541,15 @@ export default function SettingsPage() {
                         </h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           {[
-                            'Expense Tracking',
+                            'Expense & Income Tracking',
+                            'Scheduled Transactions',
+                            'Smart Notifications',
+                            'Budget Management',
+                            'Savings Goals & Insights',
                             'Analytics & Reports',
-                            'Savings Goals',
+                            'Category Management',
                             'Dark/Light Theme',
-                            'Real-time Notifications',
+                            'Real-time Dashboard',
                             'Data Export',
                             'Secure Authentication',
                             'Responsive Design'
