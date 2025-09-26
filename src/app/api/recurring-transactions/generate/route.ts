@@ -1,9 +1,8 @@
-import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabaseClient'
+import { NextRequest, NextResponse } from 'next/server'
+import { supabase } from '@/lib/supabaseClient'
 
 export async function POST() {
   try {
-    const supabase = createClient()
     
     // Call the database function to generate recurring transactions
     const { data, error } = await supabase.rpc('generate_recurring_transactions')
@@ -32,7 +31,6 @@ export async function POST() {
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createClient()
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get('userId')
 

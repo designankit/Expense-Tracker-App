@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabaseClient'
+import { supabase } from '@/lib/supabaseClient'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = createClient()
+    const { id } = await params
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get('userId')
 
@@ -20,7 +20,7 @@ export async function GET(
     const { data: recurringTransaction, error } = await supabase
       .from('recurring_transactions')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', userId)
       .single()
 
@@ -44,12 +44,12 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = createClient()
+    const { id } = await params
     const body = await request.json()
-    const { userId, ...updateData } = body
+    const { userId, ...updateData } = body as { userId: string; [key: string]: unknown }
 
     if (!userId) {
       return NextResponse.json(
@@ -58,10 +58,10 @@ export async function PUT(
       )
     }
 
-    const { data: recurringTransaction, error } = await supabase
+    const { data: recurringTransaction, error } = await (supabase as any) // eslint-disable-line @typescript-eslint/no-explicit-any
       .from('recurring_transactions')
       .update(updateData)
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', userId)
       .select()
       .single()
@@ -86,10 +86,10 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = createClient()
+    const { id } = await params
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get('userId')
 
@@ -103,7 +103,7 @@ export async function DELETE(
     const { error } = await supabase
       .from('recurring_transactions')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', userId)
 
     if (error) {

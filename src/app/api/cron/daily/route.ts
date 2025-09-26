@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabaseClient'
+import { supabase } from '@/lib/supabaseClient'
 import { notificationService } from '@/lib/notification-service'
 
 export async function POST(request: NextRequest) {
@@ -15,7 +15,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = createClient()
 
     // Generate recurring transactions
     const { data: generateResult, error: generateError } = await supabase.rpc('generate_recurring_transactions')
@@ -33,7 +32,7 @@ export async function POST(request: NextRequest) {
           id,
           email
         )
-      `)
+      `) as { data: Array<{ id: string; auth_users: { id: string; email: string } | null }> | null; error: unknown }
 
     if (usersError) {
       console.error('Error fetching users:', usersError)

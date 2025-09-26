@@ -68,7 +68,7 @@ export default function RecurringTransactionsPage() {
     if (!user || !supabase) return
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any) // eslint-disable-line @typescript-eslint/no-explicit-any
         .from('recurring_transactions')
         .update({ is_active: !isActive })
         .eq('id', id)

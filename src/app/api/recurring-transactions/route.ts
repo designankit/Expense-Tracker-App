@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabaseClient'
+import { supabase } from '@/lib/supabaseClient'
 import { calculateNextDueDate } from '@/types/recurring-transaction'
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createClient()
     const body = await request.json()
     
     const { 
@@ -29,7 +28,7 @@ export async function POST(request: NextRequest) {
     const startDate = new Date(start_date)
     const nextDueDate = calculateNextDueDate(frequency, startDate)
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any) // eslint-disable-line @typescript-eslint/no-explicit-any
       .from('recurring_transactions')
       .insert([{
         user_id: userId,
@@ -66,7 +65,6 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createClient()
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get('userId')
 

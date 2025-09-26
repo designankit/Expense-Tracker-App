@@ -249,7 +249,6 @@ export default function AddExpenseDialog({
           const startDate = new Date(formData.transaction_date)
           const nextDueDate = calculateNextDueDate(
             formData.frequency,
-            startDate,
             startDate
           )
 
