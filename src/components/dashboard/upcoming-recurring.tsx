@@ -3,19 +3,13 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useSupabase } from '@/components/supabase-provider'
 import { RecurringTransaction } from '@/types/database'
-import { formatFrequency } from '@/types/recurring-transaction'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { 
   Calendar, 
-  ArrowUpRight, 
-  ArrowDownRight, 
-  Repeat, 
   AlertCircle,
-  Clock,
-  ChevronRight,
   Bell
 } from 'lucide-react'
 import { formatCurrency } from '@/lib/user-preferences'
@@ -37,7 +31,7 @@ export function UpcomingRecurring({ className }: UpcomingRecurringProps) {
       setIsLoading(true)
       setError(null)
 
-      // Get recurring transactions that are due in the next 30 days
+      // Get recurring expense transactions that are due in the next 30 days
       const today = new Date()
       const nextMonth = new Date()
       nextMonth.setDate(today.getDate() + 30)
@@ -47,6 +41,7 @@ export function UpcomingRecurring({ className }: UpcomingRecurringProps) {
         .select('*')
         .eq('user_id', user.id)
         .eq('is_active', true)
+        .eq('transaction_type', 'expense') // Only show expenses
         .gte('next_due_date', today.toISOString().split('T')[0])
         .lte('next_due_date', nextMonth.toISOString().split('T')[0])
         .order('next_due_date', { ascending: true })
@@ -86,59 +81,173 @@ export function UpcomingRecurring({ className }: UpcomingRecurringProps) {
     }
   }, [fetchUpcomingRecurring])
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    const today = new Date()
-    const diffTime = date.getTime() - today.getTime()
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
 
-    if (diffDays === 0) return 'Today'
-    if (diffDays === 1) return 'Tomorrow'
-    if (diffDays <= 7) return `In ${diffDays} days`
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric'
-    })
-  }
-
-  const getUrgencyColor = (dateString: string) => {
-    const date = new Date(dateString)
-    const today = new Date()
-    const diffTime = date.getTime() - today.getTime()
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-
-    if (diffDays <= 1) return 'text-red-600 dark:text-red-400'
-    if (diffDays <= 3) return 'text-orange-600 dark:text-orange-400'
-    if (diffDays <= 7) return 'text-yellow-600 dark:text-yellow-400'
-    return 'text-blue-600 dark:text-blue-400'
-  }
-
-  const getUrgencyBadge = (dateString: string) => {
-    const date = new Date(dateString)
-    const today = new Date()
-    const diffTime = date.getTime() - today.getTime()
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-
-    if (diffDays <= 1) return { 
-      variant: 'destructive' as const, 
-      text: 'Due Today',
-      className: 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/40 dark:text-red-300 dark:border-red-800'
+  // Calendar component
+  const CalendarView = () => {
+    const [currentDate, setCurrentDate] = useState(new Date())
+    
+    const getDaysInMonth = (date: Date) => {
+      const year = date.getFullYear()
+      const month = date.getMonth()
+      const firstDay = new Date(year, month, 1)
+      const lastDay = new Date(year, month + 1, 0)
+      const daysInMonth = lastDay.getDate()
+      const startingDayOfWeek = firstDay.getDay()
+      
+      const days = []
+      
+      // Add empty cells for days before the first day of the month
+      for (let i = 0; i < startingDayOfWeek; i++) {
+        days.push(null)
+      }
+      
+      // Add days of the month
+      for (let day = 1; day <= daysInMonth; day++) {
+        days.push(new Date(year, month, day))
+      }
+      
+      return days
     }
-    if (diffDays <= 3) return { 
-      variant: 'destructive' as const, 
-      text: 'Due Soon',
-      className: 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/40 dark:text-orange-300 dark:border-orange-800'
+    
+    const getTransactionsForDate = (date: Date) => {
+      const dateString = date.toISOString().split('T')[0]
+      return upcomingTransactions.filter(transaction => 
+        transaction.next_due_date === dateString
+      )
     }
-    if (diffDays <= 7) return { 
-      variant: 'secondary' as const, 
-      text: 'This Week',
-      className: 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/40 dark:text-yellow-300 dark:border-yellow-800'
+    
+    const getTransactionColor = (transaction: RecurringTransaction) => {
+      // Since we only show expenses now, use different colors based on urgency
+      const date = new Date(transaction.next_due_date)
+      const today = new Date()
+      const diffTime = date.getTime() - today.getTime()
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+      
+      if (diffDays <= 1) return 'bg-red-500' // Due today/tomorrow
+      if (diffDays <= 3) return 'bg-orange-500' // Due soon
+      if (diffDays <= 7) return 'bg-yellow-500' // This week
+      return 'bg-blue-500' // Upcoming
     }
-    return { 
-      variant: 'outline' as const, 
-      text: 'Upcoming',
-      className: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-800'
+    
+    const formatDate = (date: Date) => {
+      return date.toLocaleDateString('en-US', { 
+        month: 'long', 
+        year: 'numeric' 
+      })
     }
+    
+    const navigateMonth = (direction: 'prev' | 'next') => {
+      setCurrentDate(prev => {
+        const newDate = new Date(prev)
+        if (direction === 'prev') {
+          newDate.setMonth(prev.getMonth() - 1)
+        } else {
+          newDate.setMonth(prev.getMonth() + 1)
+        }
+        return newDate
+      })
+    }
+    
+    const days = getDaysInMonth(currentDate)
+    const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+    
+    return (
+      <div className="space-y-2">
+        {/* Calendar Header */}
+        <div className="flex items-center justify-between">
+          <h3 className="text-xs font-semibold text-gray-900 dark:text-white">
+            {formatDate(currentDate)}
+          </h3>
+          <div className="flex gap-1">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigateMonth('prev')}
+              className="h-5 w-5 p-0 text-xs"
+            >
+              ←
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigateMonth('next')}
+              className="h-5 w-5 p-0 text-xs"
+            >
+              →
+            </Button>
+          </div>
+        </div>
+        
+        {/* Calendar Grid */}
+        <div className="grid grid-cols-7 gap-0.5">
+          {/* Week day headers */}
+          {weekDays.map(day => (
+            <div key={day} className="p-0.5 text-center text-xs font-medium text-gray-500 dark:text-gray-400">
+              {day}
+            </div>
+          ))}
+          
+          {/* Calendar days */}
+          {days.map((day, index) => {
+            if (!day) {
+              return <div key={index} className="h-8"></div>
+            }
+            
+            const dayTransactions = getTransactionsForDate(day)
+            const isToday = day.toDateString() === new Date().toDateString()
+            
+            return (
+              <div
+                key={day.toISOString()}
+                className={`h-8 p-0.5 border border-gray-200 dark:border-gray-700 rounded relative ${
+                  isToday ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-800'
+                } hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors`}
+              >
+                <div className={`text-xs font-medium ${
+                  isToday ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-gray-100'
+                }`}>
+                  {day.getDate()}
+                </div>
+                
+                {/* Transaction markers */}
+                <div className="flex flex-wrap gap-0.5 mt-0.5">
+                  {dayTransactions.slice(0, 3).map((transaction, idx) => (
+                    <div
+                      key={`${transaction.id}-${idx}`}
+                      className={`w-1.5 h-1.5 rounded-full ${getTransactionColor(transaction)} shadow-sm`}
+                      title={`${transaction.title} - ${formatCurrency(transaction.amount)}`}
+                    />
+                  ))}
+                  {dayTransactions.length > 3 && (
+                    <div className="w-1.5 h-1.5 rounded-full bg-gray-400 shadow-sm" title={`+${dayTransactions.length - 3} more`} />
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+        
+        {/* Legend */}
+        <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+          <div className="flex items-center gap-1">
+            <div className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-sm"></div>
+            <span>Due Today</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-1.5 h-1.5 rounded-full bg-orange-500 shadow-sm"></div>
+            <span>Due Soon</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 shadow-sm"></div>
+            <span>This Week</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-sm"></div>
+            <span>Upcoming</span>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   if (isLoading) {
@@ -149,7 +258,7 @@ export function UpcomingRecurring({ className }: UpcomingRecurringProps) {
             <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
               <Bell className="h-5 w-5" />
             </div>
-            Upcoming Scheduled Transactions
+            Upcoming Bills & Expenses
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -180,7 +289,7 @@ export function UpcomingRecurring({ className }: UpcomingRecurringProps) {
             <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
               <Bell className="h-5 w-5" />
             </div>
-            Upcoming Scheduled Transactions
+            Upcoming Bills & Expenses
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -203,7 +312,7 @@ export function UpcomingRecurring({ className }: UpcomingRecurringProps) {
           <div className="p-2.5 rounded-xl bg-emerald-100 dark:bg-emerald-900/40">
             <Bell className="h-5 w-5" />
           </div>
-          <span className="text-lg font-semibold">Upcoming Scheduled Transactions</span>
+          <span className="text-lg font-semibold">Upcoming Bills & Expenses</span>
           {upcomingTransactions.length > 0 && (
             <Badge variant="outline" className="ml-auto border-emerald-300 text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-900/20">
               {upcomingTransactions.length}
@@ -213,91 +322,22 @@ export function UpcomingRecurring({ className }: UpcomingRecurringProps) {
       </CardHeader>
       <CardContent className="pt-0">
         {upcomingTransactions.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground">
-            <div className="p-5 rounded-2xl bg-emerald-100 dark:bg-emerald-900/40 w-20 h-20 mx-auto mb-4 flex items-center justify-center">
-              <Calendar className="h-10 w-10 text-emerald-500" />
+          <div className="space-y-3">
+            {/* Empty state message */}
+            <div className="text-center py-3 text-muted-foreground">
+              <div className="p-2 rounded-xl bg-emerald-100 dark:bg-emerald-900/40 w-10 h-10 mx-auto mb-2 flex items-center justify-center">
+                <Calendar className="h-5 w-5 text-emerald-500" />
+              </div>
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">No upcoming bills this month</p>
             </div>
-            <p className="text-base font-medium text-gray-700 dark:text-gray-300">No upcoming transactions</p>
-            <p className="text-sm mt-2 text-gray-500 dark:text-gray-400">Your scheduled transactions will appear here</p>
+            
+            {/* Calendar preview */}
+            <div className="opacity-50">
+              <CalendarView />
+            </div>
           </div>
         ) : (
-          <div className="space-y-4">
-            {upcomingTransactions.slice(0, 5).map((transaction) => {
-              const urgencyBadge = getUrgencyBadge(transaction.next_due_date)
-              return (
-                <div
-                  key={transaction.id}
-                  className="group flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-200 hover:shadow-sm hover:border-emerald-200 dark:hover:border-emerald-700"
-                >
-                  <div className="flex items-center gap-4 flex-1 min-w-0">
-                    <div className={`p-2.5 rounded-xl ${
-                      transaction.transaction_type === 'income' 
-                        ? 'bg-green-100 dark:bg-green-900/40' 
-                        : 'bg-red-100 dark:bg-red-900/40'
-                    }`}>
-                      {transaction.transaction_type === 'income' ? (
-                        <ArrowUpRight className="h-4 w-4 text-green-600 dark:text-green-400" />
-                      ) : (
-                        <ArrowDownRight className="h-4 w-4 text-red-600 dark:text-red-400" />
-                      )}
-                    </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3 mb-2">
-                        <p className="font-semibold text-base truncate text-gray-900 dark:text-gray-100">
-                          {transaction.title}
-                        </p>
-                        <Badge 
-                          variant={urgencyBadge.variant}
-                          className={`text-xs font-medium px-2 py-1 ${urgencyBadge.className}`}
-                        >
-                          {urgencyBadge.text}
-                        </Badge>
-                      </div>
-                      
-                      <div className="flex items-center gap-6 text-sm text-gray-600 dark:text-gray-400">
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4" />
-                          <span className={`font-medium ${getUrgencyColor(transaction.next_due_date)}`}>
-                            {formatDate(transaction.next_due_date)}
-                          </span>
-                        </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <Repeat className="h-4 w-4" />
-                          <span className="font-medium">{formatFrequency(transaction.frequency)}</span>
-                        </div>
-                        
-                        {transaction.category && (
-                          <span className="truncate font-medium">{transaction.category}</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-3 ml-6">
-                    <div className={`text-lg font-bold ${
-                      transaction.transaction_type === 'income' 
-                        ? 'text-green-600 dark:text-green-400' 
-                        : 'text-red-600 dark:text-red-400'
-                    }`}>
-                      {transaction.transaction_type === 'income' ? '+' : '-'}
-                      {formatCurrency(transaction.amount)}
-                    </div>
-                    <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-emerald-500 transition-colors" />
-                  </div>
-                </div>
-              )
-            })}
-            
-            {upcomingTransactions.length > 5 && (
-              <div className="text-center pt-4">
-                <Button variant="ghost" size="sm" className="text-sm font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 px-4 py-2">
-                  View all {upcomingTransactions.length} upcoming transactions
-                </Button>
-              </div>
-            )}
-          </div>
+          <CalendarView />
         )}
       </CardContent>
     </Card>

@@ -197,6 +197,35 @@ export default function DashboardPage() {
                           Here&apos;s your financial overview for today
                         </p>
                         
+                        {/* Onboarding Checklist */}
+                        {financialAnalysis?.scenario === 'starting' && (
+                          <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                            <h3 className="text-sm font-medium text-blue-900 dark:text-blue-200 mb-3">
+                              Get started with these steps:
+                            </h3>
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2 text-sm">
+                                <div className="w-4 h-4 rounded-full border-2 border-blue-300 dark:border-blue-600 flex items-center justify-center">
+                                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                </div>
+                                <span className="text-blue-700 dark:text-blue-300">Add your first income</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-sm">
+                                <div className="w-4 h-4 rounded-full border-2 border-blue-300 dark:border-blue-600 flex items-center justify-center">
+                                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                </div>
+                                <span className="text-blue-700 dark:text-blue-300">Add your first expense</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-sm">
+                                <div className="w-4 h-4 rounded-full border-2 border-blue-300 dark:border-blue-600 flex items-center justify-center">
+                                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                </div>
+                                <span className="text-blue-700 dark:text-blue-300">Create a savings goal</span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        
                         {/* Financial Analysis Card */}
                         {financialAnalysis && (
                           <div className={`relative overflow-hidden rounded-xl border p-4 sm:p-6 shadow-sm transition-all duration-300 ${

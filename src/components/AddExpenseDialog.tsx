@@ -380,6 +380,20 @@ export default function AddExpenseDialog({
   const fetchCategories = useCallback(async () => {
     if (!user || !supabase || !open) return
 
+    // Default categories for both expense and income
+    const defaultCategories = {
+      expense: [
+        'Food & Dining', 'Transportation', 'Shopping', 'Entertainment', 
+        'Bills & Utilities', 'Healthcare', 'Education', 'Travel', 
+        'Groceries', 'Personal Care', 'Home & Garden', 'Insurance', 
+        'Investment', 'Other'
+      ],
+      income: [
+        'Salary', 'Freelance', 'Business', 'Investment', 'Gift', 'Bonus', 
+        'Rental', 'Other'
+      ]
+    }
+
     try {
       // Get unique categories from existing expenses for this transaction type
       const { data, error } = await (supabase as any) // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -391,18 +405,42 @@ export default function AddExpenseDialog({
 
       if (error) throw error
       
-      // Get unique categories and create simple category objects
-      const uniqueCategories = [...new Set(data?.map((item: any) => item.category).filter(Boolean) || [])] as string[] // eslint-disable-line @typescript-eslint/no-explicit-any
-      const categoryObjects = uniqueCategories.map((category: string, index: number) => ({
-        id: `existing-${index}`,
+      // Get unique categories from existing transactions
+      const existingCategories = [...new Set(data?.map((item: any) => item.category).filter(Boolean) || [])] as string[] // eslint-disable-line @typescript-eslint/no-explicit-any
+      
+      // Combine default categories with existing ones, removing duplicates
+      const allCategories = [...new Set([...defaultCategories[formData.transaction_type], ...existingCategories])]
+      
+      const categoryObjects = allCategories.map((category: string, index: number) => ({
+        id: `category-${index}`,
         name: category,
-        color: '#10b981', // Default green color for existing categories
+        color: '#10b981', // Default green color
         transaction_type: formData.transaction_type
       }))
       
       setCategories(categoryObjects)
     } catch (error) {
       console.error('Error fetching categories:', error)
+      // Fallback to default categories if database fetch fails
+      const defaultCategories = {
+        expense: [
+          'Food & Dining', 'Transportation', 'Shopping', 'Entertainment', 
+          'Bills & Utilities', 'Healthcare', 'Education', 'Travel', 
+          'Groceries', 'Personal Care', 'Home & Garden', 'Insurance', 
+          'Investment', 'Other'
+        ],
+        income: [
+          'Salary', 'Freelance', 'Business', 'Investment', 'Gift', 'Bonus', 
+          'Rental', 'Other'
+        ]
+      }
+      const categoryObjects = defaultCategories[formData.transaction_type].map((category: string, index: number) => ({
+        id: `default-${index}`,
+        name: category,
+        color: '#10b981',
+        transaction_type: formData.transaction_type
+      }))
+      setCategories(categoryObjects)
     }
   }, [user, supabase, open, formData.transaction_type])
 

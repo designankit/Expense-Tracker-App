@@ -362,6 +362,76 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
   return (
     <TooltipProvider>
       <div className={`space-y-6 ${className}`}>
+        {/* Monthly Summary Widget */}
+        <Card className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border-emerald-200/50 dark:border-emerald-800/50">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2 text-emerald-900 dark:text-emerald-200">
+              <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
+                <BarChart3 className="h-5 w-5" />
+              </div>
+              This Month&apos;s Summary
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Income */}
+              <div className="text-center">
+                <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-400 mb-1">
+                  {formatCurrencyWithPreferences(totalIncome)}
+                </div>
+                <div className="text-sm text-emerald-600 dark:text-emerald-300 font-medium">Income</div>
+              </div>
+              
+              {/* Expenses */}
+              <div className="text-center">
+                <div className="text-2xl font-bold text-rose-600 dark:text-rose-400 mb-1">
+                  {formatCurrencyWithPreferences(totalExpenses)}
+                </div>
+                <div className="text-sm text-rose-600 dark:text-rose-300 font-medium">Expenses</div>
+              </div>
+              
+              {/* Savings */}
+              <div className="text-center">
+                <div className={`text-2xl font-bold mb-1 ${
+                  monthlySavings >= 0 
+                    ? 'text-emerald-700 dark:text-emerald-400'
+                    : 'text-orange-600 dark:text-orange-400'
+                }`}>
+                  {formatCurrencyWithPreferences(monthlySavings)}
+                </div>
+                <div className={`text-sm font-medium ${
+                  monthlySavings >= 0 
+                    ? 'text-emerald-600 dark:text-emerald-300'
+                    : 'text-orange-600 dark:text-orange-300'
+                }`}>
+                  Savings ({formatPercentage(savingsRate)})
+                </div>
+              </div>
+            </div>
+            
+            {/* Difference indicator */}
+            <div className="mt-4 pt-4 border-t border-emerald-200/50 dark:border-emerald-800/50">
+              <div className="flex items-center justify-center gap-2">
+                {monthlySavings >= 0 ? (
+                  <>
+                    <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                    <span className="text-sm text-emerald-600 dark:text-emerald-300 font-medium">
+                      You saved {formatCurrencyWithPreferences(monthlySavings)} this month
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                    <span className="text-sm text-orange-600 dark:text-orange-300 font-medium">
+                      You overspent by {formatCurrencyWithPreferences(Math.abs(monthlySavings))} this month
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Top Row - KPIs */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* This Month's Income */}
@@ -377,20 +447,20 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-semibold text-emerald-700 dark:text-emerald-400 mb-2">
+                  <div className="text-4xl font-bold text-emerald-700 dark:text-emerald-400 mb-2">
                     {formatCurrencyWithPreferences(totalIncome)}
                   </div>
                   <div className="flex items-center text-xs text-emerald-700/70 dark:text-emerald-400/70 mt-1">
                     <ArrowUpRight className="h-3 w-3 mr-1" />
                     Income Sources
                   </div>
-                  <div className="mt-3 w-full bg-emerald-200/40 dark:bg-emerald-900/40 rounded-full h-2 relative">
+                  <div className="mt-3 w-full bg-emerald-200/40 dark:bg-emerald-900/40 rounded-full h-3 relative">
                     <div 
-                      className="bg-emerald-500 dark:bg-emerald-400 h-2 rounded-full transition-all duration-700"
+                      className="bg-gradient-to-r from-emerald-500 to-green-600 h-3 rounded-full transition-all duration-700"
                       style={{ width: `${incomeProgress}%` }}
                     ></div>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-xs font-medium text-emerald-600 dark:text-emerald-300">
+                      <span className="text-xs font-bold text-emerald-600 dark:text-emerald-300">
                         {incomeProgress.toFixed(0)}%
                       </span>
                     </div>
@@ -416,20 +486,20 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-semibold text-rose-600 dark:text-rose-400 mb-2">
+                  <div className="text-4xl font-bold text-rose-600 dark:text-rose-400 mb-2">
                     {formatCurrencyWithPreferences(totalExpenses)}
                   </div>
                   <div className="flex items-center text-xs text-rose-700/70 dark:text-rose-400/70 mt-1">
                     <ArrowDownRight className="h-3 w-3 mr-1" />
                     Total Spending
                   </div>
-                  <div className="mt-3 w-full bg-rose-200/40 dark:bg-rose-900/40 rounded-full h-2 relative">
+                  <div className="mt-3 w-full bg-rose-200/40 dark:bg-rose-900/40 rounded-full h-3 relative">
                     <div 
-                      className="bg-rose-500 dark:bg-rose-400 h-2 rounded-full transition-all duration-700"
+                      className="bg-gradient-to-r from-rose-500 to-red-600 h-3 rounded-full transition-all duration-700"
                       style={{ width: `${expensesProgress}%` }}
                     ></div>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-xs font-medium text-rose-600 dark:text-rose-300">
+                      <span className="text-xs font-bold text-rose-600 dark:text-rose-300">
                         {expensesProgress.toFixed(0)}%
                       </span>
                     </div>
@@ -459,7 +529,7 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className={`text-3xl font-semibold mb-2 ${
+                  <div className={`text-4xl font-bold mb-2 ${
                     monthlySavings >= 0 
                       ? 'text-emerald-700 dark:text-emerald-400'
                       : 'text-orange-600 dark:text-orange-400'
@@ -483,23 +553,23 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                       </>
                     )}
                   </div>
-                  <div className={`mt-3 w-full rounded-full h-2 relative ${
+                  <div className={`mt-3 w-full rounded-full h-3 relative ${
                     monthlySavings >= 0 
                       ? 'bg-emerald-200/40 dark:bg-emerald-900/40'
                       : 'bg-orange-200/40 dark:bg-orange-900/40'
                   }`}>
                     <div 
-                      className={`h-2 rounded-full transition-all duration-700 ${
+                      className={`h-3 rounded-full transition-all duration-700 ${
                         monthlySavings >= 0 
-                          ? 'bg-emerald-500 dark:bg-emerald-400'
-                          : 'bg-orange-500 dark:bg-orange-400'
+                          ? 'bg-gradient-to-r from-emerald-500 to-green-600'
+                          : 'bg-gradient-to-r from-orange-500 to-amber-600'
                       }`}
                       style={{ 
                         width: `${savingsProgress}%` 
                       }}
                     ></div>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className={`text-xs font-medium ${
+                      <span className={`text-xs font-bold ${
                         monthlySavings >= 0 
                           ? 'text-emerald-600 dark:text-emerald-300'
                           : 'text-orange-600 dark:text-orange-300'
@@ -535,7 +605,7 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className={`text-3xl font-semibold mb-2 ${
+                  <div className={`text-4xl font-bold mb-2 ${
                     savingsRate >= 20 
                       ? 'text-emerald-700 dark:text-emerald-400'
                       : savingsRate >= 10
@@ -554,20 +624,31 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                     <BarChart3 className="h-3 w-3 mr-1" />
                     Savings ÷ Income × 100
                   </div>
-                  <div className={`mt-3 w-full rounded-full h-2 ${
+                  <div className={`mt-3 w-full rounded-full h-3 relative ${
                     savingsRate >= 20 
                       ? 'bg-emerald-200/40 dark:bg-emerald-900/40'
                       : savingsRate >= 10
                       ? 'bg-amber-200/40 dark:bg-amber-900/40'
                       : 'bg-rose-200/40 dark:bg-rose-900/40'
                   }`}>
-                    <div className={`h-2 rounded-full transition-all duration-700 ${
+                    <div className={`h-3 rounded-full transition-all duration-700 ${
                       savingsRate >= 20 
-                        ? 'bg-emerald-500 dark:bg-emerald-400'
+                        ? 'bg-gradient-to-r from-emerald-500 to-green-600'
                         : savingsRate >= 10
-                        ? 'bg-amber-500 dark:bg-amber-400'
-                        : 'bg-rose-500 dark:bg-rose-400'
+                        ? 'bg-gradient-to-r from-amber-500 to-yellow-600'
+                        : 'bg-gradient-to-r from-rose-500 to-red-600'
                     }`} style={{ width: `${Math.min(savingsRate, 100)}%` }}></div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className={`text-xs font-bold ${
+                        savingsRate >= 20 
+                          ? 'text-emerald-600 dark:text-emerald-300'
+                          : savingsRate >= 10
+                          ? 'text-amber-600 dark:text-amber-300'
+                          : 'text-rose-600 dark:text-rose-300'
+                      }`}>
+                        {Math.min(savingsRate, 100).toFixed(0)}%
+                      </span>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -600,6 +681,39 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                 </div>
                 Budget Progress
               </CardTitle>
+              
+              {/* Status indicator */}
+              <div className="mt-3 text-center">
+                <div className="relative w-full h-12 mb-2">
+                  {/* Budget visualization */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-100 to-emerald-200 dark:from-emerald-900/30 dark:to-emerald-800/30 flex items-center justify-center">
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
+                        <Wallet className="h-3 w-3 text-white" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                    {budgetData.progress >= 100 
+                      ? 'Budget Exceeded' 
+                      : budgetData.progress >= 80
+                      ? 'Budget Alert'
+                      : 'On Track'
+                    }
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {budgetData.progress >= 100 
+                      ? 'Consider reducing expenses' 
+                      : budgetData.progress >= 80
+                      ? 'Monitor your spending'
+                      : ''
+                    }
+                  </p>
+                </div>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-3">
@@ -614,13 +728,21 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                 <div className="relative">
                   <Progress 
                     value={budgetData.progress} 
-                    className={`h-3 ${
-                      budgetData.isOverBudget ? '[&>div]:bg-gradient-to-r [&>div]:from-red-500 [&>div]:to-red-600' : '[&>div]:bg-gradient-to-r [&>div]:from-emerald-500 [&>div]:to-green-600'
+                    className={`h-4 ${
+                      budgetData.progress >= 100 
+                        ? '[&>div]:bg-gradient-to-r [&>div]:from-red-500 [&>div]:to-red-600' 
+                        : budgetData.progress >= 80
+                        ? '[&>div]:bg-gradient-to-r [&>div]:from-yellow-500 [&>div]:to-amber-600'
+                        : '[&>div]:bg-gradient-to-r [&>div]:from-emerald-500 [&>div]:to-green-600'
                     }`}
                   />
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className={`text-xs font-medium ${
-                      budgetData.isOverBudget ? 'text-red-600' : 'text-emerald-600'
+                    <span className={`text-xs font-bold ${
+                      budgetData.progress >= 100 
+                        ? 'text-red-600' 
+                        : budgetData.progress >= 80
+                        ? 'text-yellow-600'
+                        : 'text-emerald-600'
                     }`}>
                       {formatPercentage(budgetData.progress)}
                     </span>
@@ -628,11 +750,53 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                 </div>
                 <div className="flex justify-between text-xs text-muted-foreground">
                   <span>Budget: {formatCurrencyWithPreferences(budgetData.monthlyBudget)}</span>
-                  <span className={budgetData.isOverBudget ? 'text-red-500' : 'text-emerald-500'}>
-                    {budgetData.isOverBudget ? 'Over Budget' : 'On Track'}
+                  <span className={
+                    budgetData.progress >= 100 
+                      ? 'text-red-500 font-medium' 
+                      : budgetData.progress >= 80
+                      ? 'text-yellow-500 font-medium'
+                      : 'text-emerald-500 font-medium'
+                  }>
+                    {budgetData.progress >= 100 
+                      ? 'Over Limit' 
+                      : budgetData.progress >= 80
+                      ? 'Warning'
+                      : 'Safe'
+                    }
                   </span>
                 </div>
               </div>
+              
+              {/* Additional Budget Insights */}
+              <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
+                <div className="space-y-3">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Remaining Budget</span>
+                    <span className={`font-medium ${
+                      (budgetData.monthlyBudget - budgetData.totalExpenses) > 0 
+                        ? 'text-emerald-600 dark:text-emerald-400' 
+                        : 'text-red-600 dark:text-red-400'
+                    }`}>
+                      {formatCurrencyWithPreferences(Math.max(0, budgetData.monthlyBudget - budgetData.totalExpenses))}
+                    </span>
+                  </div>
+                  
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Daily Average</span>
+                    <span className="font-medium text-gray-600 dark:text-gray-400">
+                      {formatCurrencyWithPreferences(budgetData.totalExpenses / new Date().getDate())}
+                    </span>
+                  </div>
+                  
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Projected Monthly</span>
+                    <span className="font-medium text-gray-600 dark:text-gray-400">
+                      {formatCurrencyWithPreferences((budgetData.totalExpenses / new Date().getDate()) * 30)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
               {budgetData.isOverBudget && (
                 <div className="flex items-center gap-2 p-3 bg-red-100 dark:bg-red-900/30 rounded-lg text-sm text-red-700 dark:text-red-300">
                   <AlertCircle className="h-4 w-4" />
@@ -692,11 +856,11 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                 </>
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
-                  <div className="p-4 rounded-full bg-blue-100 dark:bg-blue-900/40 w-16 h-16 mx-auto mb-3 flex items-center justify-center">
-                    <PiggyBank className="h-8 w-8 text-blue-500" />
+                  <div className="p-4 rounded-full bg-emerald-100 dark:bg-emerald-900/40 w-16 h-16 mx-auto mb-3 flex items-center justify-center">
+                    <PiggyBank className="h-8 w-8 text-emerald-500" />
                   </div>
-                  <p className="text-sm font-medium">No savings goals set</p>
-                  <p className="text-xs mt-1">Create your first savings goal to track progress</p>
+                  <p className="text-sm font-medium">No goals set</p>
+                  <p className="text-xs mt-1">Create your first savings goal to start tracking progress.</p>
                 </div>
               )}
             </CardContent>
@@ -795,8 +959,11 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                 </div>
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
-                  <BarChart3 className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">No expense data available</p>
+                  <div className="p-4 rounded-full bg-purple-100 dark:bg-purple-900/40 w-16 h-16 mx-auto mb-3 flex items-center justify-center">
+                    <BarChart3 className="h-8 w-8 text-purple-500" />
+                  </div>
+                  <p className="text-sm font-medium">No expenses yet</p>
+                  <p className="text-xs mt-1">Categories will appear after your first transaction.</p>
                 </div>
               )}
             </CardContent>
@@ -863,11 +1030,11 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                   ))
                 ) : (
                   <div className="text-center py-8 text-muted-foreground">
-                    <div className="p-4 rounded-full bg-gray-100 dark:bg-gray-900/40 w-16 h-16 mx-auto mb-3 flex items-center justify-center">
-                      <Activity className="h-8 w-8 text-gray-500" />
+                    <div className="p-4 rounded-full bg-blue-100 dark:bg-blue-900/40 w-16 h-16 mx-auto mb-3 flex items-center justify-center">
+                      <Activity className="h-8 w-8 text-blue-500" />
                     </div>
                     <p className="text-sm font-medium">No transactions yet</p>
-                    <p className="text-xs mt-1">Your recent transactions will appear here</p>
+                    <p className="text-xs mt-1">Add your first expense to see it here.</p>
                   </div>
                 )}
               </div>
@@ -885,92 +1052,164 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={monthlyTrends} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                    <defs>
-                      <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#10B981" stopOpacity={0.8} />
-                        <stop offset="100%" stopColor="#059669" stopOpacity={0.6} />
-                      </linearGradient>
-                      <linearGradient id="expensesGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#EF4444" stopOpacity={0.8} />
-                        <stop offset="100%" stopColor="#DC2626" stopOpacity={0.6} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid 
-                      strokeDasharray="3 3" 
-                      stroke="rgba(148, 163, 184, 0.2)" 
-                      strokeOpacity={0.3}
-                    />
-                    <XAxis 
-                      dataKey="month" 
-                      tick={{ fontSize: 12, fill: 'currentColor' }}
-                      axisLine={{ stroke: 'rgba(148, 163, 184, 0.3)' }}
-                      tickLine={{ stroke: 'rgba(148, 163, 184, 0.3)' }}
-                    />
-                    <YAxis 
-                      tickFormatter={(value) => formatCurrencyWithPreferences(value)} 
-                      tick={{ fontSize: 12, fill: 'currentColor' }}
-                      axisLine={{ stroke: 'rgba(148, 163, 184, 0.3)' }}
-                      tickLine={{ stroke: 'rgba(148, 163, 184, 0.3)' }}
-                    />
-                    <RechartsTooltip 
-                      content={(props) => {
-                        const { active, payload, label } = props || {};
-                        if (active && payload && payload.length) {
-                          return (
-                            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700">
-                              <div className="text-sm font-medium mb-2 text-gray-900 dark:text-white">
-                                {label || 'Unknown Month'}
-                              </div>
-                              {payload.map((entry, index) => (
-                                <div key={index} className="flex items-center gap-2 mb-1">
-                                  <div 
-                                    className="w-3 h-3 rounded-full"
-                                    style={{ backgroundColor: entry?.color || '#8884d8' }}
-                                  />
-                                  <span className="text-sm text-muted-foreground">
-                                    {entry?.dataKey === 'income' ? 'Income' : 'Expenses'}:
-                                  </span>
-                                  <span className="text-sm font-medium">
-                                    {formatCurrencyWithPreferences(entry?.value as number || 0)}
-                                  </span>
+              {monthlyTrends.some(month => month.income > 0 || month.expenses > 0) ? (
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={monthlyTrends} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                      <defs>
+                        <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#10B981" stopOpacity={0.8} />
+                          <stop offset="100%" stopColor="#059669" stopOpacity={0.6} />
+                        </linearGradient>
+                        <linearGradient id="expensesGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#EF4444" stopOpacity={0.8} />
+                          <stop offset="100%" stopColor="#DC2626" stopOpacity={0.6} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid 
+                        strokeDasharray="3 3" 
+                        stroke="rgba(148, 163, 184, 0.2)" 
+                        strokeOpacity={0.3}
+                      />
+                      <XAxis 
+                        dataKey="month" 
+                        tick={{ fontSize: 12, fill: 'currentColor' }}
+                        axisLine={{ stroke: 'rgba(148, 163, 184, 0.3)' }}
+                        tickLine={{ stroke: 'rgba(148, 163, 184, 0.3)' }}
+                      />
+                      <YAxis 
+                        tickFormatter={(value) => formatCurrencyWithPreferences(value)} 
+                        tick={{ fontSize: 12, fill: 'currentColor' }}
+                        axisLine={{ stroke: 'rgba(148, 163, 184, 0.3)' }}
+                        tickLine={{ stroke: 'rgba(148, 163, 184, 0.3)' }}
+                      />
+                      <RechartsTooltip 
+                        content={(props) => {
+                          const { active, payload, label } = props || {};
+                          if (active && payload && payload.length) {
+                            return (
+                              <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700">
+                                <div className="text-sm font-medium mb-2 text-gray-900 dark:text-white">
+                                  {label || 'Unknown Month'}
                                 </div>
-                              ))}
-                            </div>
-                          );
-                        }
-                        return null;
-                      }}
-                    />
-                    <Legend 
-                      wrapperStyle={{ paddingTop: '20px' }}
-                      formatter={(value) => (
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          {value === 'income' ? 'Income' : value === 'expenses' ? 'Expenses' : value}
-                        </span>
-                      )}
-                    />
-                    <Bar 
-                      dataKey="income" 
-                      fill="url(#incomeGradient)" 
-                      name="Income"
-                      radius={[4, 4, 0, 0]}
-                      animationBegin={0}
-                      animationDuration={1500}
-                    />
-                    <Bar 
-                      dataKey="expenses" 
-                      fill="url(#expensesGradient)" 
-                      name="Expenses"
-                      radius={[4, 4, 0, 0]}
-                      animationBegin={300}
-                      animationDuration={1500}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
+                                {payload.map((entry, index) => (
+                                  <div key={index} className="flex items-center gap-2 mb-1">
+                                    <div 
+                                      className="w-3 h-3 rounded-full"
+                                      style={{ backgroundColor: entry?.color || '#8884d8' }}
+                                    />
+                                    <span className="text-sm text-muted-foreground">
+                                      {entry?.dataKey === 'income' ? 'Income' : 'Expenses'}:
+                                    </span>
+                                    <span className="text-sm font-medium">
+                                      {formatCurrencyWithPreferences(entry?.value as number || 0)}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                      <Legend 
+                        wrapperStyle={{ paddingTop: '20px' }}
+                        formatter={(value) => (
+                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {value === 'income' ? 'Income' : value === 'expenses' ? 'Expenses' : value}
+                          </span>
+                        )}
+                      />
+                      <Bar 
+                        dataKey="income" 
+                        fill="url(#incomeGradient)" 
+                        name="Income"
+                        radius={[4, 4, 0, 0]}
+                        animationBegin={0}
+                        animationDuration={1500}
+                      />
+                      <Bar 
+                        dataKey="expenses" 
+                        fill="url(#expensesGradient)" 
+                        name="Expenses"
+                        radius={[4, 4, 0, 0]}
+                        animationBegin={300}
+                        animationDuration={1500}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <div className="h-80 relative">
+                  {/* Faded placeholder chart */}
+                  <div className="absolute inset-0 opacity-30">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={[
+                        { month: 'Jan', income: 25000, expenses: 20000 },
+                        { month: 'Feb', income: 30000, expenses: 22000 },
+                        { month: 'Mar', income: 28000, expenses: 18000 },
+                        { month: 'Apr', income: 32000, expenses: 25000 },
+                        { month: 'May', income: 29000, expenses: 21000 },
+                        { month: 'Jun', income: 35000, expenses: 23000 }
+                      ]} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                        <defs>
+                          <linearGradient id="placeholderIncomeGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#10B981" stopOpacity={0.3} />
+                            <stop offset="100%" stopColor="#059669" stopOpacity={0.2} />
+                          </linearGradient>
+                          <linearGradient id="placeholderExpensesGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#EF4444" stopOpacity={0.3} />
+                            <stop offset="100%" stopColor="#DC2626" stopOpacity={0.2} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid 
+                          strokeDasharray="3 3" 
+                          stroke="rgba(148, 163, 184, 0.1)" 
+                          strokeOpacity={0.2}
+                        />
+                        <XAxis 
+                          dataKey="month" 
+                          tick={{ fontSize: 12, fill: 'rgba(148, 163, 184, 0.5)' }}
+                          axisLine={{ stroke: 'rgba(148, 163, 184, 0.2)' }}
+                          tickLine={{ stroke: 'rgba(148, 163, 184, 0.2)' }}
+                        />
+                        <YAxis 
+                          tick={{ fontSize: 12, fill: 'rgba(148, 163, 184, 0.5)' }}
+                          axisLine={{ stroke: 'rgba(148, 163, 184, 0.2)' }}
+                          tickLine={{ stroke: 'rgba(148, 163, 184, 0.2)' }}
+                        />
+                        <Bar 
+                          dataKey="income" 
+                          fill="url(#placeholderIncomeGradient)" 
+                          name="Income"
+                          radius={[4, 4, 0, 0]}
+                        />
+                        <Bar 
+                          dataKey="expenses" 
+                          fill="url(#placeholderExpensesGradient)" 
+                          name="Expenses"
+                          radius={[4, 4, 0, 0]}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                  
+                  {/* Overlay message */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-lg p-6 border border-gray-200/50 dark:border-gray-700/50">
+                      <div className="p-3 rounded-full bg-indigo-100 dark:bg-indigo-900/40 w-12 h-12 mx-auto mb-3 flex items-center justify-center">
+                        <Calendar className="h-6 w-6 text-indigo-500" />
+                      </div>
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Add transactions to unlock insights
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        on your spending trends
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
