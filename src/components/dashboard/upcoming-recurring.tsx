@@ -7,10 +7,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { 
   Calendar, 
   AlertCircle,
-  Bell
+  Bell,
+  Clock,
+  Repeat,
+  DollarSign
 } from 'lucide-react'
 import { formatCurrency } from '@/lib/user-preferences'
 
@@ -197,32 +206,84 @@ export function UpcomingRecurring({ className }: UpcomingRecurringProps) {
             const isToday = day.toDateString() === new Date().toDateString()
             
             return (
-              <div
-                key={day.toISOString()}
-                className={`h-8 p-0.5 border border-gray-200 dark:border-gray-700 rounded relative ${
-                  isToday ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-800'
-                } hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors`}
-              >
-                <div className={`text-xs font-medium ${
-                  isToday ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-gray-100'
-                }`}>
-                  {day.getDate()}
-                </div>
-                
-                {/* Transaction markers */}
-                <div className="flex flex-wrap gap-0.5 mt-0.5">
-                  {dayTransactions.slice(0, 3).map((transaction, idx) => (
-                    <div
-                      key={`${transaction.id}-${idx}`}
-                      className={`w-1.5 h-1.5 rounded-full ${getTransactionColor(transaction)} shadow-sm`}
-                      title={`${transaction.title} - ${formatCurrency(transaction.amount)}`}
-                    />
-                  ))}
-                  {dayTransactions.length > 3 && (
-                    <div className="w-1.5 h-1.5 rounded-full bg-gray-400 shadow-sm" title={`+${dayTransactions.length - 3} more`} />
-                  )}
-                </div>
-              </div>
+              <Tooltip key={day.toISOString()}>
+                <TooltipTrigger asChild>
+                  <div
+                    className={`h-8 p-0.5 border border-gray-200 dark:border-gray-700 rounded relative cursor-pointer ${
+                      isToday ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-800'
+                    } hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors`}
+                  >
+                    <div className={`text-xs font-medium ${
+                      isToday ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-gray-100'
+                    }`}>
+                      {day.getDate()}
+                    </div>
+                    
+                    {/* Transaction markers */}
+                    <div className="flex flex-wrap gap-0.5 mt-0.5">
+                      {dayTransactions.slice(0, 3).map((transaction, idx) => (
+                        <div
+                          key={`${transaction.id}-${idx}`}
+                          className={`w-1.5 h-1.5 rounded-full ${getTransactionColor(transaction)} shadow-sm`}
+                        />
+                      ))}
+                      {dayTransactions.length > 3 && (
+                        <div className="w-1.5 h-1.5 rounded-full bg-gray-400 shadow-sm" />
+                      )}
+                    </div>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-sm">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-gray-500" />
+                      <span className="font-semibold text-sm">
+                        {day.toLocaleDateString('en-US', { 
+                          weekday: 'long',
+                          month: 'long', 
+                          day: 'numeric',
+                          year: 'numeric'
+                        })}
+                      </span>
+                    </div>
+                    
+                    {dayTransactions.length > 0 ? (
+                      <div className="space-y-2">
+                        <div className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                          {dayTransactions.length} bill{dayTransactions.length > 1 ? 's' : ''} due
+                        </div>
+                        {dayTransactions.map((transaction, idx) => (
+                          <div key={`${transaction.id}-${idx}`} className="space-y-1 p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <div className={`w-2 h-2 rounded-full ${getTransactionColor(transaction)}`} />
+                              <span className="font-semibold text-sm">{transaction.title}</span>
+                            </div>
+                            <div className="space-y-1 text-xs">
+                              <div className="flex items-center gap-1">
+                                <DollarSign className="h-3 w-3 text-gray-500" />
+                                <span className="font-medium">{formatCurrency(transaction.amount)}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Repeat className="h-3 w-3 text-gray-500" />
+                                <span className="capitalize">{transaction.frequency}</span>
+                              </div>
+                              {transaction.description && (
+                                <div className="pt-1 border-t border-gray-200 dark:border-gray-600">
+                                  <span className="text-gray-600 dark:text-gray-400">{transaction.description}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                        No bills scheduled for this day
+                      </div>
+                    )}
+                  </div>
+                </TooltipContent>
+              </Tooltip>
             )
           })}
         </div>
@@ -306,40 +367,42 @@ export function UpcomingRecurring({ className }: UpcomingRecurringProps) {
   }
 
   return (
-    <Card className={`hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-900/20 border-emerald-200/50 dark:border-emerald-800/50 ${className}`}>
-      <CardHeader className="pb-4">
-        <CardTitle className="flex items-center gap-3 text-emerald-900 dark:text-emerald-200">
-          <div className="p-2.5 rounded-xl bg-emerald-100 dark:bg-emerald-900/40">
-            <Bell className="h-5 w-5" />
-          </div>
-          <span className="text-lg font-semibold">Upcoming Bills & Expenses</span>
-          {upcomingTransactions.length > 0 && (
-            <Badge variant="outline" className="ml-auto border-emerald-300 text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-900/20">
-              {upcomingTransactions.length}
-            </Badge>
-          )}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="pt-0">
-        {upcomingTransactions.length === 0 ? (
-          <div className="space-y-3">
-            {/* Empty state message */}
-            <div className="text-center py-3 text-muted-foreground">
-              <div className="p-2 rounded-xl bg-emerald-100 dark:bg-emerald-900/40 w-10 h-10 mx-auto mb-2 flex items-center justify-center">
-                <Calendar className="h-5 w-5 text-emerald-500" />
+    <TooltipProvider>
+      <Card className={`hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-900/20 border-emerald-200/50 dark:border-emerald-800/50 ${className}`}>
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-3 text-emerald-900 dark:text-emerald-200">
+            <div className="p-2.5 rounded-xl bg-emerald-100 dark:bg-emerald-900/40">
+              <Bell className="h-5 w-5" />
+            </div>
+            <span className="text-lg font-semibold">Upcoming Bills & Expenses</span>
+            {upcomingTransactions.length > 0 && (
+              <Badge variant="outline" className="ml-auto border-emerald-300 text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-900/20">
+                {upcomingTransactions.length}
+              </Badge>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-0">
+          {upcomingTransactions.length === 0 ? (
+            <div className="space-y-3">
+              {/* Empty state message */}
+              <div className="text-center py-3 text-muted-foreground">
+                <div className="p-2 rounded-xl bg-emerald-100 dark:bg-emerald-900/40 w-10 h-10 mx-auto mb-2 flex items-center justify-center">
+                  <Calendar className="h-5 w-5 text-emerald-500" />
+                </div>
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">No upcoming bills this month</p>
               </div>
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">No upcoming bills this month</p>
+              
+              {/* Calendar preview */}
+              <div className="opacity-50">
+                <CalendarView />
+              </div>
             </div>
-            
-            {/* Calendar preview */}
-            <div className="opacity-50">
-              <CalendarView />
-            </div>
-          </div>
-        ) : (
-          <CalendarView />
-        )}
-      </CardContent>
-    </Card>
+          ) : (
+            <CalendarView />
+          )}
+        </CardContent>
+      </Card>
+    </TooltipProvider>
   )
 }
