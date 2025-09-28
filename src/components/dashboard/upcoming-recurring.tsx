@@ -17,7 +17,6 @@ import {
   Calendar, 
   AlertCircle,
   Bell,
-  Clock,
   Repeat,
   DollarSign
 } from 'lucide-react'
@@ -267,11 +266,6 @@ export function UpcomingRecurring({ className }: UpcomingRecurringProps) {
                                 <Repeat className="h-3 w-3 text-gray-500" />
                                 <span className="capitalize">{transaction.frequency}</span>
                               </div>
-                              {transaction.description && (
-                                <div className="pt-1 border-t border-gray-200 dark:border-gray-600">
-                                  <span className="text-gray-600 dark:text-gray-400">{transaction.description}</span>
-                                </div>
-                              )}
                             </div>
                           </div>
                         ))}
