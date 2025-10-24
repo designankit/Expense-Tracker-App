@@ -69,7 +69,6 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
   const [savings, setSavings] = useState<Savings[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [selectedYear, setSelectedYear] = useState<string>('current')
   const [selectedRecentTransactionsMonth, setSelectedRecentTransactionsMonth] = useState<string>('current')
   const [selectedBudgetMonth, setSelectedBudgetMonth] = useState<string>('current')
   const [selectedCategoryMonth, setSelectedCategoryMonth] = useState<string>('current')
@@ -301,22 +300,22 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
     
     // Generate months from account creation to current month
     const currentMonth = new Date()
-    let current = new Date(startDate)
+    let iterDate = new Date(startDate)
     
-    while (current <= endDate) {
-      const isCurrentMonth = current.getFullYear() === currentMonth.getFullYear() && 
-                            current.getMonth() === currentMonth.getMonth()
+    while (iterDate <= endDate) {
+      const isCurrentMonth = iterDate.getFullYear() === currentMonth.getFullYear() && 
+                            iterDate.getMonth() === currentMonth.getMonth()
       
       months.push({
-        key: `${current.getFullYear()}-${current.getMonth()}`,
-        label: current.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+        key: `${iterDate.getFullYear()}-${iterDate.getMonth()}`,
+        label: iterDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
         isCurrent: isCurrentMonth,
-        year: current.getFullYear(),
-        month: current.getMonth()
+        year: iterDate.getFullYear(),
+        month: iterDate.getMonth()
       })
       
       // Move to next month
-      current.setMonth(current.getMonth() + 1)
+      iterDate = new Date(iterDate.getFullYear(), iterDate.getMonth() + 1, 1)
     }
     
     // Sort newest first
