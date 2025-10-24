@@ -70,9 +70,9 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedYear, setSelectedYear] = useState<string>('current')
-  const [selectedBudgetYear, setSelectedBudgetYear] = useState<string>('current')
-  const [selectedSavingsYear, setSelectedSavingsYear] = useState<string>('current')
-  const [selectedCategoryYear, setSelectedCategoryYear] = useState<string>('current')
+  const [selectedRecentTransactionsMonth, setSelectedRecentTransactionsMonth] = useState<string>('current')
+  const [selectedBudgetMonth, setSelectedBudgetMonth] = useState<string>('current')
+  const [selectedCategoryMonth, setSelectedCategoryMonth] = useState<string>('current')
   const [selectedIncomeExpensesYear, setSelectedIncomeExpensesYear] = useState<string>('current')
 
   // Refresh function to re-fetch data
@@ -176,39 +176,41 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
   const getBudgetProgress = () => {
     let totalExpenses = 0
     let totalIncome = 0
+    const monthlyBudget = 50000
     
-    if (selectedBudgetYear === 'current') {
-      // Use current year data
+    if (selectedBudgetMonth === 'current') {
+      // Use current month data
       const currentData = getCurrentMonthData()
       totalExpenses = currentData.totalExpenses
       totalIncome = currentData.totalIncome
     } else {
-      // Filter for specific year
-      const targetYear = parseInt(selectedBudgetYear)
+      // Filter for specific month
+      const [year, month] = selectedBudgetMonth.split('-').map(Number)
       
-      const yearExpenses = expenses.filter(expense => {
+      const monthExpenses = expenses.filter(expense => {
         if (!expense || !expense.transaction_date) return false
         const expenseDate = new Date(expense.transaction_date)
         return (
           expense.transaction_type === 'expense' &&
-          expenseDate.getFullYear() === targetYear
+          expenseDate.getFullYear() === year &&
+          expenseDate.getMonth() === month
         )
       })
       
-      const yearIncome = expenses.filter(expense => {
+      const monthIncome = expenses.filter(expense => {
         if (!expense || !expense.transaction_date) return false
         const expenseDate = new Date(expense.transaction_date)
         return (
           expense.transaction_type === 'income' &&
-          expenseDate.getFullYear() === targetYear
+          expenseDate.getFullYear() === year &&
+          expenseDate.getMonth() === month
         )
       })
       
-      totalExpenses = yearExpenses.reduce((sum, expense) => sum + (expense.amount || 0), 0)
-      totalIncome = yearIncome.reduce((sum, expense) => sum + (expense.amount || 0), 0)
+      totalExpenses = monthExpenses.reduce((sum, expense) => sum + (expense.amount || 0), 0)
+      totalIncome = monthIncome.reduce((sum, expense) => sum + (expense.amount || 0), 0)
     }
     
-    const monthlyBudget = 50000
     const progress = Math.min((totalExpenses / monthlyBudget) * 100, 100)
     const isOverBudget = totalExpenses > monthlyBudget
 
@@ -238,43 +240,31 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
   }
 
   // Calculate savings goal progress
-  const getSavingsGoalProgress = (yearFilter?: string) => {
+  const getSavingsGoalProgress = () => {
     if (!savings || savings.length === 0) {
-      return { progress: 0, totalTarget: 0, totalSaved: 0 }
+      return { progress: 0, totalTarget: 0, totalSaved: 0, filteredSavings: [] }
     }
 
-    // Filter savings goals by year if specified
-    let filteredSavings = savings
-    if (yearFilter && yearFilter !== 'current') {
-      const targetYear = parseInt(yearFilter)
-      
-      filteredSavings = savings.filter(goal => {
-        if (!goal.created_at) return true
-        const goalDate = new Date(goal.created_at)
-        return goalDate.getFullYear() === targetYear
-      })
-    }
-
-    const totalTarget = filteredSavings.reduce((sum, goal) => sum + (goal.target_amount || 0), 0)
-    const totalSaved = filteredSavings.reduce((sum, goal) => sum + (goal.saved_amount || 0), 0)
+    const totalTarget = savings.reduce((sum, goal) => sum + (goal.target_amount || 0), 0)
+    const totalSaved = savings.reduce((sum, goal) => sum + (goal.saved_amount || 0), 0)
     const progress = totalTarget > 0 ? (totalSaved / totalTarget) * 100 : 0
 
-    return { progress, totalTarget, totalSaved, filteredSavings }
+    return { progress, totalTarget, totalSaved, filteredSavings: savings }
   }
 
   // Calculate expense category breakdown
-  const getCategoryBreakdown = (yearFilter?: string) => {
+  const getCategoryBreakdown = (monthFilter?: string) => {
     if (!expenses || expenses.length === 0) return []
     
-    // Filter expenses by year if specified
+    // Filter expenses by month if specified
     let filteredExpenses = expenses
-    if (yearFilter && yearFilter !== 'current') {
-      const targetYear = parseInt(yearFilter)
+    if (monthFilter && monthFilter !== 'current') {
+      const [year, month] = monthFilter.split('-').map(Number)
       
       filteredExpenses = expenses.filter(expense => {
         if (!expense.transaction_date) return true
         const expenseDate = new Date(expense.transaction_date)
-        return expenseDate.getFullYear() === targetYear
+        return expenseDate.getFullYear() === year && expenseDate.getMonth() === month
       })
     }
     
@@ -297,7 +287,47 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
       .sort((a, b) => b.value - a.value) // Sort by amount descending
   }
 
-  // Get available years for filtering
+  // Get available months for filtering (from user account creation to current month)
+  const getAvailableMonths = () => {
+    if (!user?.created_at) return []
+    
+    const months = []
+    const currentDate = new Date()
+    const accountCreationDate = new Date(user.created_at)
+    
+    // Start from the month when user created account
+    const startDate = new Date(accountCreationDate.getFullYear(), accountCreationDate.getMonth(), 1)
+    const endDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
+    
+    // Generate months from account creation to current month
+    const currentMonth = new Date()
+    let current = new Date(startDate)
+    
+    while (current <= endDate) {
+      const isCurrentMonth = current.getFullYear() === currentMonth.getFullYear() && 
+                            current.getMonth() === currentMonth.getMonth()
+      
+      months.push({
+        key: `${current.getFullYear()}-${current.getMonth()}`,
+        label: current.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+        isCurrent: isCurrentMonth,
+        year: current.getFullYear(),
+        month: current.getMonth()
+      })
+      
+      // Move to next month
+      current.setMonth(current.getMonth() + 1)
+    }
+    
+    // Sort newest first
+    return months.sort((a, b) => {
+      if (a.year !== b.year) return b.year - a.year
+      return b.month - a.month
+    })
+  }
+
+
+  // Get available years for filtering (keep for other components)
   const getAvailableYears = () => {
     if (!expenses || expenses.length === 0) return []
     
@@ -331,25 +361,26 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
     
     let filteredExpenses = expenses
     
-    // Apply year filter
-    if (selectedYear === 'current') {
-      // Filter for current year
+    // Apply month filter
+    if (selectedRecentTransactionsMonth === 'current') {
+      // Filter for current month
       const now = new Date()
       const currentYear = now.getFullYear()
+      const currentMonth = now.getMonth()
       
       filteredExpenses = expenses.filter(expense => {
         if (!expense || !expense.transaction_date) return false
         const expenseDate = new Date(expense.transaction_date)
-        return expenseDate.getFullYear() === currentYear
+        return expenseDate.getFullYear() === currentYear && expenseDate.getMonth() === currentMonth
       })
     } else {
-      // Filter for specific year
-      const targetYear = parseInt(selectedYear)
+      // Filter for specific month
+      const [year, month] = selectedRecentTransactionsMonth.split('-').map(Number)
       
       filteredExpenses = expenses.filter(expense => {
         if (!expense || !expense.transaction_date) return false
         const expenseDate = new Date(expense.transaction_date)
-        return expenseDate.getFullYear() === targetYear
+        return expenseDate.getFullYear() === year && expenseDate.getMonth() === month
       })
     }
     
@@ -488,8 +519,8 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
 
   const { totalIncome, totalExpenses, monthlySavings, savingsRate } = getCurrentMonthData()
   const budgetData = getBudgetProgress()
-  const savingsGoalData = getSavingsGoalProgress(selectedSavingsYear)
-  const categoryData = getCategoryBreakdown(selectedCategoryYear)
+  const savingsGoalData = getSavingsGoalProgress()
+  const categoryData = getCategoryBreakdown(selectedCategoryMonth)
   const recentTransactions = getRecentTransactions()
   const monthlyTrends = getMonthlyTrends(selectedIncomeExpensesYear)
   const { incomeProgress, expensesProgress, savingsProgress } = getProgressPercentages()
@@ -845,30 +876,30 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
               : 'bg-gradient-to-br from-emerald-50/80 to-teal-50/80 border-emerald-200/60 dark:from-emerald-900/20 dark:to-teal-900/20 dark:border-emerald-800/60'
           } backdrop-blur-sm`}>
             <CardHeader className="pb-6">
-              <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
-                <div className="flex-1">
-                  <CardTitle className="flex items-center gap-3 text-emerald-900 dark:text-emerald-100 mb-3">
-                    <div className={`p-3 rounded-xl shadow-lg ${
+              <div className="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-6">
+                <div className="flex-1 min-w-0">
+                  <CardTitle className="flex items-start gap-3 text-emerald-900 dark:text-emerald-100 mb-4">
+                    <div className={`p-3 rounded-xl shadow-lg flex-shrink-0 ${
                       budgetData.isOverBudget 
                         ? 'bg-gradient-to-br from-red-500 to-rose-600'
                         : 'bg-gradient-to-br from-emerald-500 to-teal-600'
                     }`}>
                       <Wallet className="h-5 w-5 text-white" />
                     </div>
-                    <div>
-                      <div className="text-lg font-bold">Budget Progress</div>
-                      <div className="text-xs text-gray-600 dark:text-gray-300 font-normal">
-                        {selectedBudgetYear === 'current' 
-                          ? 'Current year budget tracking' 
-                          : `Budget tracking for ${getAvailableYears().find(y => y.key === selectedBudgetYear)?.label || 'selected year'}`
+                    <div className="min-w-0 flex-1">
+                      <div className="text-lg font-bold mb-1">Budget Progress</div>
+                      <div className="text-xs text-gray-600 dark:text-gray-300 font-normal leading-relaxed">
+                        {selectedBudgetMonth === 'current' 
+                          ? 'Current month budget tracking' 
+                          : `Monthly budget tracking for ${getAvailableMonths().find(m => m.key === selectedBudgetMonth)?.label || 'selected month'}`
                         }
                       </div>
                     </div>
                   </CardTitle>
                   
                   {/* Status indicator */}
-                  <div className="flex items-center gap-3">
-                    <div className={`px-3 py-1.5 rounded-full text-xs font-semibold ${
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                    <div className={`px-3 py-1.5 rounded-full text-xs font-semibold inline-flex items-center gap-1 ${
                       budgetData.progress >= 100 
                         ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
                         : budgetData.progress >= 80
@@ -882,7 +913,7 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                         : '✅ On Track'
                       }
                     </div>
-                    <div className="text-xs text-gray-600 dark:text-gray-300">
+                    <div className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
                       {budgetData.progress >= 100 
                         ? 'Consider reducing expenses' 
                         : budgetData.progress >= 80
@@ -893,31 +924,31 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                   </div>
                 </div>
                 
-                {/* Year Filter */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                  <div className="text-xs text-gray-600 dark:text-gray-300 font-medium">Filter by year:</div>
-                  <Select value={selectedBudgetYear} onValueChange={setSelectedBudgetYear}>
-                    <SelectTrigger className="w-full sm:w-40 h-9 text-sm border-2 border-emerald-200 dark:border-emerald-800 bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
-                        <SelectValue placeholder="Select year" />
+                {/* Month Filter */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 flex-shrink-0">
+                  <div className="text-xs text-gray-600 dark:text-gray-300 font-medium whitespace-nowrap">Filter by month:</div>
+                  <Select value={selectedBudgetMonth} onValueChange={setSelectedBudgetMonth}>
+                    <SelectTrigger className="w-full sm:w-52 h-10 text-sm border-2 border-emerald-200 dark:border-emerald-800 bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <Calendar className="h-4 w-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+                        <SelectValue placeholder="Select month" className="truncate text-left" />
                       </div>
                     </SelectTrigger>
-                    <SelectContent className="border-2 border-emerald-200 dark:border-emerald-800 bg-white dark:bg-gray-900 shadow-2xl backdrop-blur-sm">
+                    <SelectContent className="border-2 border-emerald-200 dark:border-emerald-800 bg-white dark:bg-gray-900 shadow-2xl backdrop-blur-sm min-w-[220px]">
                       <SelectItem value="current" className="focus:bg-gradient-to-r focus:from-emerald-50 focus:to-teal-50 dark:focus:from-emerald-900/30 dark:focus:to-teal-900/30 cursor-pointer">
-                        <div className="flex items-center gap-3 py-1">
-                          <div className="w-3 h-3 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full shadow-sm"></div>
-                          <div>
+                        <div className="flex items-center gap-3 py-2">
+                          <div className="w-3 h-3 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full shadow-sm flex-shrink-0"></div>
+                          <div className="min-w-0">
                             <div className="font-semibold text-emerald-700 dark:text-emerald-300">Current</div>
                           </div>
                         </div>
                       </SelectItem>
-                      {getAvailableYears().filter(year => !year.isCurrent).map((year) => (
-                        <SelectItem key={year.key} value={year.key} className="focus:bg-gradient-to-r focus:from-emerald-50 focus:to-teal-50 dark:focus:from-emerald-900/30 dark:focus:to-teal-900/30 cursor-pointer">
-                          <div className="flex items-center gap-3 py-1">
-                            <div className="w-3 h-3 bg-gradient-to-r from-gray-400 to-gray-500 rounded-full shadow-sm"></div>
-                            <div>
-                              <div className="font-semibold text-gray-700 dark:text-gray-300">{year.label}</div>
+                      {getAvailableMonths().filter(month => !month.isCurrent).map((month) => (
+                        <SelectItem key={month.key} value={month.key} className="focus:bg-gradient-to-r focus:from-emerald-50 focus:to-teal-50 dark:focus:from-emerald-900/30 dark:focus:to-teal-900/30 cursor-pointer">
+                          <div className="flex items-center gap-3 py-2">
+                            <div className="w-3 h-3 bg-gradient-to-r from-gray-400 to-gray-500 rounded-full shadow-sm flex-shrink-0"></div>
+                            <div className="min-w-0">
+                              <div className="font-semibold text-gray-700 dark:text-gray-300">{month.label}</div>
                             </div>
                           </div>
                         </SelectItem>
@@ -932,18 +963,25 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
               <div className="bg-white/60 dark:bg-gray-800/60 rounded-2xl p-6 border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm">
                 <div className="space-y-4">
                   {/* Spending Amount */}
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <div className="text-sm font-medium text-gray-600 dark:text-gray-300">Spent This Month</div>
-                      <div className={`text-xl font-bold ${
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <div className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                        {selectedBudgetMonth === 'current' 
+                          ? 'Spent This Month' 
+                          : `Spent in ${getAvailableMonths().find(m => m.key === selectedBudgetMonth)?.label || 'selected month'}`
+                        }
+                      </div>
+                      <div className={`text-2xl font-bold ${
                         budgetData.isOverBudget ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'
                       }`}>
                         {formatCurrencyWithPreferences(budgetData.totalExpenses)}
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="text-sm font-medium text-gray-600 dark:text-gray-300">Budget Limit</div>
-                      <div className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                    <div className="space-y-2 text-left sm:text-right">
+                      <div className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                        Monthly Budget
+                      </div>
+                      <div className="text-xl font-semibold text-gray-800 dark:text-gray-200">
                         {formatCurrencyWithPreferences(budgetData.monthlyBudget)}
                       </div>
                     </div>
@@ -971,7 +1009,7 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                         />
                       </div>
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <span className={`text-xs font-bold px-2 py-1 rounded-full backdrop-blur-sm ${
+                        <span className={`text-xs font-bold px-3 py-1.5 rounded-full backdrop-blur-sm whitespace-nowrap ${
                           budgetData.progress >= 100 
                             ? 'text-red-700 bg-red-100/80 dark:text-red-200 dark:bg-red-900/50' 
                             : budgetData.progress >= 80
@@ -985,7 +1023,7 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                     
                     {/* Status Badge */}
                     <div className="flex justify-center">
-                      <div className={`px-3 py-1.5 rounded-full text-xs font-semibold ${
+                      <div className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap ${
                         budgetData.progress >= 100 
                           ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
                           : budgetData.progress >= 80
@@ -1005,17 +1043,17 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
               </div>
               
               {/* Financial Metrics Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* Budget Metrics */}
-                <div className="bg-white/40 dark:bg-gray-800/40 rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <div className="bg-white/40 dark:bg-gray-800/40 rounded-xl p-5 border border-gray-200/50 dark:border-gray-700/50">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></div>
                     <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">Budget Metrics</span>
                   </div>
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Remaining</span>
-                      <span className={`font-semibold ${
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center min-w-0">
+                      <span className="text-sm text-gray-600 dark:text-gray-400 truncate">Remaining</span>
+                      <span className={`font-semibold text-right ml-2 ${
                         (budgetData.monthlyBudget - budgetData.totalExpenses) > 0 
                           ? 'text-emerald-600 dark:text-emerald-400' 
                           : 'text-red-600 dark:text-red-400'
@@ -1024,16 +1062,16 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                       </span>
                     </div>
                     
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Daily Average</span>
-                      <span className="font-semibold text-gray-700 dark:text-gray-300">
+                    <div className="flex justify-between items-center min-w-0">
+                      <span className="text-sm text-gray-600 dark:text-gray-400 truncate">Daily Average</span>
+                      <span className="font-semibold text-right ml-2 text-gray-700 dark:text-gray-300">
                         {formatCurrencyWithPreferences(budgetData.totalExpenses / new Date().getDate())}
                       </span>
                     </div>
                     
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Projected</span>
-                      <span className="font-semibold text-gray-700 dark:text-gray-300">
+                    <div className="flex justify-between items-center min-w-0">
+                      <span className="text-sm text-gray-600 dark:text-gray-400 truncate">Projected</span>
+                      <span className="font-semibold text-right ml-2 text-gray-700 dark:text-gray-300">
                         {formatCurrencyWithPreferences((budgetData.totalExpenses / new Date().getDate()) * 30)}
                       </span>
                     </div>
@@ -1041,22 +1079,22 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                 </div>
 
                 {/* Monthly Summary */}
-                <div className="bg-white/40 dark:bg-gray-800/40 rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                <div className="bg-white/40 dark:bg-gray-800/40 rounded-xl p-5 border border-gray-200/50 dark:border-gray-700/50">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-2 h-2 bg-emerald-500 rounded-full flex-shrink-0"></div>
                     <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">Monthly Summary</span>
                   </div>
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Income</span>
-                      <span className="font-semibold text-green-600 dark:text-green-400">
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center min-w-0">
+                      <span className="text-sm text-gray-600 dark:text-gray-400 truncate">Income</span>
+                      <span className="font-semibold text-right ml-2 text-green-600 dark:text-green-400">
                         {formatCurrencyWithPreferences(budgetData.totalIncome)}
                       </span>
                     </div>
                     
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Savings</span>
-                      <span className={`font-semibold ${
+                    <div className="flex justify-between items-center min-w-0">
+                      <span className="text-sm text-gray-600 dark:text-gray-400 truncate">Savings</span>
+                      <span className={`font-semibold text-right ml-2 ${
                         (budgetData.totalIncome - budgetData.totalExpenses) >= 0 
                           ? 'text-emerald-600 dark:text-emerald-400' 
                           : 'text-orange-600 dark:text-orange-400'
@@ -1065,9 +1103,9 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                       </span>
                     </div>
                     
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Savings Rate</span>
-                      <span className={`font-semibold ${
+                    <div className="flex justify-between items-center min-w-0">
+                      <span className="text-sm text-gray-600 dark:text-gray-400 truncate">Savings Rate</span>
+                      <span className={`font-semibold text-right ml-2 ${
                         ((budgetData.totalIncome - budgetData.totalExpenses) / budgetData.totalIncome * 100) >= 20
                           ? 'text-emerald-600 dark:text-emerald-400' 
                           : ((budgetData.totalIncome - budgetData.totalExpenses) / budgetData.totalIncome * 100) >= 10
@@ -1100,47 +1138,12 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
           {/* Savings Goal Progress */}
           <Card className="hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-900/20 border-emerald-200/50 dark:border-emerald-800/50">
             <CardHeader className="pb-4">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <CardTitle className="flex items-center gap-2 text-emerald-900 dark:text-emerald-200">
-                  <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
-                    <PiggyBank className="h-5 w-5" />
-                  </div>
-                  Savings Goals
-                </CardTitle>
-                
-                {/* Month Filter */}
-                <div className="flex items-center gap-3">
-                  <div className="text-xs text-gray-600 dark:text-gray-300 font-medium">Filter by year:</div>
-                  <Select value={selectedSavingsYear} onValueChange={setSelectedSavingsYear}>
-                    <SelectTrigger className="w-full sm:w-40 h-9 text-sm border-2 border-emerald-200 dark:border-emerald-800 bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
-                        <SelectValue placeholder="Select year" />
-                      </div>
-                    </SelectTrigger>
-                    <SelectContent className="border-2 border-emerald-200 dark:border-emerald-800 bg-white dark:bg-gray-900 shadow-2xl backdrop-blur-sm">
-                      <SelectItem value="current" className="focus:bg-gradient-to-r focus:from-emerald-50 focus:to-teal-50 dark:focus:from-emerald-900/30 dark:focus:to-teal-900/30 cursor-pointer">
-                        <div className="flex items-center gap-3 py-1">
-                          <div className="w-3 h-3 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full shadow-sm"></div>
-                          <div>
-                            <div className="font-semibold text-emerald-700 dark:text-emerald-300">Current</div>
-                          </div>
-                        </div>
-                      </SelectItem>
-                      {getAvailableYears().filter(year => !year.isCurrent).map((year) => (
-                        <SelectItem key={year.key} value={year.key} className="focus:bg-gradient-to-r focus:from-emerald-50 focus:to-teal-50 dark:focus:from-emerald-900/30 dark:focus:to-teal-900/30 cursor-pointer">
-                          <div className="flex items-center gap-3 py-1">
-                            <div className="w-3 h-3 bg-gradient-to-r from-gray-400 to-gray-500 rounded-full shadow-sm"></div>
-                            <div>
-                              <div className="font-semibold text-gray-700 dark:text-gray-300">{year.label}</div>
-                            </div>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+              <CardTitle className="flex items-center gap-2 text-emerald-900 dark:text-emerald-200">
+                <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
+                  <PiggyBank className="h-5 w-5" />
                 </div>
-              </div>
+                Savings Goals
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {savingsGoalData.filteredSavings && savingsGoalData.filteredSavings.length > 0 ? (
@@ -1185,18 +1188,8 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                   <div className="p-4 rounded-full bg-emerald-100 dark:bg-emerald-900/40 w-16 h-16 mx-auto mb-3 flex items-center justify-center">
                     <PiggyBank className="h-8 w-8 text-emerald-500" />
                   </div>
-                  <p className="text-sm font-medium">
-                    {selectedSavingsYear === 'current' 
-                      ? 'No goals set' 
-                      : 'No goals for selected year'
-                    }
-                  </p>
-                  <p className="text-xs mt-1">
-                    {selectedSavingsYear === 'current' 
-                      ? 'Create your first savings goal to start tracking progress.' 
-                      : 'Try selecting a different year or create goals for this period.'
-                    }
-                  </p>
+                  <p className="text-sm font-medium">No goals set</p>
+                  <p className="text-xs mt-1">Create your first savings goal to start tracking progress.</p>
                 </div>
               )}
             </CardContent>
@@ -1215,29 +1208,29 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                 
                 {/* Month Filter */}
                 <div className="flex items-center gap-3">
-                  <div className="text-xs text-gray-600 dark:text-gray-300 font-medium">Filter by year:</div>
-                  <Select value={selectedCategoryYear} onValueChange={setSelectedCategoryYear}>
-                    <SelectTrigger className="w-full sm:w-40 h-9 text-sm border-2 border-emerald-200 dark:border-emerald-800 bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
-                        <SelectValue placeholder="Select year" />
+                  <div className="text-xs text-gray-600 dark:text-gray-300 font-medium whitespace-nowrap">Filter by month:</div>
+                  <Select value={selectedCategoryMonth} onValueChange={setSelectedCategoryMonth}>
+                    <SelectTrigger className="w-full sm:w-52 h-10 text-sm border-2 border-emerald-200 dark:border-emerald-800 bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <Calendar className="h-4 w-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+                        <SelectValue placeholder="Select month" className="truncate" />
                       </div>
                     </SelectTrigger>
-                    <SelectContent className="border-2 border-emerald-200 dark:border-emerald-800 bg-white dark:bg-gray-900 shadow-2xl backdrop-blur-sm">
+                    <SelectContent className="border-2 border-emerald-200 dark:border-emerald-800 bg-white dark:bg-gray-900 shadow-2xl backdrop-blur-sm min-w-[220px]">
                       <SelectItem value="current" className="focus:bg-gradient-to-r focus:from-emerald-50 focus:to-teal-50 dark:focus:from-emerald-900/30 dark:focus:to-teal-900/30 cursor-pointer">
-                        <div className="flex items-center gap-3 py-1">
-                          <div className="w-3 h-3 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full shadow-sm"></div>
-                          <div>
+                        <div className="flex items-center gap-3 py-2">
+                          <div className="w-3 h-3 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full shadow-sm flex-shrink-0"></div>
+                          <div className="min-w-0">
                             <div className="font-semibold text-emerald-700 dark:text-emerald-300">Current</div>
                           </div>
                         </div>
                       </SelectItem>
-                      {getAvailableYears().filter(year => !year.isCurrent).map((year) => (
-                        <SelectItem key={year.key} value={year.key} className="focus:bg-gradient-to-r focus:from-emerald-50 focus:to-teal-50 dark:focus:from-emerald-900/30 dark:focus:to-teal-900/30 cursor-pointer">
-                          <div className="flex items-center gap-3 py-1">
-                            <div className="w-3 h-3 bg-gradient-to-r from-gray-400 to-gray-500 rounded-full shadow-sm"></div>
-                            <div>
-                              <div className="font-semibold text-gray-700 dark:text-gray-300">{year.label}</div>
+                      {getAvailableMonths().filter(month => !month.isCurrent).map((month) => (
+                        <SelectItem key={month.key} value={month.key} className="focus:bg-gradient-to-r focus:from-emerald-50 focus:to-teal-50 dark:focus:from-emerald-900/30 dark:focus:to-teal-900/30 cursor-pointer">
+                          <div className="flex items-center gap-3 py-2">
+                            <div className="w-3 h-3 bg-gradient-to-r from-gray-400 to-gray-500 rounded-full shadow-sm flex-shrink-0"></div>
+                            <div className="min-w-0">
+                              <div className="font-semibold text-gray-700 dark:text-gray-300 truncate">{month.label}</div>
                             </div>
                           </div>
                         </SelectItem>
@@ -1355,36 +1348,36 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                   <div>
                     <div className="text-xl font-bold">Recent Transactions</div>
                     <div className="text-sm text-gray-500 dark:text-gray-400 font-normal">
-                      {selectedYear === 'current' ? 'Current year activity' : `Transactions from ${getAvailableYears().find(y => y.key === selectedYear)?.label || 'selected year'}`}
+                      {selectedRecentTransactionsMonth === 'current' ? 'Current month activity' : `Transactions from ${getAvailableMonths().find(m => m.key === selectedRecentTransactionsMonth)?.label || 'selected month'}`}
                     </div>
                   </div>
                 </CardTitle>
                 
                 {/* Month Filter */}
                 <div className="flex items-center gap-3">
-                  <div className="hidden sm:block text-sm text-gray-600 dark:text-gray-300 font-medium">Filter by year:</div>
-                  <Select value={selectedYear} onValueChange={setSelectedYear}>
+                  <div className="hidden sm:block text-sm text-gray-600 dark:text-gray-300 font-medium whitespace-nowrap">Filter by month:</div>
+                  <Select value={selectedRecentTransactionsMonth} onValueChange={setSelectedRecentTransactionsMonth}>
                     <SelectTrigger className="w-full sm:w-56 h-11 text-sm border-2 border-emerald-200 dark:border-emerald-800 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 hover:from-emerald-100 to-teal-100 dark:hover:from-emerald-900/30 dark:hover:to-teal-900/30 transition-all duration-200 shadow-sm hover:shadow-md">
-                      <div className="flex items-center gap-3">
-                        <Calendar className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                        <SelectValue placeholder="Select year" />
+                      <div className="flex items-center gap-3 min-w-0">
+                        <Calendar className="h-4 w-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+                        <SelectValue placeholder="Select month" className="truncate" />
                       </div>
                     </SelectTrigger>
-                    <SelectContent className="border-2 border-emerald-200 dark:border-emerald-800 bg-white dark:bg-gray-900 shadow-2xl backdrop-blur-sm">
+                    <SelectContent className="border-2 border-emerald-200 dark:border-emerald-800 bg-white dark:bg-gray-900 shadow-2xl backdrop-blur-sm min-w-[220px]">
                       <SelectItem value="current" className="focus:bg-gradient-to-r focus:from-emerald-50 focus:to-teal-50 dark:focus:from-emerald-900/30 dark:focus:to-teal-900/30 cursor-pointer">
-                        <div className="flex items-center gap-3 py-1">
-                          <div className="w-3 h-3 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full shadow-sm"></div>
-                          <div>
-                            <div className="font-semibold text-emerald-700 dark:text-emerald-300">Current Month</div>
+                        <div className="flex items-center gap-3 py-2">
+                          <div className="w-3 h-3 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full shadow-sm flex-shrink-0"></div>
+                          <div className="min-w-0">
+                            <div className="font-semibold text-emerald-700 dark:text-emerald-300">Current</div>
                           </div>
                         </div>
                       </SelectItem>
-                      {getAvailableYears().filter(year => !year.isCurrent).map((year) => (
-                        <SelectItem key={year.key} value={year.key} className="focus:bg-gradient-to-r focus:from-emerald-50 focus:to-teal-50 dark:focus:from-emerald-900/30 dark:focus:to-teal-900/30 cursor-pointer">
-                          <div className="flex items-center gap-3 py-1">
-                            <div className="w-3 h-3 bg-gradient-to-r from-gray-400 to-gray-500 rounded-full shadow-sm"></div>
-                            <div>
-                              <div className="font-semibold text-gray-700 dark:text-gray-300">{year.label}</div>
+                      {getAvailableMonths().filter(month => !month.isCurrent).map((month) => (
+                        <SelectItem key={month.key} value={month.key} className="focus:bg-gradient-to-r focus:from-emerald-50 focus:to-teal-50 dark:focus:from-emerald-900/30 dark:focus:to-teal-900/30 cursor-pointer">
+                          <div className="flex items-center gap-3 py-2">
+                            <div className="w-3 h-3 bg-gradient-to-r from-gray-400 to-gray-500 rounded-full shadow-sm flex-shrink-0"></div>
+                            <div className="min-w-0">
+                              <div className="font-semibold text-gray-700 dark:text-gray-300 truncate">{month.label}</div>
                             </div>
                           </div>
                         </SelectItem>
@@ -1445,15 +1438,15 @@ export function EnhancedDashboard({ className }: EnhancedDashboardProps) {
                       <Activity className="h-8 w-8 text-blue-500" />
                     </div>
                     <p className="text-sm font-medium">
-                      {selectedYear === 'current' 
+                      {selectedRecentTransactionsMonth === 'current' 
                         ? 'No transactions yet' 
-                        : `No transactions found for ${getAvailableYears().find(y => y.key === selectedYear)?.label || 'selected year'}`
+                        : `No transactions found for ${getAvailableMonths().find(m => m.key === selectedRecentTransactionsMonth)?.label || 'selected month'}`
                       }
                     </p>
                     <p className="text-xs mt-1">
-                      {selectedYear === 'current' 
+                      {selectedRecentTransactionsMonth === 'current' 
                         ? 'Add your first expense to see it here.' 
-                        : 'Try selecting a different year or add transactions for this period.'
+                        : 'Try selecting a different month or add transactions for this period.'
                       }
                     </p>
                   </div>

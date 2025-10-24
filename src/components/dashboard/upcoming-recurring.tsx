@@ -162,16 +162,16 @@ export function UpcomingRecurring({ className }: UpcomingRecurringProps) {
     return (
       <div className="space-y-2">
         {/* Calendar Header */}
-        <div className="flex items-center justify-between">
-          <h3 className="text-xs font-semibold text-gray-900 dark:text-white">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white">
             {formatDate(currentDate)}
           </h3>
-          <div className="flex gap-1">
+          <div className="flex gap-2">
             <Button
               variant="outline"
               size="sm"
               onClick={() => navigateMonth('prev')}
-              className="h-5 w-5 p-0 text-xs"
+              className="h-8 w-8 p-0 text-sm font-bold hover:bg-gray-100 dark:hover:bg-gray-700"
             >
               ←
             </Button>
@@ -179,7 +179,7 @@ export function UpcomingRecurring({ className }: UpcomingRecurringProps) {
               variant="outline"
               size="sm"
               onClick={() => navigateMonth('next')}
-              className="h-5 w-5 p-0 text-xs"
+              className="h-8 w-8 p-0 text-sm font-bold hover:bg-gray-100 dark:hover:bg-gray-700"
             >
               →
             </Button>
@@ -187,10 +187,10 @@ export function UpcomingRecurring({ className }: UpcomingRecurringProps) {
         </div>
         
         {/* Calendar Grid */}
-        <div className="grid grid-cols-7 gap-0.5">
+        <div className="grid grid-cols-7 gap-1">
           {/* Week day headers */}
           {weekDays.map(day => (
-            <div key={day} className="p-0.5 text-center text-xs font-medium text-gray-500 dark:text-gray-400">
+            <div key={day} className="p-2 text-center text-sm font-semibold text-gray-600 dark:text-gray-400">
               {day}
             </div>
           ))}
@@ -198,7 +198,7 @@ export function UpcomingRecurring({ className }: UpcomingRecurringProps) {
           {/* Calendar days */}
           {days.map((day, index) => {
             if (!day) {
-              return <div key={index} className="h-8"></div>
+              return <div key={index} className="h-16"></div>
             }
             
             const dayTransactions = getTransactionsForDate(day)
@@ -208,26 +208,28 @@ export function UpcomingRecurring({ className }: UpcomingRecurringProps) {
               <Tooltip key={day.toISOString()}>
                 <TooltipTrigger asChild>
                   <div
-                    className={`h-8 p-0.5 border border-gray-200 dark:border-gray-700 rounded relative cursor-pointer ${
-                      isToday ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-800'
+                    className={`h-16 p-2 border border-gray-200 dark:border-gray-700 rounded-lg relative cursor-pointer flex flex-col justify-between ${
+                      isToday ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700' : 'bg-white dark:bg-gray-800'
                     } hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors`}
                   >
-                    <div className={`text-xs font-medium ${
+                    <div className={`text-lg font-bold ${
                       isToday ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-gray-100'
                     }`}>
                       {day.getDate()}
                     </div>
                     
                     {/* Transaction markers */}
-                    <div className="flex flex-wrap gap-0.5 mt-0.5">
-                      {dayTransactions.slice(0, 3).map((transaction, idx) => (
+                    <div className="flex flex-wrap gap-1 justify-center">
+                      {dayTransactions.slice(0, 4).map((transaction, idx) => (
                         <div
                           key={`${transaction.id}-${idx}`}
-                          className={`w-1.5 h-1.5 rounded-full ${getTransactionColor(transaction)} shadow-sm`}
+                          className={`w-2 h-2 rounded-full ${getTransactionColor(transaction)} shadow-sm`}
                         />
                       ))}
-                      {dayTransactions.length > 3 && (
-                        <div className="w-1.5 h-1.5 rounded-full bg-gray-400 shadow-sm" />
+                      {dayTransactions.length > 4 && (
+                        <div className="w-2 h-2 rounded-full bg-gray-400 shadow-sm text-xs flex items-center justify-center text-white font-bold">
+                          +
+                        </div>
                       )}
                     </div>
                   </div>
@@ -283,22 +285,22 @@ export function UpcomingRecurring({ className }: UpcomingRecurringProps) {
         </div>
         
         {/* Legend */}
-        <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-          <div className="flex items-center gap-1">
-            <div className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-sm"></div>
-            <span>Due Today</span>
+        <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-red-500 shadow-sm"></div>
+            <span className="font-medium">Due Today</span>
           </div>
-          <div className="flex items-center gap-1">
-            <div className="w-1.5 h-1.5 rounded-full bg-orange-500 shadow-sm"></div>
-            <span>Due Soon</span>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-orange-500 shadow-sm"></div>
+            <span className="font-medium">Due Soon</span>
           </div>
-          <div className="flex items-center gap-1">
-            <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 shadow-sm"></div>
-            <span>This Week</span>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-yellow-500 shadow-sm"></div>
+            <span className="font-medium">This Week</span>
           </div>
-          <div className="flex items-center gap-1">
-            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-sm"></div>
-            <span>Upcoming</span>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-blue-500 shadow-sm"></div>
+            <span className="font-medium">Upcoming</span>
           </div>
         </div>
       </div>
