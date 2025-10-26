@@ -17,8 +17,7 @@ import {
   Calendar, 
   AlertCircle,
   Bell,
-  Repeat,
-  DollarSign
+  Repeat
 } from 'lucide-react'
 import { formatCurrency } from '@/lib/user-preferences'
 
@@ -79,8 +78,8 @@ export function UpcomingRecurring({ className }: UpcomingRecurringProps) {
           console.log('Total recurring transactions in database:', allRecurring?.length || 0)
           if (allRecurring && allRecurring.length > 0) {
             console.log('All recurring transactions:', allRecurring)
-            console.log('Active recurring transactions:', allRecurring.filter(t => t.is_active))
-            console.log('Expense recurring transactions:', allRecurring.filter(t => t.transaction_type === 'expense'))
+            console.log('Active recurring transactions:', allRecurring.filter((t: RecurringTransaction) => t.is_active))
+            console.log('Expense recurring transactions:', allRecurring.filter((t: RecurringTransaction) => t.transaction_type === 'expense'))
             
             // Check each transaction's next_due_date
             allRecurring.forEach((transaction, index) => {
