@@ -82,7 +82,7 @@ export function UpcomingRecurring({ className }: UpcomingRecurringProps) {
             console.log('Expense recurring transactions:', allRecurring.filter((t: RecurringTransaction) => t.transaction_type === 'expense'))
             
             // Check each transaction's next_due_date
-            allRecurring.forEach((transaction, index) => {
+            allRecurring.forEach((transaction: RecurringTransaction, index: number) => {
               console.log(`Transaction ${index + 1}:`, {
                 title: transaction.title,
                 next_due_date: transaction.next_due_date,
